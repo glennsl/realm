@@ -1,41 +1,49 @@
 
+type dispatcher('msg)
+  = 'msg => unit;
+type element('msg)
+  = dispatcher('msg) => ReasonReact.reactElement;
+type htmlElement('msg)
+  = (~onClick: 'msg=?, list(element('msg))) => element('msg);
+
 module Helpers = {
   let element = (
-      elementName,
-      ~onClick: option(Dom.event => unit)=?,
-      children
-    ) =>
+      elementName: string,
+      ~onClick: option('msg)=?,
+      children: list(element('msg))
+    ): element('msg) => dispatch =>
     ReasonReact.createDomElement(
       elementName,
       ~props={
-        "onClick": onClick |> Js.Undefined.fromOption
+        "onClick": Belt.Option.map(onClick, msg => _event => dispatch(msg)) |> Js.Undefined.fromOption
       },
-      children |> Array.of_list
+      children |> List.map(e => e(dispatch))
+               |> Array.of_list
     );
 
 };
 
+
 module Html = {
-  let null =
+  let null = _dispatch =>
     ReasonReact.null;
 
-  let text =
-    ReasonReact.string;
+  let text = (str, _dispatch) =>
+    ReasonReact.string(str);
 
-  let div =
+  let div: htmlElement('msg) =
     Helpers.element("div");
 
   let button =
     Helpers.element("button");
 };
 
-type dispatcher('msg) = 'msg => unit;
 
 let mount = (
     ~at: string,
     ~init: unit => 'model,
     ~update: ('msg, 'model) => 'model,
-    ~view: ('model, dispatcher('msg)) => ReasonReact.reactElement
+    ~view: 'model => element('msg)
   ): unit => {
 
   let model = ref(init());
@@ -49,5 +57,4 @@ let mount = (
   };
 
   render(view(model^, dispatch))
-
 }

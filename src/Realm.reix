@@ -1,0 +1,21 @@
+
+type dispatcher('msg) = 'msg => unit;
+type element('msg)
+  = dispatcher('msg) => ReasonReact.reactElement;
+type htmlElement('msg) = (~onClick: 'msg=?, list(element('msg))) => element('msg);
+
+
+module Html: {
+  let null: element('msg);
+  let text: string => element('msg);
+  let div: 'msg. htmlElement('msg);
+  let button: 'msg. htmlElement('msg);
+};
+
+
+let mount: (
+    ~at: string,
+    ~init: unit => 'model,
+    ~update: ('msg, 'model) => 'model,
+    ~view: 'model => element('msg)
+  ) => unit;
