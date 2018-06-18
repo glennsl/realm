@@ -14,18 +14,41 @@ function init() {
 }
 
 function update(msg, model) {
-  if (msg) {
-    return /* record */[
-            /* count */model[/* count */0],
-            /* show */!model[/* show */1]
-          ];
+  if (typeof msg === "number") {
+    if (msg !== 0) {
+      return /* record */[
+              /* count */model[/* count */0],
+              /* show */!model[/* show */1]
+            ];
+    } else {
+      return /* record */[
+              /* count */model[/* count */0] + 1 | 0,
+              /* show */model[/* show */1]
+            ];
+    }
   } else {
-    return /* record */[
-            /* count */model[/* count */0] + 1 | 0,
-            /* show */model[/* show */1]
-          ];
+    console.log(msg[0]);
+    return model;
   }
 }
+
+var FooHtml = Curry._1(Realm.App[/* Html */0], /* module */[]);
+
+var partial_arg = Realm.App[/* map */2];
+
+function wrapFooMsg(param, param$1) {
+  return partial_arg((function (s) {
+                return /* Foo */[s];
+              }), param, param$1);
+}
+
+var fooView = Curry._2(FooHtml[/* button */4], /* :: */[
+      Curry._1(FooHtml[/* onClick */0], "foo"),
+      /* [] */0
+    ], /* :: */[
+      Curry._1(FooHtml[/* text */2], "Set foo"),
+      /* [] */0
+    ]);
 
 function view(greeting, model) {
   var message = "You've clicked this " + (String(model[/* count */0]) + " times(s)");
@@ -47,8 +70,13 @@ function view(greeting, model) {
                       /* [] */0
                     ]),
                 /* :: */[
-                  match ? Curry._1(Html[/* text */2], greeting) : Html[/* null */1],
-                  /* [] */0
+                  (function (param) {
+                      return wrapFooMsg(fooView, param);
+                    }),
+                  /* :: */[
+                    match ? Curry._1(Html[/* text */2], greeting) : Html[/* null */1],
+                    /* [] */0
+                  ]
                 ]
               ]
             ]);
@@ -57,5 +85,8 @@ function view(greeting, model) {
 exports.Html = Html;
 exports.init = init;
 exports.update = update;
+exports.FooHtml = FooHtml;
+exports.wrapFooMsg = wrapFooMsg;
+exports.fooView = fooView;
 exports.view = view;
 /* Html Not a pure module */

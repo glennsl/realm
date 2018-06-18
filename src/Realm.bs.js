@@ -19,6 +19,12 @@ function mount(at, init, update, view) {
   return ReactDOMRe.renderToElementWithId(component, at);
 }
 
+function map(f, element, dispatch) {
+  return Curry._1(element, (function (msg) {
+                return Curry._1(dispatch, Curry._1(f, msg));
+              }));
+}
+
 function App_000() {
   var onClick = function (msg) {
     return /* Event */Block.__(1, [
@@ -66,7 +72,8 @@ function App_000() {
 
 var App = /* module */[
   App_000,
-  /* mount */mount
+  /* mount */mount,
+  /* map */map
 ];
 
 exports.App = App;

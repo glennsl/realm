@@ -25,6 +25,8 @@ module App: {
       ~view: 'model => element('msg)
     ) => unit;
 
+  let map: ('a => 'b, element('a)) => element('b);
+
 } = {
 
   type prop('msg) =
@@ -87,5 +89,9 @@ module App: {
 
     render(view(model^, dispatch))
 
-  }
+  };
+
+  let map = (f, element) =>
+    dispatch =>
+      element(msg => dispatch(f(msg)));
 }
