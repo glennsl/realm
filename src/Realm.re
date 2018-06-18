@@ -1,53 +1,91 @@
-
-module Helpers = {
-  let element = (
-      elementName,
-      ~onClick: option(Dom.event => unit)=?,
-      children
-    ) =>
-    ReasonReact.createDomElement(
-      elementName,
-      ~props={
-        "onClick": onClick |> Js.Undefined.fromOption
-      },
-      children |> Array.of_list
-    );
-
+module type Conf = {
+  type msg;
 };
 
-module Html = {
-  let null =
-    ReasonReact.null;
+module App: {
+  type prop('msg);
 
-  let text =
-    ReasonReact.string;
+  type dispatcher('msg) = 'msg => unit;
+  type element('msg);
+  type htmlElement('msg) = list(prop('msg)) => list(element('msg)) => element('msg);
 
-  let div =
-    Helpers.element("div");
+  module Html(T: Conf): {
+    let onClick: T.msg => prop(T.msg);
 
-  let button =
-    Helpers.element("button");
-};
-
-type dispatcher('msg) = 'msg => unit;
-
-let mount = (
-    ~at: string,
-    ~init: unit => 'model,
-    ~update: ('msg, 'model) => 'model,
-    ~view: ('model, dispatcher('msg)) => ReasonReact.reactElement
-  ): unit => {
-
-  let model = ref(init());
-
-  let render = component =>
-    ReactDOMRe.renderToElementWithId(component, at);
-
-  let rec dispatch = msg => {
-    model := update(msg, model^);
-    render(view(model^, dispatch));
+    let null: element(T.msg);
+    let text: string => element(T.msg);
+    let div: htmlElement(T.msg);
+    let button: htmlElement(T.msg);
   };
 
-  render(view(model^, dispatch))
+  let mount: (
+      ~at: string,
+      ~init: unit => 'model,
+      ~update: ('msg, 'model) => 'model,
+      ~view: 'model => element('msg)
+    ) => unit;
 
+} = {
+
+  type prop('msg) =
+    | Raw(string, string)
+    | Event(string, 'msg);
+
+  type dispatcher('msg) = 'msg => unit;
+  type element('msg) = dispatcher('msg) => ReasonReact.reactElement;
+  type htmlElement('msg) = list(prop('msg)) => list(element('msg)) => element('msg);
+
+  module Html(T: Conf) = {
+
+    let onClick = msg =>
+      Event("onClick", msg);
+
+    [@bs.set_index] external _addProp : (Js.t({..}), string, 'a) => unit = "";
+
+    let _element = (elementName, props, children) =>
+      (dispatch: _ => unit) => {
+        let props: Js.t({..}) = props |> List.fold_left(props =>
+                                          fun | Raw(key, value) => { _addProp(props, key, value); props }
+                                              | Event(name, msg) =>  { _addProp(props, name, _event => dispatch(msg)); props }, Js.Obj.empty());
+        ReasonReact.createDomElement(
+          elementName,
+          ~props,
+          children |> List.map(el => el(dispatch)) |> Array.of_list
+        )
+      };
+
+    let null = _dispatch =>
+      ReasonReact.null;
+
+    let text = (text, _dispatch) =>
+      ReasonReact.string(text);
+
+    let div =
+      _element("div");
+
+    let button =
+      _element("button");
+  };
+
+
+  let mount = (
+      ~at: string,
+      ~init: unit => 'model,
+      ~update: ('msg, 'model) => 'model,
+      ~view: 'model => element('msg)
+    ): unit => {
+
+    let model = ref(init());
+
+    let render = component =>
+      ReactDOMRe.renderToElementWithId(component, at);
+
+    let rec dispatch = msg => {
+      model := update(msg, model^);
+      render(view(model^, dispatch));
+    };
+
+    render(view(model^, dispatch))
+
+  }
 }

@@ -4,6 +4,8 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("./Realm.bs.js");
 
+var Html = Curry._1(Realm.App[/* Html */0], /* module */[]);
+
 function init() {
   return /* record */[
           /* count */0,
@@ -25,32 +27,35 @@ function update(msg, model) {
   }
 }
 
-function view(greeting, model, dispatch) {
+function view(greeting, model) {
   var message = "You've clicked this " + (String(model[/* count */0]) + " times(s)");
   var match = model[/* show */1];
-  return Realm.Html[/* div */2](/* None */0, /* :: */[
-              Realm.Html[/* button */3](/* Some */[(function () {
-                        return Curry._1(dispatch, /* Click */0);
-                      })], /* :: */[
-                    Realm.Html[/* text */1](message),
+  return Curry._2(Html[/* div */3], /* [] */0, /* :: */[
+              Curry._2(Html[/* button */4], /* :: */[
+                    Curry._1(Html[/* onClick */0], /* Click */0),
+                    /* [] */0
+                  ], /* :: */[
+                    Curry._1(Html[/* text */2], message),
                     /* [] */0
                   ]),
               /* :: */[
-                Realm.Html[/* button */3](/* Some */[(function () {
-                          return Curry._1(dispatch, /* Toggle */1);
-                        })], /* :: */[
-                      Realm.Html[/* text */1]("Toggle greeting"),
+                Curry._2(Html[/* button */4], /* :: */[
+                      Curry._1(Html[/* onClick */0], /* Toggle */1),
+                      /* [] */0
+                    ], /* :: */[
+                      Curry._1(Html[/* text */2], "Toggle greeting"),
                       /* [] */0
                     ]),
                 /* :: */[
-                  match ? Realm.Html[/* text */1](greeting) : Realm.Html[/* null */0],
+                  match ? Curry._1(Html[/* text */2], greeting) : Html[/* null */1],
                   /* [] */0
                 ]
               ]
             ]);
 }
 
+exports.Html = Html;
 exports.init = init;
 exports.update = update;
 exports.view = view;
-/* Realm Not a pure module */
+/* Html Not a pure module */

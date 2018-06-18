@@ -1,4 +1,3 @@
-open Realm.Html;
 
 type model = {
   count: int,
@@ -9,6 +8,8 @@ type msg =
   | Click
   | Toggle;
 
+module Html = Realm.App.Html({ type nonrec msg = msg; })
+open Html;
 
 let init = () => {
   count: 0,
@@ -23,15 +24,15 @@ let update = (msg, model) =>
   };
 
 
-let view = (~greeting, model, dispatch) => {
+let view = (~greeting, model) => {
   let message =
     "You've clicked this " ++ string_of_int(model.count) ++ " times(s)";
 
-  div([
-    button(~onClick=_event => dispatch(Click), [
+  div([], [
+    button([ onClick(Click) ], [
       text(message)
     ]),
-    button(~onClick=_event => dispatch(Toggle), [
+    button([ onClick(Toggle) ], [
       text("Toggle greeting")
     ]),
     model.show ? text(greeting) : null

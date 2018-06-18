@@ -13,16 +13,16 @@ ReactDOMRe.renderToElementWithId(ReasonReact.element(/* None */0, /* None */0, C
 
 ReactDOMRe.renderToElementWithId(ReasonReact.element(/* None */0, /* None */0, Component2.make("Hello!", /* array */[])), "index2");
 
-Realm.mount("thing1", (function () {
+Realm.App[/* mount */1]("thing1", (function () {
         return /* () */0;
       }), (function (_, _$1) {
         return /* () */0;
-      }), (function (param, param$1) {
-        return Thing1.view("hello", param, param$1);
+      }), (function (param) {
+        return Thing1.view("hello", param);
       }));
 
-Realm.mount("thing2", Thing2.init, Thing2.update, (function (param, param$1) {
-        return Thing2.view("hello", param, param$1);
+Realm.App[/* mount */1]("thing2", Thing2.init, Thing2.update, (function (param) {
+        return Thing2.view("hello", param);
       }));
 
 /*  Not a pure module */

@@ -1,6 +1,7 @@
-open Realm.Html;
+module Html = Realm.App.Html({ type msg = unit });
+open Html;
 
-let view = (~message, _, _) =>
-  div(~onClick=(_) => Js.log("clicky!"), [
+let view = (~message, _) =>
+  div([], [
     text(message)
   ]);
