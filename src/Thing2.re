@@ -6,6 +6,7 @@ type model = {
 
 type msg =
   | Click
+  | Square 
   | Toggle
   | Foo(string);
 
@@ -20,6 +21,7 @@ let init = () => {
 let update = (msg, model) =>
   switch (msg) {
   | Click   => { ...model, count: model.count + 1 }
+  | Square  => { ...model, count: model.count * model.count }
   | Toggle  => { ...model, show: !model.show }
   | Foo(s)  => { Js.log(s); model }
   };
@@ -45,6 +47,7 @@ let view = (~greeting, model) => {
     button([ onClick(Click) ], [
       text(message)
     ]),
+    fromReact(dispatch => <button onClick=(_e => dispatch(Square))> {"Square count" |> ReasonReact.string} </button>),
     button([ onClick(Toggle) ], [
       text("Toggle greeting")
     ]),

@@ -3,6 +3,8 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("./Realm.bs.js");
+var React = require("react");
+var Caml_int32 = require("bs-platform/lib/js/caml_int32.js");
 
 var Html = Curry._1(Realm.App[/* Html */0], /* module */[]);
 
@@ -15,16 +17,23 @@ function init() {
 
 function update(msg, model) {
   if (typeof msg === "number") {
-    if (msg !== 0) {
-      return /* record */[
-              /* count */model[/* count */0],
-              /* show */!model[/* show */1]
-            ];
-    } else {
-      return /* record */[
-              /* count */model[/* count */0] + 1 | 0,
-              /* show */model[/* show */1]
-            ];
+    switch (msg) {
+      case 0 : 
+          return /* record */[
+                  /* count */model[/* count */0] + 1 | 0,
+                  /* show */model[/* show */1]
+                ];
+      case 1 : 
+          return /* record */[
+                  /* count */Caml_int32.imul(model[/* count */0], model[/* count */0]),
+                  /* show */model[/* show */1]
+                ];
+      case 2 : 
+          return /* record */[
+                  /* count */model[/* count */0],
+                  /* show */!model[/* show */1]
+                ];
+      
     }
   } else {
     console.log(msg[0]);
@@ -62,20 +71,29 @@ function view(greeting, model) {
                     /* [] */0
                   ]),
               /* :: */[
-                Curry._2(Html[/* button */4], /* :: */[
-                      Curry._1(Html[/* onClick */0], /* Toggle */1),
-                      /* [] */0
-                    ], /* :: */[
-                      Curry._1(Html[/* text */2], "Toggle greeting"),
-                      /* [] */0
-                    ]),
+                Curry._1(Html[/* fromReact */5], (function (dispatch) {
+                        return React.createElement("button", {
+                                    onClick: (function () {
+                                        return Curry._1(dispatch, /* Square */1);
+                                      })
+                                  }, "Square count");
+                      })),
                 /* :: */[
-                  (function (param) {
-                      return wrapFooMsg(fooView, param);
-                    }),
+                  Curry._2(Html[/* button */4], /* :: */[
+                        Curry._1(Html[/* onClick */0], /* Toggle */2),
+                        /* [] */0
+                      ], /* :: */[
+                        Curry._1(Html[/* text */2], "Toggle greeting"),
+                        /* [] */0
+                      ]),
                   /* :: */[
-                    match ? Curry._1(Html[/* text */2], greeting) : Html[/* null */1],
-                    /* [] */0
+                    (function (param) {
+                        return wrapFooMsg(fooView, param);
+                      }),
+                    /* :: */[
+                      match ? Curry._1(Html[/* text */2], greeting) : Html[/* null */1],
+                      /* [] */0
+                    ]
                   ]
                 ]
               ]

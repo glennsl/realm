@@ -16,6 +16,8 @@ module App: {
     let text: string => element(T.msg);
     let div: htmlElement(T.msg);
     let button: htmlElement(T.msg);
+
+    let fromReact: (dispatcher(T.msg) => ReasonReact.reactElement) => element(T.msg);
   };
 
   let mount: (
@@ -56,6 +58,7 @@ module App: {
         )
       };
 
+
     let null = _dispatch =>
       ReasonReact.null;
 
@@ -67,6 +70,9 @@ module App: {
 
     let button =
       _element("button");
+
+
+    let fromReact = f => f;
   };
 
 

@@ -61,12 +61,16 @@ function App_000() {
   var button = function (param, param$1, param$2) {
     return _element("button", param, param$1, param$2);
   };
+  var fromReact = function (f) {
+    return f;
+  };
   return [
           onClick,
           $$null$1,
           text,
           div,
-          button
+          button,
+          fromReact
         ];
 }
 
