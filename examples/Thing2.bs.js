@@ -2,7 +2,7 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var Realm = require("./Realm.bs.js");
+var Realm = require("../src/Realm.bs.js");
 var React = require("react");
 var Caml_int32 = require("bs-platform/lib/js/caml_int32.js");
 

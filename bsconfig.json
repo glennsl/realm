@@ -3,10 +3,10 @@
   "reason": {
     "react-jsx": 2
   },
-  "sources": {
+  "sources": [{
     "dir" : "src",
     "subdirs" : true
-  },
+  }, "examples"],
   "package-specs": [{
     "module": "commonjs",
     "in-source": true

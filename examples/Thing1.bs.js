@@ -2,7 +2,7 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var Realm = require("./Realm.bs.js");
+var Realm = require("../src/Realm.bs.js");
 
 var Html = Curry._1(Realm.App[/* Html */0], /* module */[]);
 
