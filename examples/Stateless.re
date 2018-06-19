@@ -5,3 +5,6 @@ let view = (~message, _) =>
   div([], [
     text(message)
   ]);
+
+let mount = (~at) =>
+  Realm.App.mount(~at, ~init=() => (), ~update=(_, ()) => (), ~view=view(~message="hello"));

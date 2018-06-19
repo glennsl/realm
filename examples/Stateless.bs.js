@@ -13,6 +13,17 @@ function view(message, _) {
             ]);
 }
 
+function mount(at) {
+  return Realm.App[/* mount */1](at, (function () {
+                return /* () */0;
+              }), (function (_, _$1) {
+                return /* () */0;
+              }), (function (param) {
+                return view("hello", param);
+              }));
+}
+
 exports.Html = Html;
 exports.view = view;
+exports.mount = mount;
 /* Html Not a pure module */
