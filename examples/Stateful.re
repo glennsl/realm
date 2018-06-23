@@ -6,7 +6,7 @@ type model = {
 type msg =
   | Click;
 
-module Html = Realm.App.Html({ type nonrec msg = msg; })
+module Html = Realm.React.Html({ type nonrec msg = msg; })
 
 let init = () => {
   count: 0
@@ -32,4 +32,4 @@ let view = model => {
 };
 
 let mount = (~at) =>
-  Realm.App.mount(~at, ~init, ~update, ~view);
+  Realm.React.mount(~at, ~init, ~update, ~view);

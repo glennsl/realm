@@ -1,21 +1,54 @@
-module type Conf = {
+module type CoreConfig = {
+  type element;
+};
+
+module type MessageConfig = {
   type msg;
 };
 
-module App: {
-  type prop('msg);
 
+module Core(Config: CoreConfig) = {
+  type dispatcher('msg) = 'msg => unit;
+  type element('msg) = dispatcher('msg) => Config.element;
+
+  let run = (
+      ~mount: Config.element => unit,
+      ~render: Config.element => unit,
+      ~init: unit => 'model,
+      ~update: ('msg, 'model) => 'model,
+      ~view: 'model => element('msg)
+    ): unit => {
+
+    let model = ref(init());
+
+    let rec dispatch = msg => {
+      model := update(msg, model^);
+      render(view(model^, dispatch));
+    };
+
+    mount(view(model^, dispatch))
+  };
+
+  let map = (f, element) =>
+    dispatch =>
+      element(msg => dispatch(f(msg)));
+};
+
+
+module React: {
   type dispatcher('msg) = 'msg => unit;
   type element('msg);
-  type htmlElement('msg) = list(prop('msg)) => list(element('msg)) => element('msg);
 
-  module Html(T: Conf): {
-    let onClick: T.msg => prop(T.msg);
+  module Html(T: MessageConfig): {
+    type prop;
+    type htmlElement = list(prop) => list(element(T.msg)) => element(T.msg);
+
+    let onClick: T.msg => prop;
 
     let null: element(T.msg);
     let text: string => element(T.msg);
-    let div: htmlElement(T.msg);
-    let button: htmlElement(T.msg);
+    let div: htmlElement;
+    let button: htmlElement;
 
     let fromReact: (dispatcher(T.msg) => ReasonReact.reactElement) => element(T.msg);
   };
@@ -30,16 +63,21 @@ module App: {
   let map: ('a => 'b, element('a)) => element('b);
 
 } = {
+  include Core({ type element = ReasonReact.reactElement });
+  
+  let mount = (~at: string) => {
 
-  type prop('msg) =
-    | Raw(string, string)
-    | Event(string, 'msg);
+    let render = component =>
+      ReactDOMRe.renderToElementWithId(component, at);
 
-  type dispatcher('msg) = 'msg => unit;
-  type element('msg) = dispatcher('msg) => ReasonReact.reactElement;
-  type htmlElement('msg) = list(prop('msg)) => list(element('msg)) => element('msg);
+    run(~mount=render, ~render)
+  };
 
-  module Html(T: Conf) = {
+  module Html(T: MessageConfig) = {
+    type prop =
+      | Raw(string, string)
+      | Event(string, T.msg);
+    type htmlElement = list(prop) => list(element(T.msg)) => element(T.msg);
 
     let onClick = msg =>
       Event("onClick", msg);
@@ -74,30 +112,4 @@ module App: {
 
     let fromReact = f => f;
   };
-
-
-  let mount = (
-      ~at: string,
-      ~init: unit => 'model,
-      ~update: ('msg, 'model) => 'model,
-      ~view: 'model => element('msg)
-    ): unit => {
-
-    let model = ref(init());
-
-    let render = component =>
-      ReactDOMRe.renderToElementWithId(component, at);
-
-    let rec dispatch = msg => {
-      model := update(msg, model^);
-      render(view(model^, dispatch));
-    };
-
-    render(view(model^, dispatch))
-
-  };
-
-  let map = (f, element) =>
-    dispatch =>
-      element(msg => dispatch(f(msg)));
-}
+};

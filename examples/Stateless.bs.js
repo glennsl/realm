@@ -4,7 +4,7 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
-var Html = Curry._1(Realm.App[/* Html */0], /* module */[]);
+var Html = Curry._1(Realm.React[/* Html */0], /* module */[]);
 
 function view(message, _) {
   return Curry._2(Html[/* div */3], /* [] */0, /* :: */[
@@ -14,7 +14,7 @@ function view(message, _) {
 }
 
 function mount(at) {
-  return Realm.App[/* mount */1](at, (function () {
+  return Realm.React[/* mount */1](at)((function () {
                 return /* () */0;
               }), (function (_, _$1) {
                 return /* () */0;

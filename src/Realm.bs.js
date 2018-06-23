@@ -8,15 +8,24 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 
-function mount(at, init, update, view) {
-  var model = [Curry._1(init, /* () */0)];
-  var dispatch = function (msg) {
-    model[0] = Curry._2(update, msg, model[0]);
-    var component = Curry._2(view, model[0], dispatch);
-    return ReactDOMRe.renderToElementWithId(component, at);
+function Core() {
+  var run = function (mount, render, init, update, view) {
+    var model = [Curry._1(init, /* () */0)];
+    var dispatch = function (msg) {
+      model[0] = Curry._2(update, msg, model[0]);
+      return Curry._1(render, Curry._2(view, model[0], dispatch));
+    };
+    return Curry._1(mount, Curry._2(view, model[0], dispatch));
   };
-  var component = Curry._2(view, model[0], dispatch);
-  return ReactDOMRe.renderToElementWithId(component, at);
+  var map = function (f, element, dispatch) {
+    return Curry._1(element, (function (msg) {
+                  return Curry._1(dispatch, Curry._1(f, msg));
+                }));
+  };
+  return /* module */[
+          /* run */run,
+          /* map */map
+        ];
 }
 
 function map(f, element, dispatch) {
@@ -25,7 +34,26 @@ function map(f, element, dispatch) {
               }));
 }
 
-function App_000() {
+function mount(at) {
+  var render = function (component) {
+    return ReactDOMRe.renderToElementWithId(component, at);
+  };
+  return (function (param, param$1, param$2) {
+      var mount = render;
+      var render$1 = render;
+      var init = param;
+      var update = param$1;
+      var view = param$2;
+      var model = [Curry._1(init, /* () */0)];
+      var dispatch = function (msg) {
+        model[0] = Curry._2(update, msg, model[0]);
+        return Curry._1(render$1, Curry._2(view, model[0], dispatch));
+      };
+      return Curry._1(mount, Curry._2(view, model[0], dispatch));
+    });
+}
+
+function React_000() {
   var onClick = function (msg) {
     return /* Event */Block.__(1, [
               "onClick",
@@ -74,11 +102,12 @@ function App_000() {
         ];
 }
 
-var App = /* module */[
-  App_000,
+var React = /* module */[
+  React_000,
   /* mount */mount,
   /* map */map
 ];
 
-exports.App = App;
+exports.Core = Core;
+exports.React = React;
 /* ReactDOMRe Not a pure module */

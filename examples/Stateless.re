@@ -1,4 +1,4 @@
-module Html = Realm.App.Html({ type msg = unit });
+module Html = Realm.React.Html({ type msg = unit });
 open Html;
 
 let view = (~message, _) =>
@@ -7,4 +7,4 @@ let view = (~message, _) =>
   ]);
 
 let mount = (~at) =>
-  Realm.App.mount(~at, ~init=() => (), ~update=(_, ()) => (), ~view=view(~message="hello"));
+  Realm.React.mount(~at, ~init=() => (), ~update=(_, ()) => (), ~view=view(~message="hello"));

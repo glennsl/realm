@@ -4,7 +4,7 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
-var Html = Curry._1(Realm.App[/* Html */0], /* module */[]);
+var Html = Curry._1(Realm.React[/* Html */0], /* module */[]);
 
 function init() {
   return /* record */[/* count */0];
@@ -29,7 +29,7 @@ function view(model) {
 }
 
 function mount(at) {
-  return Realm.App[/* mount */1](at, init, update, view);
+  return Realm.React[/* mount */1](at)(init, update, view);
 }
 
 exports.Html = Html;
