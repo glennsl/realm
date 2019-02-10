@@ -6,7 +6,7 @@
   "sources": [{
     "dir" : "src",
     "subdirs" : true
-  }, "examples"],
+  }, "examples", "examples/todomvc", "examples/todomvc-minimal"],
   "package-specs": [{
     "module": "commonjs",
     "in-source": true

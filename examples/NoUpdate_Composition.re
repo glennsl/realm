@@ -1,3 +1,4 @@
+open RealmNoUpdate;
 
 module Clicker = {
   type model = {
@@ -9,9 +10,9 @@ module Clicker = {
   };
 
   let click =
-    Realm.NoUpdate.SetState(model => { count: model.count + 1 })
+    Cmd.make(model => { count: model.count + 1 })
 
-  module Html = Realm.NoUpdate.Html({ type nonrec model = model; })
+  module Html = MakeHtml({ type nonrec model = model; })
 
   let view = model => {
     open Html;
@@ -19,8 +20,8 @@ module Clicker = {
     let message =
       "You've clicked this " ++ string_of_int(model.count) ++ " times(s)";
 
-    div([], [
-      button([ onClick(click) ], [
+    div([
+      button(~attrs=[ onClick(click) ], [
         text(message)
       ]),
     ]);
@@ -30,24 +31,28 @@ module Clicker = {
 
 module Toggler = {
   type model = {
-    show: bool
+    show: bool,
+    n: int
   };
 
   let init = () => {
-    show: true
+    show: true,
+    n: 0
   };
 
   let toggle =
-    Realm.NoUpdate.SetState(model => { show: !model.show })
+    Task.randomInt(0, 10)
+    |> Task.map(n => m => { n, show: !m.show })
+    |> Cmd.fromTask
 
-  module Html = Realm.NoUpdate.Html({ type nonrec model = model; })
+  module Html = MakeHtml({ type nonrec model = model; })
 
   let view = (~greeting, model) => {
     open Html;
 
-    div([], [
-      button([ onClick(toggle) ], [
-        text("Toggle greeting")
+    div([
+      button(~attrs=[ onClick(toggle) ], [
+        text("Toggle greeting " ++ string_of_int(model.n))
       ]),
       model.show ? text(greeting) : null
     ]);
@@ -67,18 +72,29 @@ let init = () => {
 };
 
 
-module Html = Realm.NoUpdate.Html({ type nonrec model = model; })
+module Html = MakeHtml({ type nonrec model = model; })
+
+module Components = {
+  let clicker = model => 
+    Clicker.view(model.clicker)
+      |> map( model => model.clicker,
+              (model, clickerModel) => { ...model, clicker: clickerModel });
+  
+  let toggler = (~greeting, model) =>
+    Toggler.view(~greeting, model.toggler)
+      |> map( model => model.toggler,
+              (model, togglerModel) => { ...model, toggler: togglerModel });
+}
 
 let view = (~greeting, model) => {
   open Html;
 
-  div([], [
-    Clicker.view(model.clicker) |> Realm.NoUpdate.map(model => model.clicker, (clickerModel, model) => { ...model, clicker: clickerModel }),
-    Toggler.view(~greeting, model.toggler) |> Realm.NoUpdate.map(model => model.toggler, (togglerModel, model) => { ...model, toggler: togglerModel })
+  div([
+    Components.clicker(model),
+    Components.toggler(~greeting, model)
   ])
-
 };
 
 
 let mount = (~at) =>
-  Realm.NoUpdate.mountHtml(~at, ~init, ~view=view(~greeting="hello"));
+  mountHtml(~at, ~init, ~view=view(~greeting="hello"));

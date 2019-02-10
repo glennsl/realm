@@ -1,9 +1,10 @@
+open RealmNoUpdate;
 
 type model = {
   count: int
 };
 
-module Html = Realm.NoUpdate.Html({
+module Html = MakeHtml({
   type nonrec model = model
 })
 
@@ -12,7 +13,7 @@ let init = () => {
 };
 
 let click =
-  Realm.NoUpdate.SetState(model => { count: model.count + 1 })
+  Cmd.make(model => { count: model.count + 1 })
 
 let view = model => {
   open Html;
@@ -20,8 +21,8 @@ let view = model => {
   let message =
     "You've clicked this " ++ string_of_int(model.count) ++ " times(s)";
 
-  div([], [
-    button([ onClick(click) ], [
+  div([
+    button(~attrs=[ onClick(click) ], [
       text(message)
     ])
   ]);
@@ -30,4 +31,4 @@ let view = model => {
 let mount 
   : (~at: string) => unit
   = (~at) =>
-    Realm.NoUpdate.mountHtml(~at, ~init, ~view);
+    mountHtml(~at, ~init, ~view);
