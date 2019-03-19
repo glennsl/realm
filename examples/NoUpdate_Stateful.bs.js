@@ -2,6 +2,7 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Core__String = require("../src/core/Core__String.bs.js");
 var RealmNoUpdate = require("../src/RealmNoUpdate.bs.js");
 
 var Html = RealmNoUpdate.MakeHtml(/* module */[]);
@@ -15,13 +16,13 @@ var click = RealmNoUpdate.Cmd[/* make */0]((function (model) {
       }));
 
 function view(model) {
-  var message = "You've clicked this " + (String(model[/* count */0]) + " times(s)");
-  return Curry._4(Html[/* div */7], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html[/* button */5], undefined, undefined, /* :: */[
-                    Curry._1(Html[/* onClick */0], click),
+  var message = "You've clicked this " + (Core__String.fromInt(model[/* count */0]) + " times(s)");
+  return Curry._4(Html[/* div */6], undefined, undefined, undefined, /* :: */[
+              Curry._4(Html[/* button */4], undefined, undefined, /* :: */[
+                    Curry._1(Html[/* Attr */0][/* onClick */4], click),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html[/* text */4], message),
+                    Curry._1(Html[/* text */3], message),
                     /* [] */0
                   ]),
               /* [] */0
@@ -29,7 +30,7 @@ function view(model) {
 }
 
 function mount(at) {
-  return RealmNoUpdate.mountHtml(at)(init, view);
+  return RealmNoUpdate.mountHtml(at)(init, undefined, view, /* () */0);
 }
 
 exports.Html = Html;

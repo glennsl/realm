@@ -1,15 +1,16 @@
+open! RealmNoUpdate.Core;
 open Model;
 
-let toggleAllCheckbox = (~items as _) =>
+let toggleAllCheckbox = (~entries as _) =>
   Html.input(
     ~className="toggle-all",
     ~value=`Checkbox(false));
 
-let view = (~items, ~editing) => {
+let view = (~entries, ~visibility) => {
   open Html;
 
   section(
-    [ toggleAllCheckbox(~items)
-    , TodoList.view(~items, ~editing)
+    [ toggleAllCheckbox(~entries)
+    , TodoList.view(~entries, ~visibility)
     ])
 };

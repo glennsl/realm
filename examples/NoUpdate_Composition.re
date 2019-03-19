@@ -1,4 +1,5 @@
 open RealmNoUpdate;
+open! Core;
 
 module Clicker = {
   type model = {
@@ -16,9 +17,10 @@ module Clicker = {
 
   let view = model => {
     open Html;
+    open Attr;
 
     let message =
-      "You've clicked this " ++ string_of_int(model.count) ++ " times(s)";
+      "You've clicked this " ++ String.fromInt(model.count) ++ " times(s)";
 
     div([
       button(~attrs=[ onClick(click) ], [
@@ -49,10 +51,11 @@ module Toggler = {
 
   let view = (~greeting, model) => {
     open Html;
+    open Attr;
 
     div([
       button(~attrs=[ onClick(toggle) ], [
-        text("Toggle greeting " ++ string_of_int(model.n))
+        text("Toggle greeting " ++ String.fromInt(model.n))
       ]),
       model.show ? text(greeting) : null
     ]);

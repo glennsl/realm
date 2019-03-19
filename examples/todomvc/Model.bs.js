@@ -12,6 +12,7 @@ function make(title) {
           /* id */newId(/* () */0),
           /* title */title,
           /* completed */false,
+          /* editing */false,
           /* created */new Date()
         ];
 }

@@ -45,19 +45,23 @@ let _log = value => value |> Obj.magic |. Js.Json.stringifyWithSpace(2) |> Js.lo
 let run = (
     ~mount: htmlElement => unit,
     ~render: htmlElement => unit,
-    ~init: unit => 'model,
-    ~view: 'model => element('model)
+    ~init: 'arg => 'model,
+    ~update: 'action => Cmd.t('model) = x => x,
+    ~view: 'model => element('model),
+    arg: 'arg
   ): unit => {
 
-  let model = ref(init());
+  let model = ref(init(arg));
 
-  let rec dispatch = command => {
-    command |> Cmd.run(newModel => {
-      _log(newModel);
-      model := newModel;
-      render(view(model^, dispatch));
-    }, model^);
-  };
+  let rec dispatch = action => {
+    action
+      |> update
+      |> Cmd.run(newModel => {
+          _log(newModel);
+          model := newModel;
+          render(view(model^, dispatch));
+        }, model^);
+      };
 
   mount(view(model^, dispatch))
 };
@@ -89,15 +93,13 @@ module MakeHtml(T: { type model }) = {
     | Raw(string, string)
     | Event(string, event => Cmd.t(T.model));
 
-  let onClick = command =>
-    Event("onClick", _ => command);
-
   module Attr = {
     let className = name => Raw("className", name);
     let autofocus = value => Raw("autoFocus", Obj.magic(value));
     let hidden = value => Raw("hidden", Obj.magic(value));
     let name = name => Raw("name", name);
-    let onClick = onClick;
+    let onClick = command =>
+      Event("onClick", _ => command);
     let onDoubleClick = command =>
       Event("onDoubleClick", _ => command);
     let onChange = command =>
@@ -161,3 +163,5 @@ module MakeHtml(T: { type model }) = {
 module Html = MakeHtml({
   type nonrec model = unit
 });
+
+module Core = Realm__Core

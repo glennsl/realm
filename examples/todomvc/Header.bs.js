@@ -4,33 +4,32 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
+var Realm__Core = require("../../src/core/Realm__Core.bs.js");
 var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
 var partial_arg = "What needs to be done?";
 
-function partial_arg$1(param) {
-  return TodoTextInput.view("new-todo", partial_arg, "", param);
-}
-
-function addTextInput(param) {
-  return RealmNoUpdate.map((function (param) {
-                return "";
-              }), (function (model, name) {
-                return /* record */[
-                        /* editing */model[/* editing */0],
-                        /* items */Pervasives.$at(model[/* items */1], /* :: */[
-                              Model.Todo[/* make */1](name),
-                              /* [] */0
-                            ])
-                      ];
-              }), partial_arg$1, param);
-}
+var addTextInput = Realm__Core.$pipe$great((function (param) {
+        return TodoTextInput.view("new-todo", partial_arg, "", param);
+      }), (function (param, param$1) {
+        return RealmNoUpdate.map((function (param) {
+                      return "";
+                    }), (function (model, name) {
+                      return /* record */[
+                              /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
+                                    Model.Todo[/* make */1](name),
+                                    /* [] */0
+                                  ]),
+                              /* visibility */model[/* visibility */1]
+                            ];
+                    }), param, param$1);
+      }));
 
 function view(param) {
-  return Curry._4(Model.Html[/* header */8], undefined, undefined, undefined, /* :: */[
-              Curry._4(Model.Html[/* h1 */9], undefined, undefined, undefined, /* :: */[
-                    Curry._1(Model.Html[/* text */4], "todos"),
+  return Curry._4(Model.Html[/* header */7], undefined, undefined, undefined, /* :: */[
+              Curry._4(Model.Html[/* h1 */8], undefined, undefined, undefined, /* :: */[
+                    Curry._1(Model.Html[/* text */3], "todos"),
                     /* [] */0
                   ]),
               /* :: */[
@@ -42,4 +41,4 @@ function view(param) {
 
 exports.addTextInput = addTextInput;
 exports.view = view;
-/* Model Not a pure module */
+/* addTextInput Not a pure module */

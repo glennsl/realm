@@ -1,0 +1,32 @@
+
+type t = int
+
+let add = ()
+let subtract = ()
+let multiply = ()
+let divide = ()
+let pow = ()
+let toFloat = ()
+let equals = ()
+let notEquals = ()
+let lessThan = ()
+let greaterThan = ()
+let lessThanOrEqual = ()
+let greaterThanOrEqual = ()
+let min = ()
+let max = ()
+let compare = ()
+
+let modBy = ()
+let remainderBy = ()
+let negate = ()
+let clamp = ()
+
+(* float *)
+let round = ()
+let floor = ()
+let ceiling = ()
+let truncate = ()
+let toInt = ()
+let isNaN = ()
+let isFinite = ()

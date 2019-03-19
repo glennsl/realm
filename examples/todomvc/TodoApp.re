@@ -1,9 +1,10 @@
+open! RealmNoUpdate.Core;
 open Model;
 
-let view = (~items, ~editing) =>
+let view = (~entries, ~visibility) =>
   Html.div(
     ~className="todoapp",
     [ Header.view()
-    , MainSection.view(~items, ~editing)
-    , TodoFooter.view(~items)
+    , MainSection.view(~entries, ~visibility)
+    , TodoFooter.view(~entries, ~visibility)
     ])

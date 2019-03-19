@@ -5,34 +5,36 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
 var Actions = require("./Actions.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
+var Realm__Core = require("../../src/core/Realm__Core.bs.js");
 var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
 function editTextInput(initialValue) {
-  return (function (param) {
-      return RealmNoUpdate.map((function (param) {
-                    return "";
-                  }), (function (model, name) {
-                    return /* record */[
-                            /* editing */model[/* editing */0],
-                            /* items */Pervasives.$at(model[/* items */1], /* :: */[
-                                  Model.Todo[/* make */1](name),
-                                  /* [] */0
-                                ])
-                          ];
-                  }), (function (param) {
-                    return TodoTextInput.view("edit", undefined, initialValue, param);
-                  }), param);
-    });
+  return Realm__Core.$pipe$great((function (param) {
+                return TodoTextInput.view("edit", undefined, initialValue, param);
+              }), (function (param, param$1) {
+                return RealmNoUpdate.map((function (param) {
+                              return "";
+                            }), (function (model, name) {
+                              return /* record */[
+                                      /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
+                                            Model.Todo[/* make */1](name),
+                                            /* [] */0
+                                          ]),
+                                      /* visibility */model[/* visibility */1]
+                                    ];
+                            }), param, param$1);
+              }));
 }
 
-function view(item, isEditing) {
-  var func = Model.Html[/* input */18];
+function view(entry) {
+  var match = entry[/* editing */3];
+  var func = Model.Html[/* input */17];
   var arg = /* :: */[
-    Curry._1(Model.Html[/* Attr */1][/* onChange */6], Actions.toggle(item)),
+    Curry._1(Model.Html[/* Attr */0][/* onChange */6], Actions.toggle(entry)),
     /* [] */0
   ];
-  var arg_001 = item[/* completed */2];
+  var arg_001 = entry[/* completed */2];
   var arg$1 = /* `Checkbox */[
     111644259,
     arg_001
@@ -40,22 +42,23 @@ function view(item, isEditing) {
   var arg$2 = function (param, param$1) {
     return Curry._5(func, param, param$1, "toggle", arg, arg$1);
   };
-  return Curry._4(Model.Html[/* li */13], undefined, isEditing ? "editing" : "", undefined, /* :: */[
-              Curry._4(Model.Html[/* div */7], undefined, "view", undefined, /* :: */[
+  var match$1 = entry[/* editing */3];
+  return Curry._4(Model.Html[/* li */12], undefined, match ? "editing" : "", undefined, /* :: */[
+              Curry._4(Model.Html[/* div */6], undefined, "view", undefined, /* :: */[
                     (function (eta) {
                         return Curry._1(arg$2(undefined, undefined), eta);
                       }),
                     /* :: */[
-                      Curry._5(Model.Html[/* label */17], undefined, /* :: */[
-                            Curry._1(Model.Html[/* Attr */1][/* onDoubleClick */5], Actions.edit(item)),
+                      Curry._5(Model.Html[/* label */16], undefined, /* :: */[
+                            Curry._1(Model.Html[/* Attr */0][/* onDoubleClick */5], Actions.edit(entry, true)),
                             /* [] */0
                           ], undefined, undefined, /* :: */[
-                            Curry._1(Model.Html[/* text */4], item[/* title */1]),
+                            Curry._1(Model.Html[/* text */3], entry[/* title */1]),
                             /* [] */0
                           ]),
                       /* :: */[
-                        Curry._4(Model.Html[/* button */5], undefined, "destroy", /* :: */[
-                              Curry._1(Model.Html[/* Attr */1][/* onClick */4], Actions.remove(item)),
+                        Curry._4(Model.Html[/* button */4], undefined, "destroy", /* :: */[
+                              Curry._1(Model.Html[/* Attr */0][/* onClick */4], Actions.remove(entry)),
                               /* [] */0
                             ], /* [] */0),
                         /* [] */0
@@ -63,7 +66,7 @@ function view(item, isEditing) {
                     ]
                   ]),
               /* :: */[
-                isEditing ? editTextInput(item[/* title */1]) : Model.Html[/* null */3],
+                match$1 ? editTextInput(entry[/* title */1]) : Model.Html[/* null */2],
                 /* [] */0
               ]
             ]);

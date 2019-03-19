@@ -1,9 +1,11 @@
+open! RealmNoUpdate.Core;
 
 module Todo = {
   type t = {
     id: string,
     title: string,
     completed: bool,
+    editing: bool,
     created: Js.Date.t
   };
 
@@ -13,13 +15,14 @@ module Todo = {
     id: newId (),
     title,
     completed: false,
+    editing: false,
     created: Js.Date.make ()
   };
 };
 
 type model = {
-  editing: option(string),
-  items : list(Todo.t)
+  entries : list(Todo.t),
+  visibility : string
 };
 
 module Html = RealmNoUpdate.MakeHtml({
