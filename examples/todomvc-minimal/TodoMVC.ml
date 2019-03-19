@@ -1,4 +1,5 @@
 open RealmNoUpdate
+open! Core
 
 
 
@@ -43,35 +44,25 @@ module LocalStorage = struct
   external setItem : string -> string -> unit = "localStorage.setItem" [@@bs.val]
 end
 
+
 module Json = struct
   external parse : string -> 'a option = "JSON.parse" [@@bs.val] [@@bs.return nullable]
   external stringify : 'a -> string option = "JSON.stringify" [@@bs.val] [@@bs.return nullable]
 end
 
+
 let init () =
-  match LocalStorage.getItem "realm-todo-save" with
-  | Some json ->
-    begin match Json.parse json with
-    | Some model ->
-      model
+  LocalStorage.getItem "realm-todo-save"
+  |> Option.andThen Json.parse
+  |> Option.withDefault emptyModel
 
-    | None ->
-      emptyModel
-    end
-
-  | None ->
-    emptyModel
-
-
-let store =
+let persist =
   Cmd.map (fun model -> model) @@
     fun _ model ->
-      match Json.stringify model with
-      | Some json ->
-        LocalStorage.setItem "realm-todo-save" json;
-        model
-
-      | None ->
+      let _: unit option =
+        Json.stringify model
+        |> Option.map (LocalStorage.setItem "realm-todo-save")
+      in
         model
 
 
@@ -80,7 +71,7 @@ let store =
 
 
 let add =
-  store @@ Cmd.make @@
+  Cmd.make @@
     fun model ->
       { model with
         uid = model.uid + 1
@@ -94,7 +85,7 @@ let add =
 
 
 let updateField str =
-  store @@ Cmd.make (fun model -> { model with field = str })
+  Cmd.make (fun model -> { model with field = str })
 
 
 let editingEntry id isEditing =
@@ -105,7 +96,7 @@ let editingEntry id isEditing =
       else
         t
     in
-  store @@ Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let updateEntry id task =
@@ -116,15 +107,15 @@ let updateEntry id task =
       else
         t
     in
-  store @@ Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let delete id =
-  store @@ Cmd.make (fun model -> { model with entries = List.filter (fun t -> t.Entry.id != id) model.entries})
+  Cmd.make (fun model -> { model with entries = List.filter (fun t -> t.Entry.id != id) model.entries})
 
 
 let deleteComplete = 
-  store @@ Cmd.make (fun model -> { model with entries = List.filter (fun t -> not t.Entry.completed) model.entries})
+  Cmd.make (fun model -> { model with entries = List.filter (fun t -> not t.Entry.completed) model.entries})
 
 
 let check id isCompleted =
@@ -135,7 +126,7 @@ let check id isCompleted =
       else
         t
     in
-  store @@ Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let checkAll isCompleted =
@@ -143,12 +134,15 @@ let checkAll isCompleted =
     updateEntry t =
       Entry.{ t with completed = isCompleted }
     in
-  store @@ Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let changeVisibility visibility =
-  store @@ Cmd.make (fun model -> { model with visibility })
+  Cmd.make (fun model -> { model with visibility })
 
+
+let update cmd =
+  persist cmd
 
 
 (* VIEW *)
@@ -163,7 +157,7 @@ open Attr
 
 
 let onEnter action =
-  onKeyDown @@
+  onKeyDown <|
     fun keyCode ->
       if keyCode == 13 then
         action
@@ -193,19 +187,19 @@ let viewEntry todo =
     ~className: (if todo.editing then "editing" else "")
     [ div
         ~className: "view"
-        [ input
+        [ Html.input
             ~className: "toggle"
             ~value: (`Checkbox todo.completed)
-            ~attrs: [onClick (check todo.id (not todo.completed))]
+            ~attrs: [ onClick (check todo.id (not todo.completed)) ]
         ; label
-            ~attrs: [onDoubleClick (editingEntry todo.id true)]
+            ~attrs: [ onDoubleClick (editingEntry todo.id true) ]
             [ text todo.description ]
         ; button
             ~className: "destroy"
-            ~attrs: [onClick (delete todo.id)]
+            ~attrs: [ onClick (delete todo.id) ]
             []
         ]
-    ; input
+    ; Html.input
         ~id: ("todo-" ^ string_of_int todo.id)
         ~className: "edit"
         ~value: (`Text todo.description)
@@ -228,28 +222,28 @@ let viewEntries visibility entries =
     in
   let
     allCompleted =
-      List.for_all (fun todo -> todo.completed) entries
+      List.all (fun t -> t.completed) entries
     in
-  let
+  (* let
     cssVisibility =
       if entries = [] then
         "hidden"
       else
         "visible"
-    in
+    in *)
   section
     ~className: "main"
     (* ~attrs: [style "visibility" cssVisibility] *)
     [ Html.input
         ~className: "toggle-all"
         ~value: (`Checkbox allCompleted)
-        ~attrs: [name "toggle-all"; onClick (checkAll (not allCompleted))]
+        ~attrs: [ name "toggle-all"; onClick (checkAll (not allCompleted)) ]
     ; label
         ~for_: "toggle-all"
-        [ text "Mark all as complete"]
+        [ text "Mark all as complete" ]
     ; ul
-        ~className: "todo-list" @@
-        List.map viewEntry (List.filter isVisible entries)
+        ~className: "todo-list" <|
+        (entries |> List.filter isVisible |> List.map viewEntry)
     ]
 
 
@@ -263,14 +257,14 @@ let viewControlsCount entriesLeft =
     in
   span
     ~className: "todo-count"
-    [ strong [ text (string_of_int entriesLeft) ]
+    [ strong [ text (String.fromInt entriesLeft) ]
     ; text (item ^ " left")
     ]
 
 
 let visibilitySwap uri visibility actualVisibility =
   li
-    ~attrs: [onClick (changeVisibility visibility)]
+    ~attrs: [ onClick (changeVisibility visibility) ]
     [ a
         ~className: (if visibility = actualVisibility then "selected" else "")
         ~href: uri
@@ -296,13 +290,15 @@ let viewControlsClear entriesCompleted =
       [ hidden (entriesCompleted == 0)
       ; onClick deleteComplete
       ] 
-      [ text ("Clear completed (" ^ string_of_int entriesCompleted ^ ")") ]
+      [ text ("Clear completed (" ^ String.fromInt entriesCompleted ^ ")") ]
 
 
 let viewControls visibility entries =
   let
     entriesCompleted =
-      List.length (List.filter (fun todo -> todo.Entry.completed) entries)
+      entries
+      |> List.filter (fun t -> t.Entry.completed)
+      |> List.length
     in
   let
     entriesLeft =
@@ -349,4 +345,4 @@ let view model =
 
 
 let () =
-  mountHtml ~at:"todoapp" ~init ~view
+  mountHtml ~at:"todoapp" ~init ~update ~view ()

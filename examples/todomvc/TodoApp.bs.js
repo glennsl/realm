@@ -7,13 +7,13 @@ var Header = require("./Header.bs.js");
 var TodoFooter = require("./TodoFooter.bs.js");
 var MainSection = require("./MainSection.bs.js");
 
-function view(items, editing) {
-  return Curry._4(Model.Html[/* div */7], undefined, "todoapp", undefined, /* :: */[
+function view(entries, visibility) {
+  return Curry._4(Model.Html[/* div */6], undefined, "todoapp", undefined, /* :: */[
               Header.view(/* () */0),
               /* :: */[
-                MainSection.view(items, editing),
+                MainSection.view(entries, visibility),
                 /* :: */[
-                  TodoFooter.view(items),
+                  TodoFooter.view(entries, visibility),
                   /* [] */0
                 ]
               ]

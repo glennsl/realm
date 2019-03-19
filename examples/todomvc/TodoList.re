@@ -1,15 +1,21 @@
+open! RealmNoUpdate.Core;
 open Model;
 
-let view = (~items, ~editing) => {
+let view = (~entries, ~visibility) => {
   open Html;
 
-  let itemViews =
-    items |> List.map(item =>
-    TodoItem.view(
-      ~item,
-      ~isEditing=(Some(item.id) == editing)))
+  let
+    isVisible = entry =>
+      switch (visibility) {
+      | "Completed" => entry.Todo.completed
+      | "Active"    => !entry.completed
+      | _           => true
+      }
 
- ul(
-   ~className="todo-list",
-   itemViews)
+  ul(
+    ~className="todo-list",
+    entries
+      |> List.filter(isVisible)
+      |> List.map(TodoItem.view)
+  )
 };

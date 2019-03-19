@@ -2,6 +2,8 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Realm__Core = require("../src/core/Realm__Core.bs.js");
+var Core__String = require("../src/core/Core__String.bs.js");
 var RealmNoUpdate = require("../src/RealmNoUpdate.bs.js");
 
 function init(param) {
@@ -15,13 +17,13 @@ var click = RealmNoUpdate.Cmd[/* make */0]((function (model) {
 var Html = RealmNoUpdate.MakeHtml(/* module */[]);
 
 function view(model) {
-  var message = "You've clicked this " + (String(model[/* count */0]) + " times(s)");
-  return Curry._4(Html[/* div */7], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html[/* button */5], undefined, undefined, /* :: */[
-                    Curry._1(Html[/* onClick */0], click),
+  var message = "You've clicked this " + (Core__String.fromInt(model[/* count */0]) + " times(s)");
+  return Curry._4(Html[/* div */6], undefined, undefined, undefined, /* :: */[
+              Curry._4(Html[/* button */4], undefined, undefined, /* :: */[
+                    Curry._1(Html[/* Attr */0][/* onClick */4], click),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html[/* text */4], message),
+                    Curry._1(Html[/* text */3], message),
                     /* [] */0
                   ]),
               /* [] */0
@@ -44,35 +46,33 @@ function init$1(param) {
 
 var partial_arg = RealmNoUpdate.Task[/* randomInt */3];
 
-function partial_arg$1(param) {
-  return partial_arg(0, 10, param);
-}
+var partial_arg$1 = RealmNoUpdate.Task[/* map */2];
 
-var partial_arg$2 = RealmNoUpdate.Task[/* map */2];
-
-var toggle = RealmNoUpdate.Cmd[/* fromTask */1]((function (param) {
-        return partial_arg$2((function (n, m) {
-                      return /* record */[
-                              /* show */!m[/* show */0],
-                              /* n */n
-                            ];
-                    }), partial_arg$1, param);
-      }));
+var toggle = Realm__Core.$pipe$great(Realm__Core.$pipe$great((function (param) {
+            return partial_arg(0, 10, param);
+          }), (function (param, param$1) {
+            return partial_arg$1((function (n, m) {
+                          return /* record */[
+                                  /* show */!m[/* show */0],
+                                  /* n */n
+                                ];
+                        }), param, param$1);
+          })), RealmNoUpdate.Cmd[/* fromTask */1]);
 
 var Html$1 = RealmNoUpdate.MakeHtml(/* module */[]);
 
 function view$1(greeting, model) {
   var match = model[/* show */0];
-  return Curry._4(Html$1[/* div */7], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html$1[/* button */5], undefined, undefined, /* :: */[
-                    Curry._1(Html$1[/* onClick */0], toggle),
+  return Curry._4(Html$1[/* div */6], undefined, undefined, undefined, /* :: */[
+              Curry._4(Html$1[/* button */4], undefined, undefined, /* :: */[
+                    Curry._1(Html$1[/* Attr */0][/* onClick */4], toggle),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html$1[/* text */4], "Toggle greeting " + String(model[/* n */1])),
+                    Curry._1(Html$1[/* text */3], "Toggle greeting " + Core__String.fromInt(model[/* n */1])),
                     /* [] */0
                   ]),
               /* :: */[
-                match ? Curry._1(Html$1[/* text */4], greeting) : Html$1[/* null */3],
+                match ? Curry._1(Html$1[/* text */3], greeting) : Html$1[/* null */2],
                 /* [] */0
               ]
             ]);
@@ -98,31 +98,29 @@ function init$2(param) {
 var Html$2 = RealmNoUpdate.MakeHtml(/* module */[]);
 
 function clicker(model) {
-  var partial_arg = view(model[/* clicker */0]);
-  return (function (param) {
-      return RealmNoUpdate.map((function (model) {
-                    return model[/* clicker */0];
-                  }), (function (model, clickerModel) {
-                    return /* record */[
-                            /* clicker */clickerModel,
-                            /* toggler */model[/* toggler */1]
-                          ];
-                  }), partial_arg, param);
-    });
+  return Realm__Core.$pipe$great(view(model[/* clicker */0]), (function (param, param$1) {
+                return RealmNoUpdate.map((function (model) {
+                              return model[/* clicker */0];
+                            }), (function (model, clickerModel) {
+                              return /* record */[
+                                      /* clicker */clickerModel,
+                                      /* toggler */model[/* toggler */1]
+                                    ];
+                            }), param, param$1);
+              }));
 }
 
 function toggler(greeting, model) {
-  var partial_arg = view$1(greeting, model[/* toggler */1]);
-  return (function (param) {
-      return RealmNoUpdate.map((function (model) {
-                    return model[/* toggler */1];
-                  }), (function (model, togglerModel) {
-                    return /* record */[
-                            /* clicker */model[/* clicker */0],
-                            /* toggler */togglerModel
-                          ];
-                  }), partial_arg, param);
-    });
+  return Realm__Core.$pipe$great(view$1(greeting, model[/* toggler */1]), (function (param, param$1) {
+                return RealmNoUpdate.map((function (model) {
+                              return model[/* toggler */1];
+                            }), (function (model, togglerModel) {
+                              return /* record */[
+                                      /* clicker */model[/* clicker */0],
+                                      /* toggler */togglerModel
+                                    ];
+                            }), param, param$1);
+              }));
 }
 
 var Components = /* module */[
@@ -131,7 +129,7 @@ var Components = /* module */[
 ];
 
 function view$2(greeting, model) {
-  return Curry._4(Html$2[/* div */7], undefined, undefined, undefined, /* :: */[
+  return Curry._4(Html$2[/* div */6], undefined, undefined, undefined, /* :: */[
               clicker(model),
               /* :: */[
                 toggler(greeting, model),
@@ -141,9 +139,16 @@ function view$2(greeting, model) {
 }
 
 function mount(at) {
-  return RealmNoUpdate.mountHtml(at)(init$2, (function (param) {
-                return view$2("hello", param);
-              }));
+  var partial_arg = RealmNoUpdate.mountHtml(at);
+  var func = function (param, param$1, param$2) {
+    return partial_arg(init$2, param, param$1, param$2);
+  };
+  var arg = function (param) {
+    return view$2("hello", param);
+  };
+  return (function (param) {
+      return Curry._2(func, param, arg);
+    });
 }
 
 exports.Clicker = Clicker;

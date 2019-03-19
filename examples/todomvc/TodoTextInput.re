@@ -1,4 +1,5 @@
 open RealmNoUpdate;
+open! Core;
 
 module TextInput = {
   let component = ReasonReact.reducerComponent("Greeting");

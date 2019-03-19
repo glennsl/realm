@@ -74,14 +74,17 @@ function _log(value) {
   return /* () */0;
 }
 
-function run$2(mount, render, init, view) {
-  var model = /* record */[/* contents */Curry._1(init, /* () */0)];
-  var dispatch = function (command) {
+function run$2(mount, render, init, $staropt$star, view, arg) {
+  var update = $staropt$star !== undefined ? $staropt$star : (function (x) {
+        return x;
+      });
+  var model = /* record */[/* contents */Curry._1(init, arg)];
+  var dispatch = function (action) {
     return run$1((function (newModel) {
                   _log(newModel);
                   model[0] = newModel;
                   return Curry._1(render, Curry._2(view, model[0], dispatch));
-                }), model[0], command);
+                }), model[0], Curry._1(update, action));
   };
   return Curry._1(mount, Curry._2(view, model[0], dispatch));
 }
@@ -96,20 +99,12 @@ function mountHtml(at) {
   var render = function (component) {
     return ReactDOMRe.renderToElementWithId(component, at);
   };
-  return (function (param, param$1) {
-      return run$2(render, render, param, param$1);
+  return (function (param, param$1, param$2, param$3) {
+      return run$2(render, render, param, param$1, param$2, param$3);
     });
 }
 
 function MakeHtml(T) {
-  var onClick = function (command) {
-    return /* Event */Block.__(1, [
-              "onClick",
-              (function (param) {
-                  return command;
-                })
-            ]);
-  };
   var className = function (name) {
     return /* Raw */Block.__(0, [
               "className",
@@ -132,6 +127,14 @@ function MakeHtml(T) {
     return /* Raw */Block.__(0, [
               "name",
               name$1
+            ]);
+  };
+  var onClick = function (command) {
+    return /* Event */Block.__(1, [
+              "onClick",
+              (function (param) {
+                  return command;
+                })
             ]);
   };
   var onDoubleClick = function (command) {
@@ -342,7 +345,6 @@ function MakeHtml(T) {
     }
   };
   return /* module */[
-          /* onClick */onClick,
           /* Attr */Attr,
           /* _element */_element,
           /* null */$$null$1,
@@ -362,15 +364,6 @@ function MakeHtml(T) {
           /* label */label,
           /* input */input
         ];
-}
-
-function onClick(command) {
-  return /* Event */Block.__(1, [
-            "onClick",
-            (function (param) {
-                return command;
-              })
-          ]);
 }
 
 function className(name) {
@@ -398,6 +391,15 @@ function name(name$1) {
   return /* Raw */Block.__(0, [
             "name",
             name$1
+          ]);
+}
+
+function onClick(command) {
+  return /* Event */Block.__(1, [
+            "onClick",
+            (function (param) {
+                return command;
+              })
           ]);
 }
 
@@ -632,7 +634,6 @@ function input($staropt$star, id, className, $staropt$star$1, value) {
 }
 
 var Html = /* module */[
-  /* onClick */onClick,
   /* Attr */Attr,
   /* _element */_element,
   /* null */$$null$1,
@@ -653,6 +654,8 @@ var Html = /* module */[
   /* input */input
 ];
 
+var Core = 0;
+
 exports.Task = Task;
 exports.Cmd = Cmd;
 exports._log = _log;
@@ -661,4 +664,5 @@ exports.map = map$2;
 exports.mountHtml = mountHtml;
 exports.MakeHtml = MakeHtml;
 exports.Html = Html;
+exports.Core = Core;
 /* ReactDOMRe Not a pure module */

@@ -1,4 +1,5 @@
 open RealmNoUpdate;
+open! Core;
 
 type model = {
   count: int
@@ -17,9 +18,10 @@ let click =
 
 let view = model => {
   open Html;
+  open Attr;
 
   let message =
-    "You've clicked this " ++ string_of_int(model.count) ++ " times(s)";
+    "You've clicked this " ++ String.fromInt(model.count) ++ " times(s)";
 
   div([
     button(~attrs=[ onClick(click) ], [
@@ -31,4 +33,4 @@ let view = model => {
 let mount 
   : (~at: string) => unit
   = (~at) =>
-    mountHtml(~at, ~init, ~view);
+    mountHtml(~at, ~init, ~view, ());

@@ -1,24 +1,25 @@
 open RealmNoUpdate;
+open! Core;
 open Model;
 
 let editTextInput = initialValue =>
   TodoTextInput.view(~className="edit", initialValue)
-    |> map(_ => "", (model, name) => { ...model, items: model.items @ [Todo.make(name)] })
+    |> map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] })
 
-let view = (~item: Todo.t, ~isEditing) => {
+let view = (entry: Todo.t) => {
   open Model.Html;
   open Attr;
 
-  li(~className=isEditing ? "editing" : "", [
+  li(~className=entry.editing ? "editing" : "", [
     div(~className="view", [
       Model.Html.input(
         ~className="toggle",
-        ~attrs=[onChange(Actions.toggle(item))], 
-        ~value=`Checkbox(item.completed)),
-      label(~attrs=[onDoubleClick(Actions.edit(item))], [text(item.title)]),
-      button(~className="destroy", ~attrs=[Attr.onClick(Actions.remove(item))], [])
+        ~attrs=[onChange(Actions.toggle(entry))], 
+        ~value=`Checkbox(entry.completed)),
+      label(~attrs=[onDoubleClick(Actions.edit(entry, ~editing=true))], [text(entry.title)]),
+      button(~className="destroy", ~attrs=[Attr.onClick(Actions.remove(entry))], [])
     ]),
-    isEditing ? editTextInput(item.title) : null
+    entry.editing ? editTextInput(entry.title) : null
     /* div(~attrs=Attr.[className("created")], [text(Js.Date.toLocaleString(item.created))]) */
   ])
 };
