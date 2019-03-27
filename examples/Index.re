@@ -4,3 +4,4 @@ ReactInterop.mount(~at="react-interop");
 Composition.mount(~at="composition");
 NoUpdate_Stateful.mount(~at="noupdate-stateful");
 NoUpdate_Composition.mount(~at="noupdate-composition");
+NoUpdate_Timer.mount(~at="noupdate-timer");

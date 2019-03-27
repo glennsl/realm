@@ -519,7 +519,7 @@ function view(model) {
             ]);
 }
 
-RealmNoUpdate.mountHtml("todoapp")(init, update, view, /* () */0);
+RealmNoUpdate.mountHtml("todoapp")(init, update, undefined, view, /* () */0);
 
 exports.Entry = Entry;
 exports.emptyModel = emptyModel;

@@ -35,34 +35,87 @@ module Cmd : {
     command |> Task.map(updater => b => b |> getter |> updater |> setter(b));
 }
 
+module Sub : {
+  type t('action);
+  type unsubber = unit => unit;
+  type callback('a) = 'a => unit;
+  let make : (string, 'a => 'action, callback('a) => unsubber) => t('action);
+  let run : ('action => unit, t('action)) => unsubber;
+  let unsub : unsubber => unit;
+  let id : t(_) => string;
+} = {
+  type unsubber = unit => unit;
+  type callback('a) = 'a => unit;
+  type dispatcher('a) = 'a => unit
+  type t('action) = { id: string, spawner: dispatcher('action) => unsubber };
+  let make = (id, action, spawner) =>
+    { id, spawner: dispatch => spawner(value => value |> action |> dispatch) }
+  let run = (dispatch, sub) =>
+    sub.spawner(dispatch);
+  let unsub = unsubber =>
+    unsubber();
+  let id = sub =>
+    sub.id
+}
+
+module Time : {
+  let every : (string, float, unit => 'action) => Sub.t('action)
+} = {
+  let every = (id, ms, action) =>
+    Sub.make(id, action,
+      callback => {
+        let intervalId = Js.Global.setIntervalFloat(callback, ms);
+        () => Js.Global.clearInterval(intervalId)
+      });
+}
+
 /* type action('arg, 'model) = 'arg => command('model); */
 type dispatcher('model) = Cmd.t('model) => unit;
 type element('model) = dispatcher('model) => htmlElement
 and htmlElement = ReasonReact.reactElement;
 
-let _log = value => value |> Obj.magic |. Js.Json.stringifyWithSpace(2) |> Js.log;
+// let _log = value => value |> Obj.magic |. Js.Json.stringifyWithSpace(2) |> Js.log;
+let _log = value => Js.log2("model updated", value);
+
+module SubMap = Belt.Map.String;
 
 let run = (
     ~mount: htmlElement => unit,
     ~render: htmlElement => unit,
     ~init: 'arg => 'model,
     ~update: 'action => Cmd.t('model) = x => x,
+    ~subs: 'model => list(Sub.t('action)) = _ => [],
     ~view: 'model => element('model),
     arg: 'arg
   ): unit => {
 
+  let activeSubs = ref(SubMap.empty);
   let model = ref(init(arg));
 
-  let rec dispatch = action => {
+  let rec updateSubs = () => {
+    let newSubs = subs(model^) |> List.fold_left((subs, sub) => SubMap.set(subs, Sub.id(sub), sub), SubMap.empty);
+    let spawns = SubMap.keep(newSubs, (key, _) => !SubMap.has(activeSubs^, key));
+    let existing = SubMap.keep(activeSubs^, (key, _) => SubMap.has(newSubs, key));
+    let kills = SubMap.keep(activeSubs^, (key, _) => !SubMap.has(newSubs, key));
+    SubMap.forEach(kills, _ => Sub.unsub);
+    activeSubs := SubMap.reduce(spawns, existing, (subs, id, sub) => SubMap.set(subs, id, Sub.run(dispatch, sub)));
+    Js.log2("updateSubs", activeSubs^);
+  }
+
+  and dispatch = action => {
+    let step = newModel => {
+      _log(newModel);
+      model := newModel;
+      updateSubs();
+      render(view(model^, dispatch));
+    };
+
     action
       |> update
-      |> Cmd.run(newModel => {
-          _log(newModel);
-          model := newModel;
-          render(view(model^, dispatch));
-        }, model^);
-      };
+      |> Cmd.run(step, model^);
+  };
 
+  updateSubs();
   mount(view(model^, dispatch))
 };
 

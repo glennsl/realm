@@ -9,6 +9,7 @@ var Random = require("bs-platform/lib/js/random.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
+var Belt_MapString = require("bs-platform/lib/js/belt_MapString.js");
 
 function make(f) {
   return f;
@@ -69,23 +70,94 @@ var Cmd = /* module */[
   /* map */map$1
 ];
 
+function make$2(id, action, spawner) {
+  return /* record */[
+          /* id */id,
+          /* spawner */(function (dispatch) {
+              return Curry._1(spawner, (function (value) {
+                            return Curry._1(dispatch, Curry._1(action, value));
+                          }));
+            })
+        ];
+}
+
+function run$2(dispatch, sub) {
+  return Curry._1(sub[/* spawner */1], dispatch);
+}
+
+function unsub(unsubber) {
+  return Curry._1(unsubber, /* () */0);
+}
+
+function id(sub) {
+  return sub[/* id */0];
+}
+
+var Sub = /* module */[
+  /* make */make$2,
+  /* run */run$2,
+  /* unsub */unsub,
+  /* id */id
+];
+
+function every(id, ms, action) {
+  return make$2(id, action, (function (callback) {
+                var intervalId = setInterval(callback, ms);
+                return (function (param) {
+                    clearInterval(intervalId);
+                    return /* () */0;
+                  });
+              }));
+}
+
+var Time = /* module */[/* every */every];
+
 function _log(value) {
-  console.log(JSON.stringify(value, null, 2));
+  console.log("model updated", value);
   return /* () */0;
 }
 
-function run$2(mount, render, init, $staropt$star, view, arg) {
+function run$3(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
   var update = $staropt$star !== undefined ? $staropt$star : (function (x) {
         return x;
       });
+  var subs = $staropt$star$1 !== undefined ? $staropt$star$1 : (function (param) {
+        return /* [] */0;
+      });
+  var activeSubs = /* record */[/* contents */Belt_MapString.empty];
   var model = /* record */[/* contents */Curry._1(init, arg)];
-  var dispatch = function (action) {
-    return run$1((function (newModel) {
-                  _log(newModel);
-                  model[0] = newModel;
-                  return Curry._1(render, Curry._2(view, model[0], dispatch));
-                }), model[0], Curry._1(update, action));
+  var updateSubs = function (param) {
+    var newSubs = List.fold_left((function (subs, sub) {
+            return Belt_MapString.set(subs, sub[/* id */0], sub);
+          }), Belt_MapString.empty, Curry._1(subs, model[0]));
+    var spawns = Belt_MapString.keep(newSubs, (function (key, param) {
+            return !Belt_MapString.has(activeSubs[0], key);
+          }));
+    var existing = Belt_MapString.keep(activeSubs[0], (function (key, param) {
+            return Belt_MapString.has(newSubs, key);
+          }));
+    var kills = Belt_MapString.keep(activeSubs[0], (function (key, param) {
+            return !Belt_MapString.has(newSubs, key);
+          }));
+    Belt_MapString.forEach(kills, (function (param) {
+            return unsub;
+          }));
+    activeSubs[0] = Belt_MapString.reduce(spawns, existing, (function (subs, id, sub) {
+            return Belt_MapString.set(subs, id, Curry._1(sub[/* spawner */1], dispatch));
+          }));
+    console.log("updateSubs", activeSubs[0]);
+    return /* () */0;
   };
+  var dispatch = function (action) {
+    var step = function (newModel) {
+      console.log("model updated", newModel);
+      model[0] = newModel;
+      updateSubs(/* () */0);
+      return Curry._1(render, Curry._2(view, model[0], dispatch));
+    };
+    return run$1(step, model[0], Curry._1(update, action));
+  };
+  updateSubs(/* () */0);
   return Curry._1(mount, Curry._2(view, model[0], dispatch));
 }
 
@@ -99,8 +171,8 @@ function mountHtml(at) {
   var render = function (component) {
     return ReactDOMRe.renderToElementWithId(component, at);
   };
-  return (function (param, param$1, param$2, param$3) {
-      return run$2(render, render, param, param$1, param$2, param$3);
+  return (function (param, param$1, param$2, param$3, param$4) {
+      return run$3(render, render, param, param$1, param$2, param$3, param$4);
     });
 }
 
@@ -654,12 +726,17 @@ var Html = /* module */[
   /* input */input
 ];
 
+var SubMap = 0;
+
 var Core = 0;
 
 exports.Task = Task;
 exports.Cmd = Cmd;
+exports.Sub = Sub;
+exports.Time = Time;
 exports._log = _log;
-exports.run = run$2;
+exports.SubMap = SubMap;
+exports.run = run$3;
 exports.map = map$2;
 exports.mountHtml = mountHtml;
 exports.MakeHtml = MakeHtml;

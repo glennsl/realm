@@ -5,6 +5,7 @@ var Stateful = require("./Stateful.bs.js");
 var Stateless = require("./Stateless.bs.js");
 var Composition = require("./Composition.bs.js");
 var ReactInterop = require("./ReactInterop.bs.js");
+var NoUpdate_Timer = require("./NoUpdate_Timer.bs.js");
 var NoUpdate_Stateful = require("./NoUpdate_Stateful.bs.js");
 var NoUpdate_Composition = require("./NoUpdate_Composition.bs.js");
 
@@ -19,5 +20,7 @@ Composition.mount("composition");
 NoUpdate_Stateful.mount("noupdate-stateful");
 
 NoUpdate_Composition.mount("noupdate-composition");
+
+NoUpdate_Timer.mount("noupdate-timer");
 
 /*  Not a pure module */
