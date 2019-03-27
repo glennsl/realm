@@ -140,14 +140,14 @@ function view$2(greeting, model) {
 
 function mount(at) {
   var partial_arg = RealmNoUpdate.mountHtml(at);
-  var func = function (param, param$1, param$2) {
-    return partial_arg(init$2, param, param$1, param$2);
+  var func = function (param, param$1, param$2, param$3) {
+    return partial_arg(init$2, param, param$1, param$2, param$3);
   };
   var arg = function (param) {
     return view$2("hello", param);
   };
-  return (function (param) {
-      return Curry._2(func, param, arg);
+  return (function (param, param$1) {
+      return Curry._3(func, param, param$1, arg);
     });
 }
 

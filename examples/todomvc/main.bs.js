@@ -61,7 +61,7 @@ function view(param) {
             ]);
 }
 
-RealmNoUpdate.mountHtml("todoapp")(init, undefined, view, /* () */0);
+RealmNoUpdate.mountHtml("todoapp")(init, undefined, undefined, view, /* () */0);
 
 exports.init = init;
 exports.infoFooter = infoFooter;

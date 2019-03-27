@@ -30,7 +30,7 @@ function view(model) {
 }
 
 function mount(at) {
-  return RealmNoUpdate.mountHtml(at)(init, undefined, view, /* () */0);
+  return RealmNoUpdate.mountHtml(at)(init, undefined, undefined, view, /* () */0);
 }
 
 exports.Html = Html;
