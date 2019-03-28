@@ -100,4 +100,4 @@ let view = (~greeting, model) => {
 
 
 let mount = (~at) =>
-  mountHtml(~at, ~init, ~view=view(~greeting="hello"));
+  mountHtml(~at, ~init, ~view=view(~greeting="hello"), ());
