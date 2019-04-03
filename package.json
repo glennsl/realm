@@ -5,7 +5,8 @@
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
     "clean": "bsb -clean-world",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "watch:test": "jest --watch",
     "webpack": "webpack -w",
     "webpack:production": "NODE_ENV=production webpack"
   },
@@ -15,6 +16,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@glennsl/bs-jest": "^0.4.8",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "reason-react": ">=0.4.0"
