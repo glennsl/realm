@@ -47,26 +47,40 @@ let () = {
 }
 
 module Effect : {
-  type t('model, 'result)
-  let const : 'a => t(_, 'a)
-  let update : ('model => 'result) => t('model, 'result)
-  let do_ : ('model => Task.t('result)) => t('model, 'result)
-  let andThen : ('a => t('model, 'b), t('model, 'a)) => t('model, 'b)
+  type t('model)
+  let const : 'model => t('model)
+  let update : ('model => 'model) => t('model)
+  let do_ : ('model => Task.t('result), ('result, 'model) => 'model) => t('model)
+  let andThen : (t('model), t('model)) => t('model)
 
-  let run : ('result => unit, 'model, t('model, 'result)) => unit
+  let step : ('model, t('model)) => (option('model), option(Task.t(t('model))))
 } = {
-  type t('model, 'result) = 'model => Task.t('result);
-  let const = value =>
-    _ => Task.const(value)
-  let update = updater => 
-    model => updater(model) |> Task.const;
-  let do_ = f =>
-    f
-  let andThen = (f, effect) =>
-    model => effect(model) |> Task.andThen(value => f(value)(model))
+  type t('model) =
+  | Update('model => 'model, t('model))
+  | Task('model => Task.t('model => 'model), t('model))
+  | End
 
-  let run = (receiver, model, command) =>
-    command(model) |> Task.run(receiver);
+  let const = value =>
+    Update(_ => value, End)
+  let update = updater => 
+    Update(updater, End)
+  let do_ = (action, mapper) =>
+    Task(model => action(model) |> Task.map(mapper), End)
+  let rec andThen = last => 
+    fun | End => last
+        | Update(f, next) => Update(f, andThen(last, next))
+        | Task(f, next) => Task(f, andThen(last, next))
+
+  let step = model =>
+    fun | End =>
+          (None, None)
+        | Update(f, next) =>
+          (Some(f(model)),
+           next == End ? None : Some(Task.const(next)))
+        | Task(f, next) =>
+          (None,
+           Some(f(model) |> Task.map(updater => Update(updater, next))))
+
   // let mapModel = (mapper, command) =>
   //   model => command(model) |> Task.map(updater => value => updater |> mapper);
   // let mapResult = 
@@ -86,28 +100,72 @@ let () = {
 
   describe("Effect", () => {
 
-    testAsync("const", finish => {
+    test("const", () => {
       let effect = Effect.const(42)
-      effect |> Effect.run(value => expect(value) |> toBe(42) |> finish, "foo")
+      let (value, next) = Effect.step(0, effect);
+      expect((value, next)) |> toEqual((Some(42), None))
     });
 
-    testAsync("update", finish => {
+    test("update", () => {
       let effect = Effect.update(model => model + 1)
-      effect |> Effect.run(value => expect(value) |> toBe(3) |> finish, 2)
+      let (value, next) = Effect.step(2, effect);
+      expect((value, next)) |> toEqual((Some(3), None))
     });
 
     testAsync("do_", finish => {
-      let effect = Effect.do_(model => Task.const(model + 1))
-      effect |> Effect.run(value => expect(value) |> toBe(3) |> finish, 2)
+      let model = 2
+      let effect = Effect.do_(model => Task.const(model + 1), (model, value) => model + value)
+      let (value1, next) = Effect.step(model, effect);
+      switch next {
+      | Some(task) =>
+        task |> Task.run(effect => {
+          let model = switch value1 {
+          | Some(value) => value
+          | None => model
+          };
+          let (value2, next) = Effect.step(model, effect);
+          expect((value1, value2, next)) |> toEqual((None, Some(5), None)) |> finish
+        })
+      | None =>
+        fail("should be more steps") |> finish
+      }
     })
 
     testAsync("andThen", finish => {
+      let model = 3
       let effect =
         Effect.(
-          do_(model => Task.const(int_of_string(model) + 1))
-          |> andThen(value => update(model => model ++ (string_of_int(value))))
+          do_(
+            model => Task.const(string_of_int(model) ++ "1"),
+            (result, model) => model + int_of_string(result))
+          |> andThen(update(model => model / 2))
         )
-      effect |> Effect.run(value => expect(value) |> toBe("23") |> finish, "2")
+      let (value1, next) = Effect.step(model, effect);
+      switch next {
+      | Some(task) =>
+        task |> Task.run(effect => {
+          let model = switch value1 {
+          | Some(value) => value
+          | None => model
+          };
+          let (value2, next) = Effect.step(model, effect);
+          switch next {
+          | Some(task) =>
+            task |> Task.run(effect => {
+              let model = switch value2 {
+              | Some(value) => value
+              | None => model
+              };
+              let (value3, next) = Effect.step(model, effect);
+              expect((value1, value2, value3, next)) |> toEqual((None, Some(34), Some(17), None)) |> finish
+            })
+          | None =>
+            fail("should be more steps") |> finish
+          }
+        })
+      | None =>
+        fail("should be more steps") |> finish
+      }
     })
   })
 }

@@ -2,8 +2,10 @@
 'use strict';
 
 var Jest = require("@glennsl/bs-jest/src/jest.js");
+var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
+var Caml_option = require("bs-platform/lib/js/caml_option.js");
 
 function make(f) {
   return f;
@@ -57,34 +59,85 @@ Jest.describe("Task", (function (param) {
                     }));
       }));
 
-function $$const$1(value, param) {
-  return (function (f) {
-      return Curry._1(f, value);
-    });
+function $$const$1(value) {
+  return /* Update */Block.__(0, [
+            (function (param) {
+                return value;
+              }),
+            /* End */0
+          ]);
 }
 
-function update(updater, model) {
-  var value = Curry._1(updater, model);
-  return (function (f) {
-      return Curry._1(f, value);
-    });
+function update(updater) {
+  return /* Update */Block.__(0, [
+            updater,
+            /* End */0
+          ]);
 }
 
-function do_(f) {
-  return f;
+function do_(action, mapper) {
+  return /* Task */Block.__(1, [
+            (function (model) {
+                var partial_arg = Curry._1(action, model);
+                return (function (param) {
+                    return Curry._1(partial_arg, (function (value) {
+                                  return Curry._1(param, Curry._1(mapper, value));
+                                }));
+                  });
+              }),
+            /* End */0
+          ]);
 }
 
-function andThen$1(f, effect, model) {
-  var partial_arg = Curry._1(effect, model);
-  return (function (param) {
-      return andThen((function (value) {
-                    return Curry._2(f, value, model);
-                  }), partial_arg, param);
-    });
+function andThen$1(last, param) {
+  if (typeof param === "number") {
+    return last;
+  } else if (param.tag) {
+    return /* Task */Block.__(1, [
+              param[0],
+              andThen$1(last, param[1])
+            ]);
+  } else {
+    return /* Update */Block.__(0, [
+              param[0],
+              andThen$1(last, param[1])
+            ]);
+  }
 }
 
-function run$1(receiver, model, command) {
-  return Curry._2(command, model, receiver);
+function step(model, param) {
+  if (typeof param === "number") {
+    return /* tuple */[
+            undefined,
+            undefined
+          ];
+  } else if (param.tag) {
+    var next = param[1];
+    var partial_arg = Curry._1(param[0], model);
+    return /* tuple */[
+            undefined,
+            Caml_option.some((function (param) {
+                    var f = function (updater) {
+                      return /* Update */Block.__(0, [
+                                updater,
+                                next
+                              ]);
+                    };
+                    return Curry._1(partial_arg, (function (value) {
+                                  return Curry._1(param, Curry._1(f, value));
+                                }));
+                  }))
+          ];
+  } else {
+    var next$1 = param[1];
+    var match = next$1 === /* End */0;
+    return /* tuple */[
+            Caml_option.some(Curry._1(param[0], model)),
+            match ? undefined : Caml_option.some((function (f) {
+                      return Curry._1(f, next$1);
+                    }))
+          ];
+  }
 }
 
 var Effect = /* module */[
@@ -92,53 +145,120 @@ var Effect = /* module */[
   /* update */update,
   /* do_ */do_,
   /* andThen */andThen$1,
-  /* run */run$1
+  /* step */step
 ];
 
 Jest.describe("Effect", (function (param) {
-        Jest.testAsync("const", undefined, (function (finish) {
-                var effect = function (param) {
-                  return $$const(42);
+        Jest.test("const", (function (param) {
+                var effect_000 = function (param) {
+                  return 42;
                 };
-                return run$1((function (value) {
-                              return Curry._1(finish, Jest.Expect[/* toBe */2](42, Jest.Expect[/* expect */0](value)));
-                            }), "foo", effect);
+                var effect = /* Update */Block.__(0, [
+                    effect_000,
+                    /* End */0
+                  ]);
+                var match = step(0, effect);
+                return Jest.Expect[/* toEqual */12](/* tuple */[
+                            42,
+                            undefined
+                          ], Jest.Expect[/* expect */0](/* tuple */[
+                                match[0],
+                                match[1]
+                              ]));
               }));
-        Jest.testAsync("update", undefined, (function (finish) {
-                var effect = function (param) {
-                  return $$const(param + 1 | 0);
+        Jest.test("update", (function (param) {
+                var effect_000 = function (model) {
+                  return model + 1 | 0;
                 };
-                return run$1((function (value) {
-                              return Curry._1(finish, Jest.Expect[/* toBe */2](3, Jest.Expect[/* expect */0](value)));
-                            }), 2, effect);
+                var effect = /* Update */Block.__(0, [
+                    effect_000,
+                    /* End */0
+                  ]);
+                var match = step(2, effect);
+                return Jest.Expect[/* toEqual */12](/* tuple */[
+                            3,
+                            undefined
+                          ], Jest.Expect[/* expect */0](/* tuple */[
+                                match[0],
+                                match[1]
+                              ]));
               }));
         Jest.testAsync("do_", undefined, (function (finish) {
-                var effect = function (model) {
-                  var value = model + 1 | 0;
-                  return (function (f) {
-                      return Curry._1(f, value);
-                    });
-                };
-                return run$1((function (value) {
-                              return Curry._1(finish, Jest.Expect[/* toBe */2](3, Jest.Expect[/* expect */0](value)));
-                            }), 2, effect);
+                var effect = do_((function (model) {
+                        var value = model + 1 | 0;
+                        return (function (f) {
+                            return Curry._1(f, value);
+                          });
+                      }), (function (model, value) {
+                        return model + value | 0;
+                      }));
+                var match = step(2, effect);
+                var next = match[1];
+                var value1 = match[0];
+                if (next !== undefined) {
+                  return Curry._1(Caml_option.valFromOption(next), (function (effect) {
+                                var model = value1 !== undefined ? value1 : 2;
+                                var match = step(model, effect);
+                                return Curry._1(finish, Jest.Expect[/* toEqual */12](/* tuple */[
+                                                undefined,
+                                                5,
+                                                undefined
+                                              ], Jest.Expect[/* expect */0](/* tuple */[
+                                                    value1,
+                                                    match[0],
+                                                    match[1]
+                                                  ])));
+                              }));
+                } else {
+                  return Curry._1(finish, Jest.fail("should be more steps"));
+                }
               }));
         return Jest.testAsync("andThen", undefined, (function (finish) {
-                      var effect = function (param) {
-                        return andThen$1((function (value) {
-                                      return (function (param) {
-                                          return $$const(param + String(value));
-                                        });
-                                    }), (function (model) {
-                                      var value = Caml_format.caml_int_of_string(model) + 1 | 0;
-                                      return (function (f) {
-                                          return Curry._1(f, value);
-                                        });
-                                    }), param);
-                      };
-                      return run$1((function (value) {
-                                    return Curry._1(finish, Jest.Expect[/* toBe */2]("23", Jest.Expect[/* expect */0](value)));
-                                  }), "2", effect);
+                      var effect = andThen$1(/* Update */Block.__(0, [
+                              (function (model) {
+                                  return model / 2 | 0;
+                                }),
+                              /* End */0
+                            ]), do_((function (model) {
+                                  var value = String(model) + "1";
+                                  return (function (f) {
+                                      return Curry._1(f, value);
+                                    });
+                                }), (function (result, model) {
+                                  return model + Caml_format.caml_int_of_string(result) | 0;
+                                })));
+                      var match = step(3, effect);
+                      var next = match[1];
+                      var value1 = match[0];
+                      if (next !== undefined) {
+                        return Curry._1(Caml_option.valFromOption(next), (function (effect) {
+                                      var model = value1 !== undefined ? value1 : 3;
+                                      var match = step(model, effect);
+                                      var next = match[1];
+                                      var value2 = match[0];
+                                      if (next !== undefined) {
+                                        return Curry._1(Caml_option.valFromOption(next), (function (effect) {
+                                                      var model$1 = value2 !== undefined ? value2 : model;
+                                                      var match = step(model$1, effect);
+                                                      return Curry._1(finish, Jest.Expect[/* toEqual */12](/* tuple */[
+                                                                      undefined,
+                                                                      34,
+                                                                      17,
+                                                                      undefined
+                                                                    ], Jest.Expect[/* expect */0](/* tuple */[
+                                                                          value1,
+                                                                          value2,
+                                                                          match[0],
+                                                                          match[1]
+                                                                        ])));
+                                                    }));
+                                      } else {
+                                        return Curry._1(finish, Jest.fail("should be more steps"));
+                                      }
+                                    }));
+                      } else {
+                        return Curry._1(finish, Jest.fail("should be more steps"));
+                      }
                     }));
       }));
 
