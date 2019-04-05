@@ -149,6 +149,39 @@ var Effect = /* module */[
 ];
 
 Jest.describe("Effect", (function (param) {
+        var run = function (effect, model, callback) {
+          var aux = function (model, result, effect) {
+            var match = step(model, effect);
+            var next = match[1];
+            var maybeValue = match[0];
+            var match$1;
+            if (maybeValue !== undefined) {
+              var value = Caml_option.valFromOption(maybeValue);
+              match$1 = /* tuple */[
+                value,
+                /* :: */[
+                  value,
+                  result
+                ]
+              ];
+            } else {
+              match$1 = /* tuple */[
+                model,
+                result
+              ];
+            }
+            var result$1 = match$1[1];
+            var model$1 = match$1[0];
+            if (next !== undefined) {
+              return Curry._1(Caml_option.valFromOption(next), (function (param) {
+                            return aux(model$1, result$1, param);
+                          }));
+            } else {
+              return Curry._1(callback, result$1);
+            }
+          };
+          return aux(model, /* [] */0, effect);
+        };
         Jest.test("const", (function (param) {
                 var effect_000 = function (param) {
                   return 42;
@@ -192,26 +225,12 @@ Jest.describe("Effect", (function (param) {
                       }), (function (model, value) {
                         return model + value | 0;
                       }));
-                var match = step(2, effect);
-                var next = match[1];
-                var value1 = match[0];
-                if (next !== undefined) {
-                  return Curry._1(Caml_option.valFromOption(next), (function (effect) {
-                                var model = value1 !== undefined ? value1 : 2;
-                                var match = step(model, effect);
-                                return Curry._1(finish, Jest.Expect[/* toEqual */12](/* tuple */[
-                                                undefined,
-                                                5,
-                                                undefined
-                                              ], Jest.Expect[/* expect */0](/* tuple */[
-                                                    value1,
-                                                    match[0],
-                                                    match[1]
-                                                  ])));
-                              }));
-                } else {
-                  return Curry._1(finish, Jest.fail("should be more steps"));
-                }
+                return run(effect, 2, (function (result) {
+                              return Curry._1(finish, Jest.Expect[/* toEqual */12](/* :: */[
+                                              5,
+                                              /* [] */0
+                                            ], Jest.Expect[/* expect */0](result)));
+                            }));
               }));
         return Jest.testAsync("andThen", undefined, (function (finish) {
                       var effect = andThen$1(/* Update */Block.__(0, [
@@ -227,38 +246,15 @@ Jest.describe("Effect", (function (param) {
                                 }), (function (result, model) {
                                   return model + Caml_format.caml_int_of_string(result) | 0;
                                 })));
-                      var match = step(3, effect);
-                      var next = match[1];
-                      var value1 = match[0];
-                      if (next !== undefined) {
-                        return Curry._1(Caml_option.valFromOption(next), (function (effect) {
-                                      var model = value1 !== undefined ? value1 : 3;
-                                      var match = step(model, effect);
-                                      var next = match[1];
-                                      var value2 = match[0];
-                                      if (next !== undefined) {
-                                        return Curry._1(Caml_option.valFromOption(next), (function (effect) {
-                                                      var model$1 = value2 !== undefined ? value2 : model;
-                                                      var match = step(model$1, effect);
-                                                      return Curry._1(finish, Jest.Expect[/* toEqual */12](/* tuple */[
-                                                                      undefined,
-                                                                      34,
-                                                                      17,
-                                                                      undefined
-                                                                    ], Jest.Expect[/* expect */0](/* tuple */[
-                                                                          value1,
-                                                                          value2,
-                                                                          match[0],
-                                                                          match[1]
-                                                                        ])));
-                                                    }));
-                                      } else {
-                                        return Curry._1(finish, Jest.fail("should be more steps"));
-                                      }
-                                    }));
-                      } else {
-                        return Curry._1(finish, Jest.fail("should be more steps"));
-                      }
+                      return run(effect, 3, (function (result) {
+                                    return Curry._1(finish, Jest.Expect[/* toEqual */12](/* :: */[
+                                                    17,
+                                                    /* :: */[
+                                                      34,
+                                                      /* [] */0
+                                                    ]
+                                                  ], Jest.Expect[/* expect */0](result)));
+                                  }));
                     }));
       }));
 

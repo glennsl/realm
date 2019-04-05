@@ -100,6 +100,26 @@ let () = {
 
   describe("Effect", () => {
 
+    let run = (effect, model, callback) => {
+      let rec aux = (model, result, effect) => {
+        let (maybeValue, next) = Effect.step(model, effect);
+        let (model, result) =
+          switch maybeValue {
+          | Some(value) =>
+            (value, [value, ...result])
+          | None =>
+            (model, result)
+          };
+        switch next {
+        | Some(task) =>
+          task |> Task.run(aux(model, result))
+        | None =>
+          callback(result);
+        }
+      }
+      aux(model, [], effect);
+    }
+
     test("const", () => {
       let effect = Effect.const(42)
       let (value, next) = Effect.step(0, effect);
@@ -113,26 +133,11 @@ let () = {
     });
 
     testAsync("do_", finish => {
-      let model = 2
       let effect = Effect.do_(model => Task.const(model + 1), (model, value) => model + value)
-      let (value1, next) = Effect.step(model, effect);
-      switch next {
-      | Some(task) =>
-        task |> Task.run(effect => {
-          let model = switch value1 {
-          | Some(value) => value
-          | None => model
-          };
-          let (value2, next) = Effect.step(model, effect);
-          expect((value1, value2, next)) |> toEqual((None, Some(5), None)) |> finish
-        })
-      | None =>
-        fail("should be more steps") |> finish
-      }
+      run(effect, 2, result => expect(result) |> toEqual([5]) |> finish)
     })
 
     testAsync("andThen", finish => {
-      let model = 3
       let effect =
         Effect.(
           do_(
@@ -140,32 +145,7 @@ let () = {
             (result, model) => model + int_of_string(result))
           |> andThen(update(model => model / 2))
         )
-      let (value1, next) = Effect.step(model, effect);
-      switch next {
-      | Some(task) =>
-        task |> Task.run(effect => {
-          let model = switch value1 {
-          | Some(value) => value
-          | None => model
-          };
-          let (value2, next) = Effect.step(model, effect);
-          switch next {
-          | Some(task) =>
-            task |> Task.run(effect => {
-              let model = switch value2 {
-              | Some(value) => value
-              | None => model
-              };
-              let (value3, next) = Effect.step(model, effect);
-              expect((value1, value2, value3, next)) |> toEqual((None, Some(34), Some(17), None)) |> finish
-            })
-          | None =>
-            fail("should be more steps") |> finish
-          }
-        })
-      | None =>
-        fail("should be more steps") |> finish
-      }
+      run(effect, 3, result => expect(result) |> toEqual([17, 34]) |> finish)
     })
   })
 }
