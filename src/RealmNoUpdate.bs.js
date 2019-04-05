@@ -8,6 +8,7 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Random = require("bs-platform/lib/js/random.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
+var Caml_option = require("bs-platform/lib/js/caml_option.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Belt_MapString = require("bs-platform/lib/js/belt_MapString.js");
 
@@ -25,6 +26,12 @@ function map(f, task, resolve) {
               }));
 }
 
+function $$const(value) {
+  return (function (f) {
+      return Curry._1(f, value);
+    });
+}
+
 function randomInt(l, h, f) {
   return Curry._1(f, Random.$$int(h) + l | 0);
 }
@@ -33,44 +40,134 @@ var Task = /* module */[
   /* make */make,
   /* run */run,
   /* map */map,
+  /* const */$$const,
   /* randomInt */randomInt
 ];
 
-function make$1(updater) {
-  return (function (resolve) {
-      return Curry._1(resolve, updater);
-    });
+function $$const$1(value) {
+  return /* Update */Block.__(0, [
+            (function (param) {
+                return value;
+              }),
+            /* End */0
+          ]);
 }
 
-function fromTask(task) {
-  return task;
+function update(updater) {
+  return /* Update */Block.__(0, [
+            updater,
+            /* End */0
+          ]);
 }
 
-function run$1(receiver, model, command) {
-  return Curry._1(command, (function (updater) {
-                return Curry._1(receiver, Curry._1(updater, model));
-              }));
+function do_(action, mapper) {
+  return /* Task */Block.__(1, [
+            (function (model) {
+                var partial_arg = Curry._1(action, model);
+                return (function (param) {
+                    return Curry._1(partial_arg, (function (a) {
+                                  return Curry._1(param, Curry._1(mapper, a));
+                                }));
+                  });
+              }),
+            /* End */0
+          ]);
 }
 
-function map$1(getter, setter, command) {
-  return (function (param) {
-      var f = function (updater, b) {
-        return Curry._2(setter, b, Curry._1(updater, Curry._1(getter, b)));
-      };
-      return Curry._1(command, (function (a) {
-                    return Curry._1(param, Curry._1(f, a));
-                  }));
-    });
+function andThen(last, param) {
+  if (typeof param === "number") {
+    return last;
+  } else if (param.tag) {
+    return /* Task */Block.__(1, [
+              param[0],
+              andThen(last, param[1])
+            ]);
+  } else {
+    return /* Update */Block.__(0, [
+              param[0],
+              andThen(last, param[1])
+            ]);
+  }
 }
 
-var Cmd = /* module */[
-  /* make */make$1,
-  /* fromTask */fromTask,
-  /* run */run$1,
-  /* map */map$1
+function map$1(getter, setter, param) {
+  if (typeof param === "number") {
+    return /* End */0;
+  } else if (param.tag) {
+    var f = param[0];
+    return /* Task */Block.__(1, [
+              (function (model) {
+                  var partial_arg = Curry._1(f, Curry._1(getter, model));
+                  return (function (param) {
+                      var f = function (f$1, model) {
+                        return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
+                      };
+                      return Curry._1(partial_arg, (function (a) {
+                                    return Curry._1(param, Curry._1(f, a));
+                                  }));
+                    });
+                }),
+              map$1(getter, setter, param[1])
+            ]);
+  } else {
+    var f$1 = param[0];
+    return /* Update */Block.__(0, [
+              (function (model) {
+                  return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
+                }),
+              map$1(getter, setter, param[1])
+            ]);
+  }
+}
+
+function step(model, param) {
+  if (typeof param === "number") {
+    return /* tuple */[
+            undefined,
+            undefined
+          ];
+  } else if (param.tag) {
+    var next = param[1];
+    var partial_arg = Curry._1(param[0], model);
+    return /* tuple */[
+            undefined,
+            Caml_option.some((function (param) {
+                    var f = function (updater) {
+                      return /* Update */Block.__(0, [
+                                updater,
+                                next
+                              ]);
+                    };
+                    return Curry._1(partial_arg, (function (a) {
+                                  return Curry._1(param, Curry._1(f, a));
+                                }));
+                  }))
+          ];
+  } else {
+    var next$1 = param[1];
+    var match = next$1 === /* End */0;
+    return /* tuple */[
+            Caml_option.some(Curry._1(param[0], model)),
+            match ? undefined : Caml_option.some((function (f) {
+                      return Curry._1(f, next$1);
+                    }))
+          ];
+  }
+}
+
+var EffectImpl = /* module */[
+  /* none : End */0,
+  /* const */$$const$1,
+  /* update */update,
+  /* do_ */do_,
+  /* andThen */andThen,
+  /* map */map$1,
+  /* step */step
 ];
 
-function make$2(id, action, spawner) {
+var EventSource = /* module */[];
+
+function make$1(id, action, spawner) {
   return /* record */[
           /* id */id,
           /* spawner */(function (dispatch) {
@@ -81,7 +178,7 @@ function make$2(id, action, spawner) {
         ];
 }
 
-function run$2(dispatch, sub) {
+function run$1(dispatch, sub) {
   return Curry._1(sub[/* spawner */1], dispatch);
 }
 
@@ -94,14 +191,14 @@ function id(sub) {
 }
 
 var Sub = /* module */[
-  /* make */make$2,
-  /* run */run$2,
+  /* make */make$1,
+  /* run */run$1,
   /* unsub */unsub,
   /* id */id
 ];
 
 function every(id, ms, action) {
-  return make$2(id, action, (function (callback) {
+  return make$1(id, action, (function (callback) {
                 var intervalId = setInterval(callback, ms);
                 return (function (param) {
                     clearInterval(intervalId);
@@ -117,7 +214,7 @@ function _log(value) {
   return /* () */0;
 }
 
-function run$3(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
+function run$2(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
   var update = $staropt$star !== undefined ? $staropt$star : (function (x) {
         return x;
       });
@@ -149,21 +246,34 @@ function run$3(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
     return /* () */0;
   };
   var dispatch = function (action) {
-    var step = function (newModel) {
+    var step$1 = function (newModel) {
       console.log("model updated", newModel);
       model[0] = newModel;
       updateSubs(/* () */0);
       return Curry._1(render, Curry._2(view, model[0], dispatch));
     };
-    return run$1(step, model[0], Curry._1(update, action));
+    var runEffect = function (effect) {
+      var match = step(model[0], effect);
+      var nextEffect = match[1];
+      var maybeModel = match[0];
+      if (maybeModel !== undefined) {
+        step$1(Caml_option.valFromOption(maybeModel));
+      }
+      if (nextEffect !== undefined) {
+        return Curry._1(Caml_option.valFromOption(nextEffect), runEffect);
+      } else {
+        return /* () */0;
+      }
+    };
+    return runEffect(Curry._1(update, action));
   };
   updateSubs(/* () */0);
   return Curry._1(mount, Curry._2(view, model[0], dispatch));
 }
 
 function map$2(getter, setter, element, dispatch) {
-  return Curry._1(element, (function (command) {
-                return Curry._1(dispatch, map$1(getter, setter, command));
+  return Curry._1(element, (function (effect) {
+                return Curry._1(dispatch, map$1(getter, setter, effect));
               }));
 }
 
@@ -172,7 +282,7 @@ function mountHtml(at) {
     return ReactDOMRe.renderToElementWithId(component, at);
   };
   return (function (param, param$1, param$2, param$3, param$4) {
-      return run$3(render, render, param, param$1, param$2, param$3, param$4);
+      return run$2(render, render, param, param$1, param$2, param$3, param$4);
     });
 }
 
@@ -726,17 +836,21 @@ var Html = /* module */[
   /* input */input
 ];
 
+var Effect = EffectImpl;
+
 var SubMap = 0;
 
 var Core = 0;
 
 exports.Task = Task;
-exports.Cmd = Cmd;
+exports.EffectImpl = EffectImpl;
+exports.Effect = Effect;
+exports.EventSource = EventSource;
 exports.Sub = Sub;
 exports.Time = Time;
 exports._log = _log;
 exports.SubMap = SubMap;
-exports.run = run$3;
+exports.run = run$2;
 exports.map = map$2;
 exports.mountHtml = mountHtml;
 exports.MakeHtml = MakeHtml;

@@ -42,7 +42,7 @@ function init(param) {
               }));
 }
 
-var partial_arg = RealmNoUpdate.Cmd[/* map */3];
+var partial_arg = RealmNoUpdate.Effect[/* map */5];
 
 function persist(param) {
   return partial_arg((function (model) {
@@ -58,7 +58,7 @@ function persist(param) {
               }), param);
 }
 
-var add = RealmNoUpdate.Cmd[/* make */0]((function (model) {
+var add = RealmNoUpdate.Effect[/* update */2]((function (model) {
         return /* record */[
                 /* entries */model[/* field */1] === "" ? model[/* entries */0] : Pervasives.$at(model[/* entries */0], /* :: */[
                         create(model[/* field */1], model[/* uid */2]),
@@ -71,7 +71,7 @@ var add = RealmNoUpdate.Cmd[/* make */0]((function (model) {
       }));
 
 function updateField(str) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */model[/* entries */0],
                         /* field */str,
@@ -94,7 +94,7 @@ function editingEntry(id, isEditing) {
       return t;
     }
   };
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -117,7 +117,7 @@ function updateEntry(id, task) {
       return t;
     }
   };
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry$1, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -128,7 +128,7 @@ function updateEntry(id, task) {
 }
 
 function $$delete(id) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.filter((function (t) {
                                   return t[/* id */3] !== id;
@@ -140,7 +140,7 @@ function $$delete(id) {
               }));
 }
 
-var deleteComplete = RealmNoUpdate.Cmd[/* make */0]((function (model) {
+var deleteComplete = RealmNoUpdate.Effect[/* update */2]((function (model) {
         return /* record */[
                 /* entries */Core__List.filter((function (t) {
                           return !t[/* completed */1];
@@ -164,7 +164,7 @@ function check(id, isCompleted) {
       return t;
     }
   };
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -183,7 +183,7 @@ function checkAll(isCompleted) {
             /* id */t[/* id */3]
           ];
   };
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -194,7 +194,7 @@ function checkAll(isCompleted) {
 }
 
 function changeVisibility(visibility) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */model[/* entries */0],
                         /* field */model[/* field */1],
@@ -213,9 +213,7 @@ function onEnter(action) {
                 if (keyCode === 13) {
                   return action;
                 } else {
-                  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
-                                return model;
-                              }));
+                  return RealmNoUpdate.Effect[/* none */0];
                 }
               }));
 }

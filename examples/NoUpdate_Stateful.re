@@ -14,7 +14,7 @@ let init = () => {
 };
 
 let click =
-  Cmd.make(model => { count: model.count + 1 })
+  Effect.update(model => { count: model.count + 1 })
 
 let view = model => {
   open Html;

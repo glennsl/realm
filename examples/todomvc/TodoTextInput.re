@@ -29,4 +29,4 @@ module TextInput = {
 }
 
 let view = (~className, ~placeholder=?, initialValue) =>
-  dispatch => <TextInput className ?placeholder initialValue onEnter=(value => dispatch(Cmd.make(_ => value))) />
+  dispatch => <TextInput className ?placeholder initialValue onEnter=(value => dispatch(Effect.const(value))) />

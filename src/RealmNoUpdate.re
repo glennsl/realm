@@ -3,6 +3,7 @@ module Task : {
   let make : (('a => unit) => unit) => t('a);
   let run : (('a => unit), t('a)) => unit;
   let map : (('a => 'b), t('a)) => t('b);
+  let const : 'a => t('a);
 
   let randomInt : (int, int) => t(int);
 } = {
@@ -12,27 +13,87 @@ module Task : {
     task(receiver);
   let map = (f, task) =>
     resolve => task(a => resolve(f(a)));
+  let const = value =>
+    make (f => f(value));
 
   let randomInt = (l, h) =>
     f => f(Random.int(h) + l);
 }
 
-module Cmd : {
-  type t('model);
-  let make : ('model => 'model) => t('model);
-  let fromTask : Task.t('model => 'model) => t('model);
-  let run : (('model => unit), 'model, t('model)) => unit;
-  let map : (('b => 'a), (('b, 'a) => 'b), t('a)) => t('b)
+module EffectImpl : {
+  type t('model)
+  let none : t('model)
+  let const : 'model => t('model)
+  let update : ('model => 'model) => t('model)
+  let do_ : ('model => Task.t('result), ('result, 'model) => 'model) => t('model)
+  let andThen : (t('model), t('model)) => t('model)
+  let map : ('b => 'a, ('b, 'a) => 'b, t('a)) => t('b)
+
+  let step : ('model, t('model)) => (option('model), option(Task.t(t('model))))
 } = {
-  type t('model) = Task.t('model => 'model);
-  let make = updater => 
-    Task.make(resolve => resolve(updater));
-  let fromTask = task =>
-    task;
-  let run = (receiver, model, command) =>
-    command |> Task.run(updater => model |> updater |> receiver);
-  let map = (getter, setter, command) =>
-    command |> Task.map(updater => b => b |> getter |> updater |> setter(b));
+  type t('model) =
+  | Update('model => 'model, t('model))
+  | Task('model => Task.t('model => 'model), t('model))
+  | End
+
+  let none =
+    End
+  let const = value =>
+    Update(_ => value, End)
+  let update = updater => 
+    Update(updater, End)
+  let do_ = (action, mapper) =>
+    Task(model => action(model) |> Task.map(mapper), End)
+  let rec andThen = last => 
+    fun | End => last
+        | Update(f, next) =>
+          Update(f, andThen(last, next))
+        | Task(f, next) =>
+          Task(f, andThen(last, next))
+  let rec map = (getter, setter) =>
+    fun | End => End
+        | Update(f, next) =>
+          Update(model => model |> getter |> f |> setter(model), map(getter, setter, next))
+        | Task(f, next) =>
+          Task(model => model |> getter |> f |> Task.map(f => model => model |> getter |> f |> setter(model)), map(getter, setter, next))
+
+  let step = model =>
+    fun | End =>
+          (None, None)
+        | Update(f, next) =>
+          (Some(f(model)),
+           next == End ? None : Some(Task.const(next)))
+        | Task(f, next) =>
+          (None,
+           Some(f(model) |> Task.map(updater => Update(updater, next))))
+
+  // let mapModel = (mapper, command) =>
+  //   model => command(model) |> Task.map(updater => value => updater |> mapper);
+  // let mapResult = 
+  //   model => command(model) |> Task.map(updater => b => b |> getter |> updater |> setter(b));
+  // let map : (('b => 'a), (('b, 'a) => 'b), t('model, 'a)) => t('model, 'b)
+  //         = (getter, setter, command) =>
+  //   model => command(model) |> Task.map(updater => b => b |> getter |> updater |> setter(b));
+  // let effect; let do_
+  // let update
+  // let andThen
+  // let then_
+}
+
+module Effect : ({
+  type t('model)
+  let none : t('model)
+  let const : 'model => t('model)
+  let update : ('model => 'model) => t('model)
+  let do_ : ('model => Task.t('result), ('result, 'model) => 'model) => t('model)
+  let andThen : (t('model), t('model)) => t('model)
+  let map : ('b => 'a, ('b, 'a) => 'b, t('a)) => t('b)
+
+  let step : ('model, t('model)) => (option('model), option(Task.t(t('model))))
+} with type t('model) = EffectImpl.t('model)) = EffectImpl;
+
+module EventSource = {
+  type t;
 }
 
 module Sub : {
@@ -70,7 +131,7 @@ module Time : {
 }
 
 /* type action('arg, 'model) = 'arg => command('model); */
-type dispatcher('model) = Cmd.t('model) => unit;
+type dispatcher('model) = Effect.t('model) => unit;
 type element('model) = dispatcher('model) => htmlElement
 and htmlElement = ReasonReact.reactElement;
 
@@ -83,7 +144,7 @@ let run = (
     ~mount: htmlElement => unit,
     ~render: htmlElement => unit,
     ~init: 'arg => 'model,
-    ~update: 'action => Cmd.t('model) = x => x,
+    ~update: 'action => Effect.t('model) = x => x,
     ~subs: 'model => list(Sub.t('action)) = _ => [],
     ~view: 'model => element('model),
     arg: 'arg
@@ -103,16 +164,24 @@ let run = (
   }
 
   and dispatch = action => {
-    let step = newModel => {
+    let rec step = newModel => {
       _log(newModel);
       model := newModel;
       updateSubs();
       render(view(model^, dispatch));
-    };
-
-    action
-      |> update
-      |> Cmd.run(step, model^);
+    }
+    and runEffect = effect => {
+      let (maybeModel, nextEffect) = EffectImpl.step(model^, effect);
+      switch maybeModel {
+      | Some(newModel) => step(newModel)
+      | None => ();
+      };
+      switch nextEffect {
+      | Some(task) => Task.run(runEffect, task)
+      | None => ()
+      }
+    }
+    action |> update |> runEffect
   };
 
   updateSubs();
@@ -123,9 +192,9 @@ let run = (
   : ('b => 'a, ('b, 'a) => 'b, element('a)) => element('b)
   = (getter, setter, element) =>
     dispatch =>
-      element(command =>
+      element(effect =>
         dispatch(
-          command |> Cmd.map(getter, setter)
+          effect |> Effect.map(getter, setter)
         )
       );
 
@@ -144,7 +213,7 @@ module MakeHtml(T: { type model }) = {
 
   type attr =
     | Raw(string, string)
-    | Event(string, event => Cmd.t(T.model));
+    | Event(string, event => Effect.t(T.model));
 
   module Attr = {
     let className = name => Raw("className", name);

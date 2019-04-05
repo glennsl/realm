@@ -11,7 +11,7 @@ function init(param) {
   return /* record */[/* count */0];
 }
 
-var click = RealmNoUpdate.Cmd[/* make */0]((function (model) {
+var click = RealmNoUpdate.Effect[/* update */2]((function (model) {
         return /* record */[/* count */model[/* count */0] + 1 | 0];
       }));
 

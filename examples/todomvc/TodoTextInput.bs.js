@@ -69,9 +69,7 @@ var TextInput = /* module */[
 
 function view(className, placeholder, initialValue, dispatch) {
   return ReasonReact.element(undefined, undefined, make(className, placeholder, (function (value) {
-                    return Curry._1(dispatch, RealmNoUpdate.Cmd[/* make */0]((function (param) {
-                                      return value;
-                                    })));
+                    return Curry._1(dispatch, RealmNoUpdate.Effect[/* const */1](value));
                   }), initialValue, /* array */[]));
 }
 
