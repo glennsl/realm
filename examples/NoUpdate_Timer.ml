@@ -16,7 +16,7 @@ let init () =
   }
 
 let subs model =
-  let tick () = Cmd.make (fun model -> { model with count = (model.count + 1) }) in
+  let tick () = Effect.update (fun model -> { model with count = (model.count + 1) }) in
   let slow = Time.every "slow" 2000. tick in
   let fast = Time.every "fast" 1000. tick in
   match model.mode with
@@ -26,7 +26,7 @@ let subs model =
   | Both -> [ slow; fast ]
 
 let setMode mode =
-  Cmd.make (fun model -> { model with mode })
+  Effect.update (fun model -> { model with mode })
 
 let view model =
   let open Html in

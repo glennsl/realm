@@ -16,7 +16,7 @@ function init(param) {
 
 function subs(model) {
   var tick = function (param) {
-    return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+    return RealmNoUpdate.Effect[/* update */2]((function (model) {
                   return /* record */[
                           /* count */model[/* count */0] + 1 | 0,
                           /* mode */model[/* mode */1]
@@ -52,7 +52,7 @@ function subs(model) {
 }
 
 function setMode(mode) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* count */model[/* count */0],
                         /* mode */mode

@@ -10,7 +10,7 @@ function init(param) {
   return /* record */[/* count */0];
 }
 
-var click = RealmNoUpdate.Cmd[/* make */0]((function (model) {
+var click = RealmNoUpdate.Effect[/* update */2]((function (model) {
         return /* record */[/* count */model[/* count */0] + 1 | 0];
       }));
 
@@ -44,20 +44,17 @@ function init$1(param) {
         ];
 }
 
-var partial_arg = RealmNoUpdate.Task[/* randomInt */3];
-
-var partial_arg$1 = RealmNoUpdate.Task[/* map */2];
-
-var toggle = Realm__Core.$pipe$great(Realm__Core.$pipe$great((function (param) {
+var toggle = RealmNoUpdate.Effect[/* do_ */3]((function (param) {
+        var partial_arg = RealmNoUpdate.Task[/* randomInt */4];
+        return (function (param) {
             return partial_arg(0, 10, param);
-          }), (function (param, param$1) {
-            return partial_arg$1((function (n, m) {
-                          return /* record */[
-                                  /* show */!m[/* show */0],
-                                  /* n */n
-                                ];
-                        }), param, param$1);
-          })), RealmNoUpdate.Cmd[/* fromTask */1]);
+          });
+      }), (function (n, model) {
+        return /* record */[
+                /* show */!model[/* show */0],
+                /* n */n
+              ];
+      }));
 
 var Html$1 = RealmNoUpdate.MakeHtml(/* module */[]);
 

@@ -57,7 +57,7 @@ let init () =
   |> Option.withDefault emptyModel
 
 let persist =
-  Cmd.map (fun model -> model) @@
+  Effect.map (fun model -> model) @@
     fun _ model ->
       let _: unit option =
         Json.stringify model
@@ -71,7 +71,7 @@ let persist =
 
 
 let add =
-  Cmd.make @@
+  Effect.update @@
     fun model ->
       { model with
         uid = model.uid + 1
@@ -85,7 +85,7 @@ let add =
 
 
 let updateField str =
-  Cmd.make (fun model -> { model with field = str })
+  Effect.update (fun model -> { model with field = str })
 
 
 let editingEntry id isEditing =
@@ -96,7 +96,7 @@ let editingEntry id isEditing =
       else
         t
     in
-  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Effect.update (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let updateEntry id task =
@@ -107,15 +107,15 @@ let updateEntry id task =
       else
         t
     in
-  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Effect.update (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let delete id =
-  Cmd.make (fun model -> { model with entries = List.filter (fun t -> t.Entry.id != id) model.entries})
+  Effect.update (fun model -> { model with entries = List.filter (fun t -> t.Entry.id != id) model.entries})
 
 
 let deleteComplete = 
-  Cmd.make (fun model -> { model with entries = List.filter (fun t -> not t.Entry.completed) model.entries})
+  Effect.update (fun model -> { model with entries = List.filter (fun t -> not t.Entry.completed) model.entries})
 
 
 let check id isCompleted =
@@ -126,7 +126,7 @@ let check id isCompleted =
       else
         t
     in
-  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Effect.update (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let checkAll isCompleted =
@@ -134,11 +134,11 @@ let checkAll isCompleted =
     updateEntry t =
       Entry.{ t with completed = isCompleted }
     in
-  Cmd.make (fun model -> { model with entries = List.map updateEntry model.entries })
+  Effect.update (fun model -> { model with entries = List.map updateEntry model.entries })
 
 
 let changeVisibility visibility =
-  Cmd.make (fun model -> { model with visibility })
+  Effect.update (fun model -> { model with visibility })
 
 
 let update cmd =
@@ -162,7 +162,7 @@ let onEnter action =
       if keyCode == 13 then
         action
       else
-        Cmd.make (fun model -> model)
+        Effect.none
 
 
 let viewInput task =

@@ -11,7 +11,7 @@ module Clicker = {
   };
 
   let click =
-    Cmd.make(model => { count: model.count + 1 })
+    Effect.update(model => { count: model.count + 1 })
 
   module Html = MakeHtml({ type nonrec model = model; })
 
@@ -43,9 +43,10 @@ module Toggler = {
   };
 
   let toggle =
-    Task.randomInt(0, 10)
-    |> Task.map(n => m => { n, show: !m.show })
-    |> Cmd.fromTask
+    Effect.do_(
+      _ => Task.randomInt(0, 10),
+      (n, model) => { n, show: !model.show }
+    )
 
   module Html = MakeHtml({ type nonrec model = model; })
 

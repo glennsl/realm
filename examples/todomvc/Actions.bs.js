@@ -5,7 +5,7 @@ var Core__List = require("../../src/core/Core__List.bs.js");
 var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 
 function toggle(entry) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map((function (it) {
                                 var match = it[/* id */0] === entry[/* id */0];
@@ -27,7 +27,7 @@ function toggle(entry) {
 }
 
 function edit(entry, editing) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map((function (it) {
                                 var match = it[/* id */0] === entry[/* id */0];
@@ -49,7 +49,7 @@ function edit(entry, editing) {
 }
 
 function remove(entry) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.filter((function (it) {
                                   return it[/* id */0] !== entry[/* id */0];
@@ -59,7 +59,7 @@ function remove(entry) {
               }));
 }
 
-var clearCompleted = RealmNoUpdate.Cmd[/* make */0]((function (model) {
+var clearCompleted = RealmNoUpdate.Effect[/* update */2]((function (model) {
         return /* record */[
                 /* entries */Core__List.filter((function (it) {
                           return !it[/* completed */2];
@@ -69,7 +69,7 @@ var clearCompleted = RealmNoUpdate.Cmd[/* make */0]((function (model) {
       }));
 
 function changeVisibility(visibility) {
-  return RealmNoUpdate.Cmd[/* make */0]((function (model) {
+  return RealmNoUpdate.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */model[/* entries */0],
                         /* visibility */visibility
