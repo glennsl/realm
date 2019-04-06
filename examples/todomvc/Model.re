@@ -1,4 +1,4 @@
-open! RealmNoUpdate.Core;
+open! Realm.Core;
 
 module Todo = {
   type t = {
@@ -25,7 +25,7 @@ type model = {
   visibility : string
 };
 
-module Html = RealmNoUpdate.MakeHtml({
+module Html = Realm.MakeHtml({
   type nonrec model = model
 })
 

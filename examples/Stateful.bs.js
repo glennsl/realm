@@ -2,9 +2,9 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var Realm = require("../src/Realm.bs.js");
+var RealmOld = require("../src/RealmOld.bs.js");
 
-var Html = Curry._1(Realm.React[/* Html */0], /* module */[]);
+var Html = Curry._1(RealmOld.React[/* Html */0], /* module */[]);
 
 function init(param) {
   return /* record */[/* count */0];
@@ -29,7 +29,7 @@ function view(model) {
 }
 
 function mount(at) {
-  return Realm.React[/* mount */1](at)(init, update, view);
+  return RealmOld.React[/* mount */1](at)(init, update, view);
 }
 
 exports.Html = Html;

@@ -2,16 +2,16 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Realm = require("../src/Realm.bs.js");
 var Core__String = require("../src/core/Core__String.bs.js");
-var RealmNoUpdate = require("../src/RealmNoUpdate.bs.js");
 
-var Html = RealmNoUpdate.MakeHtml(/* module */[]);
+var Html = Realm.MakeHtml(/* module */[]);
 
 function init(param) {
   return /* record */[/* count */0];
 }
 
-var click = RealmNoUpdate.Effect[/* update */2]((function (model) {
+var click = Realm.Effect[/* update */2]((function (model) {
         return /* record */[/* count */model[/* count */0] + 1 | 0];
       }));
 
@@ -30,7 +30,7 @@ function view(model) {
 }
 
 function mount(at) {
-  return RealmNoUpdate.mountHtml(at)(init, undefined, undefined, view, /* () */0);
+  return Realm.mountHtml(at)(init, undefined, undefined, view, /* () */0);
 }
 
 exports.Html = Html;

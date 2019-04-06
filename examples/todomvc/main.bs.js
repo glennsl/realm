@@ -3,8 +3,8 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
+var Realm = require("../../src/Realm.bs.js");
 var TodoApp = require("./TodoApp.bs.js");
-var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 
 function init(param) {
   return /* record */[
@@ -61,7 +61,7 @@ function view(param) {
             ]);
 }
 
-RealmNoUpdate.mountHtml("todoapp")(init, undefined, undefined, view, /* () */0);
+Realm.mountHtml("todoapp")(init, undefined, undefined, view, /* () */0);
 
 exports.init = init;
 exports.infoFooter = infoFooter;
