@@ -45,117 +45,135 @@ var Task = /* module */[
 ];
 
 function $$const$1(value) {
-  return /* Update */Block.__(0, [
-            (function (param) {
-                return value;
-              }),
-            /* End */0
-          ]);
+  return /* :: */[
+          /* Update */Block.__(0, [(function (param) {
+                  return value;
+                })]),
+          /* [] */0
+        ];
 }
 
 function update(updater) {
-  return /* Update */Block.__(0, [
-            updater,
-            /* End */0
-          ]);
+  return /* :: */[
+          /* Update */Block.__(0, [updater]),
+          /* [] */0
+        ];
 }
 
 function do_(action, mapper) {
-  return /* Task */Block.__(1, [
-            (function (model) {
-                var partial_arg = Curry._1(action, model);
-                return (function (param) {
-                    return Curry._1(partial_arg, (function (a) {
-                                  return Curry._1(param, Curry._1(mapper, a));
-                                }));
-                  });
-              }),
-            /* End */0
-          ]);
+  return /* :: */[
+          /* Task */Block.__(1, [(function (model) {
+                  var partial_arg = Curry._1(action, model);
+                  return (function (param) {
+                      return Curry._1(partial_arg, (function (a) {
+                                    return Curry._1(param, Curry._1(mapper, a));
+                                  }));
+                    });
+                })]),
+          /* [] */0
+        ];
 }
 
 function andThen(last, param) {
-  if (typeof param === "number") {
-    return last;
-  } else if (param.tag) {
-    return /* Task */Block.__(1, [
-              param[0],
+  if (param) {
+    var match = param[0];
+    if (match.tag) {
+      return /* :: */[
+              /* Task */Block.__(1, [match[0]]),
               andThen(last, param[1])
-            ]);
+            ];
+    } else {
+      return /* :: */[
+              /* Update */Block.__(0, [match[0]]),
+              andThen(last, param[1])
+            ];
+    }
   } else {
-    return /* Update */Block.__(0, [
-              param[0],
-              andThen(last, param[1])
-            ]);
+    return last;
   }
 }
 
-function map$1(getter, setter, param) {
-  if (typeof param === "number") {
-    return /* End */0;
-  } else if (param.tag) {
-    var f = param[0];
-    return /* Task */Block.__(1, [
-              (function (model) {
-                  var partial_arg = Curry._1(f, Curry._1(getter, model));
-                  return (function (param) {
-                      var f = function (f$1, model) {
-                        return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
-                      };
-                      return Curry._1(partial_arg, (function (a) {
-                                    return Curry._1(param, Curry._1(f, a));
-                                  }));
-                    });
-                }),
-              map$1(getter, setter, param[1])
-            ]);
+function map$1(get, set, param) {
+  if (param) {
+    var match = param[0];
+    if (match.tag) {
+      var f = match[0];
+      return /* :: */[
+              /* Task */Block.__(1, [(function (model) {
+                      var partial_arg = Curry._1(f, Curry._1(get, model));
+                      return (function (param) {
+                          var f = function (f$1, model) {
+                            return Curry._2(set, model, Curry._1(f$1, Curry._1(get, model)));
+                          };
+                          return Curry._1(partial_arg, (function (a) {
+                                        return Curry._1(param, Curry._1(f, a));
+                                      }));
+                        });
+                    })]),
+              map$1(get, set, param[1])
+            ];
+    } else {
+      var f$1 = match[0];
+      return /* :: */[
+              /* Update */Block.__(0, [(function (model) {
+                      return Curry._2(set, model, Curry._1(f$1, Curry._1(get, model)));
+                    })]),
+              map$1(get, set, param[1])
+            ];
+    }
   } else {
-    var f$1 = param[0];
-    return /* Update */Block.__(0, [
-              (function (model) {
-                  return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
-                }),
-              map$1(getter, setter, param[1])
-            ]);
+    return /* [] */0;
   }
 }
 
 function step(model, param) {
-  if (typeof param === "number") {
+  if (param) {
+    var match = param[0];
+    if (match.tag) {
+      var rest = param[1];
+      var partial_arg = Curry._1(match[0], model);
+      var next = function (param) {
+        var f = function (f$prime) {
+          return /* :: */[
+                  /* Update */Block.__(0, [f$prime]),
+                  rest
+                ];
+        };
+        return Curry._1(partial_arg, (function (a) {
+                      return Curry._1(param, Curry._1(f, a));
+                    }));
+      };
+      return /* tuple */[
+              undefined,
+              Caml_option.some(next)
+            ];
+    } else {
+      var rest$1 = param[1];
+      var f = match[0];
+      if (rest$1) {
+        return /* tuple */[
+                Caml_option.some(Curry._1(f, model)),
+                Caml_option.some((function (f) {
+                        return Curry._1(f, rest$1);
+                      }))
+              ];
+      } else {
+        return /* tuple */[
+                Caml_option.some(Curry._1(f, model)),
+                undefined
+              ];
+      }
+    }
+  } else {
     return /* tuple */[
             undefined,
             undefined
-          ];
-  } else if (param.tag) {
-    var next = param[1];
-    var partial_arg = Curry._1(param[0], model);
-    return /* tuple */[
-            undefined,
-            Caml_option.some((function (param) {
-                    var f = function (updater) {
-                      return /* Update */Block.__(0, [
-                                updater,
-                                next
-                              ]);
-                    };
-                    return Curry._1(partial_arg, (function (a) {
-                                  return Curry._1(param, Curry._1(f, a));
-                                }));
-                  }))
-          ];
-  } else {
-    var next$1 = param[1];
-    return /* tuple */[
-            Caml_option.some(Curry._1(param[0], model)),
-            next$1 === /* End */0 ? undefined : Caml_option.some((function (f) {
-                      return Curry._1(f, next$1);
-                    }))
           ];
   }
 }
 
 var EffectImpl = /* module */[
-  /* none : End */0,
+  /* none : [] */0,
   /* const */$$const$1,
   /* update */update,
   /* do_ */do_,

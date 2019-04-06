@@ -36,65 +36,53 @@ module EffectImpl
 
     val step : 'model -> 'model t -> ('model option* 'model t Task.t option)
   end
-= struct
+  = struct
     type 'model t =
-      | Update of ('model -> 'model)* 'model t
-      | Task of ('model -> ('model -> 'model) Task.t)* 'model t
-      | End
+      'model node list
+    and 'model node =
+      | Update of ('model -> 'model)
+      | Task   of ('model -> ('model -> 'model) Task.t)
 
     let none =
-      End
+      []
 
     let const value =
-      Update ((fun _ -> value), End)
+      [ Update (fun _ -> value) ]
 
     let update updater =
-      Update (updater, End)
+      [ Update updater ]
 
     let do_ action mapper =
-      Task ((fun model -> action model |> Task.map mapper), End)
+      [ Task (fun model -> action model |> Task.map mapper) ]
 
     let rec andThen last =
       function
-      | End ->
-        last
-      | Update (f, next) ->
-        Update (f, andThen last next)
-      | Task (f, next) ->
-        Task (f, andThen last next)
+      | []               -> last
+      | Update f :: rest -> Update f :: andThen last rest
+      | Task f   :: rest -> Task   f :: andThen last rest
 
-    let rec map getter setter =
+    let rec map get set =
       function
-      | End ->
-        End
-      | Update (f, next) ->
-        Update
-          ( (fun model -> model |> getter |> f |> setter model)
-          , map getter setter next
-          )
-      | Task (f, next) ->
-        Task
-          ( (fun model -> model |> getter |> f |> Task.map (fun f model -> model |> getter |> f |> setter model))
-          , map getter setter next
-          )
+      | [] -> []
+
+      | Update f :: rest ->
+        Update (fun model -> model |> get |> f |> set model)
+          :: map get set rest
+
+      | Task f :: rest ->
+        Task (fun model -> model |> get |> f |> Task.map (fun f model -> model |> get |> f |> set model))
+          :: map get set rest
 
 
     let step model =
       function
-      | End ->
-        (None, None)
-      | Update (f, next) ->
-        ( Some (f model)
-        , if next = End then
-            None
-          else
-            Some (Task.const next)
-        )
-      | Task (f, next) ->
-        ( None
-        , Some (f model |> Task.map (fun updater -> Update (updater, next)))
-        )
-  end 
+      | []               -> ( None, None )
+      | Update f :: []   -> ( Some (f model), None )
+      | Update f :: rest -> ( Some (f model), Some (Task.const rest) )
+      | Task f   :: rest ->
+        let next = f model |> Task.map (fun f' -> Update f' :: rest) in
+        ( None, Some next )
+  end
 
 module Effect
 : sig
