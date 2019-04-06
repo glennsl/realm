@@ -145,10 +145,9 @@ function step(model, param) {
           ];
   } else {
     var next$1 = param[1];
-    var match = next$1 === /* End */0;
     return /* tuple */[
             Caml_option.some(Curry._1(param[0], model)),
-            match ? undefined : Caml_option.some((function (f) {
+            next$1 === /* End */0 ? undefined : Caml_option.some((function (f) {
                       return Curry._1(f, next$1);
                     }))
           ];
@@ -246,20 +245,17 @@ function run$2(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
     return /* () */0;
   };
   var dispatch = function (action) {
-    var step$1 = function (newModel) {
-      console.log("model updated", newModel);
-      model[0] = newModel;
-      updateSubs(/* () */0);
-      return Curry._1(render, Curry._2(view, model[0], dispatch));
-    };
     var runEffect = function (effect) {
       var match = step(model[0], effect);
       var nextEffect = match[1];
       var maybeModel = match[0];
       if (maybeModel !== undefined) {
-        step$1(Caml_option.valFromOption(maybeModel));
-      }
-      if (nextEffect !== undefined) {
+        var newModel = Caml_option.valFromOption(maybeModel);
+        console.log("model updated", newModel);
+        model[0] = newModel;
+        updateSubs(/* () */0);
+        return Curry._1(render, Curry._2(view, model[0], dispatch));
+      } else if (nextEffect !== undefined) {
         return Curry._1(Caml_option.valFromOption(nextEffect), runEffect);
       } else {
         return /* () */0;
