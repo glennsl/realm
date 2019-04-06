@@ -3,17 +3,17 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
+var Realm = require("../../src/Realm.bs.js");
 var Actions = require("./Actions.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Realm__Core = require("../../src/core/Realm__Core.bs.js");
-var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
 function editTextInput(initialValue) {
   return Realm__Core.$pipe$great((function (param) {
                 return TodoTextInput.view("edit", undefined, initialValue, param);
               }), (function (param, param$1) {
-                return RealmNoUpdate.map((function (param) {
+                return Realm.map((function (param) {
                               return "";
                             }), (function (model, name) {
                               return /* record */[

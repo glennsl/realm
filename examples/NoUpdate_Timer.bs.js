@@ -2,10 +2,10 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Realm = require("../src/Realm.bs.js");
 var Core__String = require("../src/core/Core__String.bs.js");
-var RealmNoUpdate = require("../src/RealmNoUpdate.bs.js");
 
-var Html = RealmNoUpdate.MakeHtml(/* module */[]);
+var Html = Realm.MakeHtml(/* module */[]);
 
 function init(param) {
   return /* record */[
@@ -16,15 +16,15 @@ function init(param) {
 
 function subs(model) {
   var tick = function (param) {
-    return RealmNoUpdate.Effect[/* update */2]((function (model) {
+    return Realm.Effect[/* update */2]((function (model) {
                   return /* record */[
                           /* count */model[/* count */0] + 1 | 0,
                           /* mode */model[/* mode */1]
                         ];
                 }));
   };
-  var slow = RealmNoUpdate.Time[/* every */0]("slow", 2000, tick);
-  var fast = RealmNoUpdate.Time[/* every */0]("fast", 1000, tick);
+  var slow = Realm.Time[/* every */0]("slow", 2000, tick);
+  var fast = Realm.Time[/* every */0]("fast", 1000, tick);
   var match = model[/* mode */1];
   switch (match) {
     case 0 : 
@@ -52,7 +52,7 @@ function subs(model) {
 }
 
 function setMode(mode) {
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* count */model[/* count */0],
                         /* mode */mode
@@ -108,7 +108,7 @@ function view(model) {
 }
 
 function mount(at) {
-  return RealmNoUpdate.mountHtml(at)(init, undefined, subs, view, /* () */0);
+  return Realm.mountHtml(at)(init, undefined, subs, view, /* () */0);
 }
 
 exports.Html = Html;

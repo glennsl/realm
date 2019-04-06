@@ -3,10 +3,10 @@
 
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
+var Realm = require("../../src/Realm.bs.js");
 var React = require("react");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
-var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 
 var component = ReasonReact.reducerComponent("Greeting");
 
@@ -69,7 +69,7 @@ var TextInput = /* module */[
 
 function view(className, placeholder, initialValue, dispatch) {
   return ReasonReact.element(undefined, undefined, make(className, placeholder, (function (value) {
-                    return Curry._1(dispatch, RealmNoUpdate.Effect[/* const */1](value));
+                    return Curry._1(dispatch, Realm.Effect[/* const */1](value));
                   }), initialValue, /* array */[]));
 }
 

@@ -2,13 +2,13 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Realm = require("../../src/Realm.bs.js");
 var Core__List = require("../../src/core/Core__List.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 var Realm__Core = require("../../src/core/Realm__Core.bs.js");
 var Core__Option = require("../../src/core/Core__Option.bs.js");
 var Core__String = require("../../src/core/Core__String.bs.js");
-var RealmNoUpdate = require("../../src/RealmNoUpdate.bs.js");
 
 function create(description, id) {
   return /* record */[
@@ -42,7 +42,7 @@ function init(param) {
               }));
 }
 
-var partial_arg = RealmNoUpdate.Effect[/* map */5];
+var partial_arg = Realm.Effect[/* map */5];
 
 function persist(param) {
   return partial_arg((function (model) {
@@ -58,7 +58,7 @@ function persist(param) {
               }), param);
 }
 
-var add = RealmNoUpdate.Effect[/* update */2]((function (model) {
+var add = Realm.Effect[/* update */2]((function (model) {
         return /* record */[
                 /* entries */model[/* field */1] === "" ? model[/* entries */0] : Pervasives.$at(model[/* entries */0], /* :: */[
                         create(model[/* field */1], model[/* uid */2]),
@@ -71,7 +71,7 @@ var add = RealmNoUpdate.Effect[/* update */2]((function (model) {
       }));
 
 function updateField(str) {
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */model[/* entries */0],
                         /* field */str,
@@ -94,7 +94,7 @@ function editingEntry(id, isEditing) {
       return t;
     }
   };
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -117,7 +117,7 @@ function updateEntry(id, task) {
       return t;
     }
   };
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry$1, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -128,7 +128,7 @@ function updateEntry(id, task) {
 }
 
 function $$delete(id) {
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.filter((function (t) {
                                   return t[/* id */3] !== id;
@@ -140,7 +140,7 @@ function $$delete(id) {
               }));
 }
 
-var deleteComplete = RealmNoUpdate.Effect[/* update */2]((function (model) {
+var deleteComplete = Realm.Effect[/* update */2]((function (model) {
         return /* record */[
                 /* entries */Core__List.filter((function (t) {
                           return !t[/* completed */1];
@@ -164,7 +164,7 @@ function check(id, isCompleted) {
       return t;
     }
   };
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -183,7 +183,7 @@ function checkAll(isCompleted) {
             /* id */t[/* id */3]
           ];
   };
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */Core__List.map(updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
@@ -194,7 +194,7 @@ function checkAll(isCompleted) {
 }
 
 function changeVisibility(visibility) {
-  return RealmNoUpdate.Effect[/* update */2]((function (model) {
+  return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
                         /* entries */model[/* entries */0],
                         /* field */model[/* field */1],
@@ -206,14 +206,14 @@ function changeVisibility(visibility) {
 
 var update = persist;
 
-var Html = RealmNoUpdate.MakeHtml(/* module */[]);
+var Html = Realm.MakeHtml(/* module */[]);
 
 function onEnter(action) {
   return Realm__Core.$less$pipe(Html[/* Attr */0][/* onKeyDown */9], (function (keyCode) {
                 if (keyCode === 13) {
                   return action;
                 } else {
-                  return RealmNoUpdate.Effect[/* none */0];
+                  return Realm.Effect[/* none */0];
                 }
               }));
 }
@@ -517,7 +517,7 @@ function view(model) {
             ]);
 }
 
-RealmNoUpdate.mountHtml("todoapp")(init, update, undefined, view, /* () */0);
+Realm.mountHtml("todoapp")(init, update, undefined, view, /* () */0);
 
 exports.Entry = Entry;
 exports.emptyModel = emptyModel;

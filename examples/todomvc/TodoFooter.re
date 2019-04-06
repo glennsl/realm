@@ -1,4 +1,4 @@
-open! RealmNoUpdate.Core;
+open! Realm.Core;
 open Model;
 open Html;
 open Attr;

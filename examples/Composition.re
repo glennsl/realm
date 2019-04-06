@@ -16,7 +16,7 @@ module Clicker = {
     | Click => { count: model.count + 1 }
     };
 
-  module Html = Realm.React.Html({ type nonrec msg = msg; })
+  module Html = RealmOld.React.Html({ type nonrec msg = msg; })
 
   let view = model => {
     open Html;
@@ -50,7 +50,7 @@ module Toggler = {
     | Toggle => { show: !model.show }
     };
 
-  module Html = Realm.React.Html({ type nonrec msg = msg; })
+  module Html = RealmOld.React.Html({ type nonrec msg = msg; })
 
   let view = (~greeting, model) => {
     open Html;
@@ -87,18 +87,18 @@ let update = (msg, model) =>
   | TogglerMsg(msg) => { ...model, toggler: Toggler.update(msg, model.toggler) }
   };
 
-module Html = Realm.React.Html({ type nonrec msg = msg; })
+module Html = RealmOld.React.Html({ type nonrec msg = msg; })
 
 let view = (~greeting, model) => {
   open Html;
 
   div([], [
-    Clicker.view(model.clicker) |> Realm.React.map(msg => ClickerMsg(msg)),
-    Toggler.view(~greeting, model.toggler) |> Realm.React.map(msg => TogglerMsg(msg))
+    Clicker.view(model.clicker) |> RealmOld.React.map(msg => ClickerMsg(msg)),
+    Toggler.view(~greeting, model.toggler) |> RealmOld.React.map(msg => TogglerMsg(msg))
   ])
 
 };
 
 
 let mount = (~at) =>
-  Realm.React.mount(~at, ~init, ~update, ~view=view(~greeting="hello"));
+  RealmOld.React.mount(~at, ~init, ~update, ~view=view(~greeting="hello"));

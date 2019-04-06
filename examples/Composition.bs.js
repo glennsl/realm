@@ -3,7 +3,7 @@
 
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
-var Realm = require("../src/Realm.bs.js");
+var RealmOld = require("../src/RealmOld.bs.js");
 
 function init(param) {
   return /* record */[/* count */0];
@@ -13,7 +13,7 @@ function update(msg, model) {
   return /* record */[/* count */model[/* count */0] + 1 | 0];
 }
 
-var Html = Curry._1(Realm.React[/* Html */0], /* module */[]);
+var Html = Curry._1(RealmOld.React[/* Html */0], /* module */[]);
 
 function view(model) {
   var message = "You've clicked this " + (String(model[/* count */0]) + " times(s)");
@@ -44,7 +44,7 @@ function update$1(msg, model) {
   return /* record */[/* show */!model[/* show */0]];
 }
 
-var Html$1 = Curry._1(Realm.React[/* Html */0], /* module */[]);
+var Html$1 = Curry._1(RealmOld.React[/* Html */0], /* module */[]);
 
 function view$1(greeting, model) {
   var match = model[/* show */0];
@@ -91,13 +91,13 @@ function update$2(msg, model) {
   }
 }
 
-var Html$2 = Curry._1(Realm.React[/* Html */0], /* module */[]);
+var Html$2 = Curry._1(RealmOld.React[/* Html */0], /* module */[]);
 
 function view$2(greeting, model) {
   var partial_arg = view(model[/* clicker */0]);
-  var partial_arg$1 = Realm.React[/* map */2];
+  var partial_arg$1 = RealmOld.React[/* map */2];
   var partial_arg$2 = view$1(greeting, model[/* toggler */1]);
-  var partial_arg$3 = Realm.React[/* map */2];
+  var partial_arg$3 = RealmOld.React[/* map */2];
   return Curry._2(Html$2[/* div */3], /* [] */0, /* :: */[
               (function (param) {
                   return partial_arg$1((function (msg) {
@@ -116,7 +116,7 @@ function view$2(greeting, model) {
 }
 
 function mount(at) {
-  return Realm.React[/* mount */1](at)(init$2, update$2, (function (param) {
+  return RealmOld.React[/* mount */1](at)(init$2, update$2, (function (param) {
                 return view$2("hello", param);
               }));
 }

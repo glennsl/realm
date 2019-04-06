@@ -2,19 +2,19 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Realm = require("../src/Realm.bs.js");
 var Realm__Core = require("../src/core/Realm__Core.bs.js");
 var Core__String = require("../src/core/Core__String.bs.js");
-var RealmNoUpdate = require("../src/RealmNoUpdate.bs.js");
 
 function init(param) {
   return /* record */[/* count */0];
 }
 
-var click = RealmNoUpdate.Effect[/* update */2]((function (model) {
+var click = Realm.Effect[/* update */2]((function (model) {
         return /* record */[/* count */model[/* count */0] + 1 | 0];
       }));
 
-var Html = RealmNoUpdate.MakeHtml(/* module */[]);
+var Html = Realm.MakeHtml(/* module */[]);
 
 function view(model) {
   var message = "You've clicked this " + (Core__String.fromInt(model[/* count */0]) + " times(s)");
@@ -44,8 +44,8 @@ function init$1(param) {
         ];
 }
 
-var toggle = RealmNoUpdate.Effect[/* do_ */3]((function (param) {
-        var partial_arg = RealmNoUpdate.Task[/* randomInt */4];
+var toggle = Realm.Effect[/* do_ */3]((function (param) {
+        var partial_arg = Realm.Task[/* randomInt */4];
         return (function (param) {
             return partial_arg(0, 10, param);
           });
@@ -56,7 +56,7 @@ var toggle = RealmNoUpdate.Effect[/* do_ */3]((function (param) {
               ];
       }));
 
-var Html$1 = RealmNoUpdate.MakeHtml(/* module */[]);
+var Html$1 = Realm.MakeHtml(/* module */[]);
 
 function view$1(greeting, model) {
   var match = model[/* show */0];
@@ -92,11 +92,11 @@ function init$2(param) {
         ];
 }
 
-var Html$2 = RealmNoUpdate.MakeHtml(/* module */[]);
+var Html$2 = Realm.MakeHtml(/* module */[]);
 
 function clicker(model) {
   return Realm__Core.$pipe$great(view(model[/* clicker */0]), (function (param, param$1) {
-                return RealmNoUpdate.map((function (model) {
+                return Realm.map((function (model) {
                               return model[/* clicker */0];
                             }), (function (model, clickerModel) {
                               return /* record */[
@@ -109,7 +109,7 @@ function clicker(model) {
 
 function toggler(greeting, model) {
   return Realm__Core.$pipe$great(view$1(greeting, model[/* toggler */1]), (function (param, param$1) {
-                return RealmNoUpdate.map((function (model) {
+                return Realm.map((function (model) {
                               return model[/* toggler */1];
                             }), (function (model, togglerModel) {
                               return /* record */[
@@ -136,7 +136,7 @@ function view$2(greeting, model) {
 }
 
 function mount(at) {
-  return RealmNoUpdate.mountHtml(at)(init$2, undefined, undefined, (function (param) {
+  return Realm.mountHtml(at)(init$2, undefined, undefined, (function (param) {
                 return view$2("hello", param);
               }), /* () */0);
 }
