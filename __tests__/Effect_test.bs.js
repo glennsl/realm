@@ -5,10 +5,21 @@ var Jest = require("@glennsl/bs-jest/src/jest.js");
 var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
+var Random = require("bs-platform/lib/js/random.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 
 function make(f) {
   return f;
+}
+
+function run(receiver, task) {
+  return Curry._1(task, receiver);
+}
+
+function map(f, task, resolve) {
+  return Curry._1(task, (function (a) {
+                return Curry._1(resolve, Curry._1(f, a));
+              }));
 }
 
 function $$const(value) {
@@ -17,28 +28,16 @@ function $$const(value) {
     });
 }
 
-function map(f, task, resolve) {
-  return Curry._1(task, (function (value) {
-                return Curry._1(resolve, Curry._1(f, value));
-              }));
-}
-
-function run(receiver, task) {
-  return Curry._1(task, receiver);
-}
-
-function andThen(f, task, resolve) {
-  return Curry._1(task, (function (value) {
-                return Curry._2(f, value, resolve);
-              }));
+function randomInt(l, h, f) {
+  return Curry._1(f, Random.$$int(h) + l | 0);
 }
 
 var Task = /* module */[
   /* make */make,
-  /* const */$$const,
+  /* run */run,
   /* map */map,
-  /* andThen */andThen,
-  /* run */run
+  /* const */$$const,
+  /* randomInt */randomInt
 ];
 
 Jest.describe("Task", (function (param) {
@@ -80,8 +79,8 @@ function do_(action, mapper) {
             (function (model) {
                 var partial_arg = Curry._1(action, model);
                 return (function (param) {
-                    return Curry._1(partial_arg, (function (value) {
-                                  return Curry._1(param, Curry._1(mapper, value));
+                    return Curry._1(partial_arg, (function (a) {
+                                  return Curry._1(param, Curry._1(mapper, a));
                                 }));
                   });
               }),
@@ -89,18 +88,18 @@ function do_(action, mapper) {
           ]);
 }
 
-function andThen$1(last, param) {
+function andThen(last, param) {
   if (typeof param === "number") {
     return last;
   } else if (param.tag) {
     return /* Task */Block.__(1, [
               param[0],
-              andThen$1(last, param[1])
+              andThen(last, param[1])
             ]);
   } else {
     return /* Update */Block.__(0, [
               param[0],
-              andThen$1(last, param[1])
+              andThen(last, param[1])
             ]);
   }
 }
@@ -117,8 +116,8 @@ function map$1(getter, setter, param) {
                       var f = function (f$1, model) {
                         return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
                       };
-                      return Curry._1(partial_arg, (function (value) {
-                                    return Curry._1(param, Curry._1(f, value));
+                      return Curry._1(partial_arg, (function (a) {
+                                    return Curry._1(param, Curry._1(f, a));
                                   }));
                     });
                 }),
@@ -153,17 +152,16 @@ function step(model, param) {
                                 next
                               ]);
                     };
-                    return Curry._1(partial_arg, (function (value) {
-                                  return Curry._1(param, Curry._1(f, value));
+                    return Curry._1(partial_arg, (function (a) {
+                                  return Curry._1(param, Curry._1(f, a));
                                 }));
                   }))
           ];
   } else {
     var next$1 = param[1];
-    var match = next$1 === /* End */0;
     return /* tuple */[
             Caml_option.some(Curry._1(param[0], model)),
-            match ? undefined : Caml_option.some((function (f) {
+            next$1 === /* End */0 ? undefined : Caml_option.some((function (f) {
                       return Curry._1(f, next$1);
                     }))
           ];
@@ -171,10 +169,11 @@ function step(model, param) {
 }
 
 var Effect = /* module */[
+  /* none : End */0,
   /* const */$$const$1,
   /* update */update,
   /* do_ */do_,
-  /* andThen */andThen$1,
+  /* andThen */andThen,
   /* map */map$1,
   /* step */step
 ];
@@ -264,7 +263,7 @@ Jest.describe("Effect", (function (param) {
                             }));
               }));
         Jest.testAsync("andThen", undefined, (function (finish) {
-                var effect = andThen$1(/* Update */Block.__(0, [
+                var effect = andThen(/* Update */Block.__(0, [
                         (function (model) {
                             return /* record */[
                                     /* number */model[/* number */0],
