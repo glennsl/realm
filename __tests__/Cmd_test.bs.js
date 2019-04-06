@@ -2,9 +2,9 @@
 'use strict';
 
 var Jest = require("@glennsl/bs-jest/src/jest.js");
+var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
-var Caml_format = require("bs-platform/lib/js/caml_format.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 
 function make(f) {
@@ -105,6 +105,36 @@ function andThen$1(last, param) {
   }
 }
 
+function map$1(getter, setter, param) {
+  if (typeof param === "number") {
+    return /* End */0;
+  } else if (param.tag) {
+    var f = param[0];
+    return /* Task */Block.__(1, [
+              (function (model) {
+                  var partial_arg = Curry._1(f, Curry._1(getter, model));
+                  return (function (param) {
+                      var f = function (f$1, model) {
+                        return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
+                      };
+                      return Curry._1(partial_arg, (function (value) {
+                                    return Curry._1(param, Curry._1(f, value));
+                                  }));
+                    });
+                }),
+              map$1(getter, setter, param[1])
+            ]);
+  } else {
+    var f$1 = param[0];
+    return /* Update */Block.__(0, [
+              (function (model) {
+                  return Curry._2(setter, model, Curry._1(f$1, Curry._1(getter, model)));
+                }),
+              map$1(getter, setter, param[1])
+            ]);
+  }
+}
+
 function step(model, param) {
   if (typeof param === "number") {
     return /* tuple */[
@@ -145,6 +175,7 @@ var Effect = /* module */[
   /* update */update,
   /* do_ */do_,
   /* andThen */andThen$1,
+  /* map */map$1,
   /* step */step
 ];
 
@@ -177,7 +208,7 @@ Jest.describe("Effect", (function (param) {
                             return aux(model$1, result$1, param);
                           }));
             } else {
-              return Curry._1(callback, result$1);
+              return Curry._1(callback, List.rev(result$1));
             }
           };
           return aux(model, /* [] */0, effect);
@@ -232,29 +263,73 @@ Jest.describe("Effect", (function (param) {
                                             ], Jest.Expect[/* expect */0](result)));
                             }));
               }));
-        return Jest.testAsync("andThen", undefined, (function (finish) {
-                      var effect = andThen$1(/* Update */Block.__(0, [
+        Jest.testAsync("andThen", undefined, (function (finish) {
+                var effect = andThen$1(/* Update */Block.__(0, [
+                        (function (model) {
+                            return /* record */[
+                                    /* number */model[/* number */0],
+                                    /* text */String(model[/* number */0])
+                                  ];
+                          }),
+                        /* End */0
+                      ]), do_((function (model) {
+                            var value = model[/* number */0] + 1 | 0;
+                            return (function (f) {
+                                return Curry._1(f, value);
+                              });
+                          }), (function (result, model) {
+                            return /* record */[
+                                    /* number */result,
+                                    /* text */model[/* text */1]
+                                  ];
+                          })));
+                return run(effect, /* record */[
+                            /* number */1,
+                            /* text */"foo"
+                          ], (function (result) {
+                              return Curry._1(finish, Jest.Expect[/* toEqual */12](/* :: */[
+                                              /* record */[
+                                                /* number */2,
+                                                /* text */"foo"
+                                              ],
+                                              /* :: */[
+                                                /* record */[
+                                                  /* number */2,
+                                                  /* text */"2"
+                                                ],
+                                                /* [] */0
+                                              ]
+                                            ], Jest.Expect[/* expect */0](result)));
+                            }));
+              }));
+        return Jest.test("map", (function (param) {
+                      var effect = map$1((function (model) {
+                              return model[/* number */0];
+                            }), (function (model, number) {
+                              return /* record */[
+                                      /* number */number,
+                                      /* text */model[/* text */1]
+                                    ];
+                            }), /* Update */Block.__(0, [
                               (function (model) {
-                                  return model / 2 | 0;
+                                  return model + 1 | 0;
                                 }),
                               /* End */0
-                            ]), do_((function (model) {
-                                  var value = String(model) + "1";
-                                  return (function (f) {
-                                      return Curry._1(f, value);
-                                    });
-                                }), (function (result, model) {
-                                  return model + Caml_format.caml_int_of_string(result) | 0;
-                                })));
-                      return run(effect, 3, (function (result) {
-                                    return Curry._1(finish, Jest.Expect[/* toEqual */12](/* :: */[
-                                                    17,
-                                                    /* :: */[
-                                                      34,
-                                                      /* [] */0
-                                                    ]
-                                                  ], Jest.Expect[/* expect */0](result)));
-                                  }));
+                            ]));
+                      var match = step(/* record */[
+                            /* number */4,
+                            /* text */"bar"
+                          ], effect);
+                      return Jest.Expect[/* toEqual */12](/* tuple */[
+                                  /* record */[
+                                    /* number */5,
+                                    /* text */"bar"
+                                  ],
+                                  undefined
+                                ], Jest.Expect[/* expect */0](/* tuple */[
+                                      match[0],
+                                      match[1]
+                                    ]));
                     }));
       }));
 

@@ -52,6 +52,7 @@ module Effect : {
   let update : ('model => 'model) => t('model)
   let do_ : ('model => Task.t('result), ('result, 'model) => 'model) => t('model)
   let andThen : (t('model), t('model)) => t('model)
+  let map : ('b => 'a, ('b, 'a) => 'b, t('a)) => t('b)
 
   let step : ('model, t('model)) => (option('model), option(Task.t(t('model))))
 } = {
@@ -70,6 +71,12 @@ module Effect : {
     fun | End => last
         | Update(f, next) => Update(f, andThen(last, next))
         | Task(f, next) => Task(f, andThen(last, next))
+  let rec map = (getter, setter) =>
+    fun | End => End
+        | Update(f, next) =>
+          Update(model => model |> getter |> f |> setter(model), map(getter, setter, next))
+        | Task(f, next) =>
+          Task(model => model |> getter |> f |> Task.map(f => model => model |> getter |> f |> setter(model)), map(getter, setter, next))
 
   let step = model =>
     fun | End =>
@@ -94,6 +101,11 @@ module Effect : {
   // let then_
 }
 
+type model = {
+  number: int,
+  text: string
+}
+
 let () = {
   open Jest
   open Expect
@@ -114,7 +126,7 @@ let () = {
         | Some(task) =>
           task |> Task.run(aux(model, result))
         | None =>
-          callback(result);
+          callback(List.rev(result));
         }
       }
       aux(model, [], effect);
@@ -138,14 +150,33 @@ let () = {
     })
 
     testAsync("andThen", finish => {
+      let initial = { number: 1, text: "foo" }
       let effect =
         Effect.(
           do_(
-            model => Task.const(string_of_int(model) ++ "1"),
-            (result, model) => model + int_of_string(result))
-          |> andThen(update(model => model / 2))
+            model => Task.const(model.number + 1),
+            (result, model) => { ...model, number: result }
+          )
+          |> andThen(update(model => { ...model, text: string_of_int(model.number) }))
         )
-      run(effect, 3, result => expect(result) |> toEqual([17, 34]) |> finish)
+      run(effect, initial, result =>
+        expect(result)
+          |> toEqual([
+            { ...initial, number: 2 },
+            { number: 2, text: "2" }
+          ])
+          |> finish)
     })
+
+    test("map", () => {
+      let initial = { number: 4, text: "bar" }
+      let effect =
+        Effect.(
+          update(model => model + 1)
+          |> map(model => model.number, (model, number) => { ...model, number })
+        )
+      let (value, next) = Effect.step(initial, effect);
+      expect((value, next)) |> toEqual((Some({ ...initial, number: 5 }), None))
+    });
   })
 }
