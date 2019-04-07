@@ -3,12 +3,14 @@ open! Core;
 open Model;
 
 let init = () =>
-  { entries:
-    [ Todo.make("Item 1")
-    , Todo.make("Item 2")
-    ]
-  , visibility: "All"
-  };
+  Task.const(
+    { entries:
+      [ Todo.make("Item 1")
+      , Todo.make("Item 2")
+      ]
+    , visibility: "All"
+    }
+  );
 
 open Model.Html;
 

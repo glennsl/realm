@@ -5,60 +5,59 @@ var Jest = require("@glennsl/bs-jest/src/jest.js");
 var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
-var Random = require("bs-platform/lib/js/random.js");
+var Realm = require("../src/Realm.bs.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
-
-function make(f) {
-  return f;
-}
-
-function run(receiver, task) {
-  return Curry._1(task, receiver);
-}
-
-function map(f, task, resolve) {
-  return Curry._1(task, (function (a) {
-                return Curry._1(resolve, Curry._1(f, a));
-              }));
-}
-
-function $$const(value) {
-  return (function (f) {
-      return Curry._1(f, value);
-    });
-}
-
-function randomInt(l, h, f) {
-  return Curry._1(f, Random.$$int(h) + l | 0);
-}
-
-var Task = /* module */[
-  /* make */make,
-  /* run */run,
-  /* map */map,
-  /* const */$$const,
-  /* randomInt */randomInt
-];
 
 Jest.describe("Task", (function (param) {
         Jest.testAsync("make", undefined, (function (finish) {
                 var expected = "my-value";
-                return Curry._1(finish, Jest.Expect[/* toBe */2](expected, Jest.Expect[/* expect */0](expected)));
+                var task = Realm.Task[/* make */0]((function (callback) {
+                        return Curry._1(callback, expected);
+                      }));
+                return Realm.Task[/* run */5]((function (value) {
+                              return Curry._1(finish, Jest.Expect[/* toBe */2](expected, Jest.Expect[/* expect */0](value)));
+                            }), task);
+              }));
+        Jest.testAsync("const", undefined, (function (finish) {
+                var expected = "my-value";
+                var task = Realm.Task[/* const */1](expected);
+                return Realm.Task[/* run */5]((function (value) {
+                              return Curry._1(finish, Jest.Expect[/* toBe */2](expected, Jest.Expect[/* expect */0](value)));
+                            }), task);
+              }));
+        Jest.testAsync("andThen", undefined, (function (finish) {
+                var partial_arg = Realm.Task[/* const */1]("a");
+                var partial_arg$1 = Realm.Task[/* andThen */2];
+                var task = function (param) {
+                  return partial_arg$1((function (a) {
+                                return Realm.Task[/* const */1](a + "b");
+                              }), partial_arg, param);
+                };
+                return Realm.Task[/* run */5]((function (value) {
+                              return Curry._1(finish, Jest.Expect[/* toBe */2]("ab", Jest.Expect[/* expect */0](value)));
+                            }), task);
               }));
         Jest.testAsync("map", undefined, (function (finish) {
-                var f = function (x) {
-                  return x + 5 | 0;
-                };
-                var value = Curry._1(f, 3);
-                return Curry._1(finish, Jest.Expect[/* toBe */2](8, Jest.Expect[/* expect */0](value)));
+                var partial_arg = Realm.Task[/* const */1](3);
+                var partial_arg$1 = Realm.Task[/* map */3];
+                return Realm.Task[/* run */5]((function (value) {
+                              return Curry._1(finish, Jest.Expect[/* toBe */2](8, Jest.Expect[/* expect */0](value)));
+                            }), (function (param) {
+                              return partial_arg$1((function (x) {
+                                            return x + 5 | 0;
+                                          }), partial_arg, param);
+                            }));
               }));
-        return Jest.testAsync("const", undefined, (function (finish) {
-                      var expected = "my-value";
-                      return Curry._1(finish, Jest.Expect[/* toBe */2](expected, Jest.Expect[/* expect */0](expected)));
+        return Jest.testAsync("map2", undefined, (function (finish) {
+                      return Realm.Task[/* run */5]((function (value) {
+                                    return Curry._1(finish, Jest.Expect[/* toBe */2](9, Jest.Expect[/* expect */0](value)));
+                                  }), Realm.Task[/* map2 */4]((function (x, y) {
+                                        return x + y | 0;
+                                      }), Realm.Task[/* const */1](3), Realm.Task[/* const */1](6)));
                     }));
       }));
 
-function $$const$1(value) {
+function $$const(value) {
   return /* :: */[
           /* Update */Block.__(0, [(function (param) {
                   return value;
@@ -78,10 +77,9 @@ function do_(action, mapper) {
   return /* :: */[
           /* Task */Block.__(1, [(function (model) {
                   var partial_arg = Curry._1(action, model);
+                  var partial_arg$1 = Realm.Task[/* map */3];
                   return (function (param) {
-                      return Curry._1(partial_arg, (function (a) {
-                                    return Curry._1(param, Curry._1(mapper, a));
-                                  }));
+                      return partial_arg$1(mapper, partial_arg, param);
                     });
                 })]),
           /* [] */0
@@ -107,7 +105,7 @@ function andThen(last, param) {
   }
 }
 
-function map$1(get, set, param) {
+function map(get, set, param) {
   if (param) {
     var match = param[0];
     if (match.tag) {
@@ -115,16 +113,14 @@ function map$1(get, set, param) {
       return /* :: */[
               /* Task */Block.__(1, [(function (model) {
                       var partial_arg = Curry._1(f, Curry._1(get, model));
+                      var partial_arg$1 = Realm.Task[/* map */3];
                       return (function (param) {
-                          var f = function (f$1, model) {
-                            return Curry._2(set, model, Curry._1(f$1, Curry._1(get, model)));
-                          };
-                          return Curry._1(partial_arg, (function (a) {
-                                        return Curry._1(param, Curry._1(f, a));
-                                      }));
+                          return partial_arg$1((function (f, model) {
+                                        return Curry._2(set, model, Curry._1(f, Curry._1(get, model)));
+                                      }), partial_arg, param);
                         });
                     })]),
-              map$1(get, set, param[1])
+              map(get, set, param[1])
             ];
     } else {
       var f$1 = match[0];
@@ -132,7 +128,7 @@ function map$1(get, set, param) {
               /* Update */Block.__(0, [(function (model) {
                       return Curry._2(set, model, Curry._1(f$1, Curry._1(get, model)));
                     })]),
-              map$1(get, set, param[1])
+              map(get, set, param[1])
             ];
     }
   } else {
@@ -146,16 +142,14 @@ function step(model, param) {
     if (match.tag) {
       var rest = param[1];
       var partial_arg = Curry._1(match[0], model);
+      var partial_arg$1 = Realm.Task[/* map */3];
       var next = function (param) {
-        var f = function (f$prime) {
-          return /* :: */[
-                  /* Update */Block.__(0, [f$prime]),
-                  rest
-                ];
-        };
-        return Curry._1(partial_arg, (function (a) {
-                      return Curry._1(param, Curry._1(f, a));
-                    }));
+        return partial_arg$1((function (f$prime) {
+                      return /* :: */[
+                              /* Update */Block.__(0, [f$prime]),
+                              rest
+                            ];
+                    }), partial_arg, param);
       };
       return /* tuple */[
               undefined,
@@ -167,9 +161,7 @@ function step(model, param) {
       if (rest$1) {
         return /* tuple */[
                 Caml_option.some(Curry._1(f, model)),
-                Caml_option.some((function (f) {
-                        return Curry._1(f, rest$1);
-                      }))
+                Caml_option.some(Realm.Task[/* const */1](rest$1))
               ];
       } else {
         return /* tuple */[
@@ -188,11 +180,11 @@ function step(model, param) {
 
 var Effect = /* module */[
   /* none : [] */0,
-  /* const */$$const$1,
+  /* const */$$const,
   /* update */update,
   /* do_ */do_,
   /* andThen */andThen,
-  /* map */map$1,
+  /* map */map,
   /* step */step
 ];
 
@@ -221,9 +213,9 @@ Jest.describe("Effect", (function (param) {
             var result$1 = match$1[1];
             var model$1 = match$1[0];
             if (next !== undefined) {
-              return Curry._1(Caml_option.valFromOption(next), (function (param) {
+              return Realm.Task[/* run */5]((function (param) {
                             return aux(model$1, result$1, param);
-                          }));
+                          }), Caml_option.valFromOption(next));
             } else {
               return Curry._1(callback, List.rev(result$1));
             }
@@ -266,10 +258,7 @@ Jest.describe("Effect", (function (param) {
               }));
         Jest.testAsync("do_", undefined, (function (finish) {
                 var effect = do_((function (model) {
-                        var value = model + 1 | 0;
-                        return (function (f) {
-                            return Curry._1(f, value);
-                          });
+                        return Realm.Task[/* const */1](model + 1 | 0);
                       }), (function (model, value) {
                         return model + value | 0;
                       }));
@@ -290,10 +279,7 @@ Jest.describe("Effect", (function (param) {
                             })]),
                       /* [] */0
                     ], do_((function (model) {
-                            var value = model[/* number */0] + 1 | 0;
-                            return (function (f) {
-                                return Curry._1(f, value);
-                              });
+                            return Realm.Task[/* const */1](model[/* number */0] + 1 | 0);
                           }), (function (result, model) {
                             return /* record */[
                                     /* number */result,
@@ -320,7 +306,7 @@ Jest.describe("Effect", (function (param) {
                             }));
               }));
         return Jest.test("map", (function (param) {
-                      var effect = map$1((function (model) {
+                      var effect = map((function (model) {
                               return model[/* number */0];
                             }), (function (model, number) {
                               return /* record */[
@@ -349,6 +335,8 @@ Jest.describe("Effect", (function (param) {
                                     ]));
                     }));
       }));
+
+var Task = 0;
 
 exports.Task = Task;
 exports.Effect = Effect;

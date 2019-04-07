@@ -16,8 +16,16 @@ function make(f) {
   return f;
 }
 
-function run(receiver, task) {
-  return Curry._1(task, receiver);
+function $$const(value) {
+  return (function (f) {
+      return Curry._1(f, value);
+    });
+}
+
+function andThen(f, task, resolve) {
+  return Curry._1(task, (function (a) {
+                return Curry._2(f, a, resolve);
+              }));
 }
 
 function map(f, task, resolve) {
@@ -26,10 +34,29 @@ function map(f, task, resolve) {
               }));
 }
 
-function $$const(value) {
-  return (function (f) {
-      return Curry._1(f, value);
+function map2(f, taskA, taskB) {
+  return (function (param) {
+      var f$1 = function (a) {
+        return (function (param) {
+            var f$2 = function (b) {
+              var value = Curry._2(f, a, b);
+              return (function (f) {
+                  return Curry._1(f, value);
+                });
+            };
+            return Curry._1(taskB, (function (a) {
+                          return Curry._2(f$2, a, param);
+                        }));
+          });
+      };
+      return Curry._1(taskA, (function (a) {
+                    return Curry._2(f$1, a, param);
+                  }));
     });
+}
+
+function run(receiver, task) {
+  return Curry._1(task, receiver);
 }
 
 function randomInt(l, h, f) {
@@ -38,9 +65,11 @@ function randomInt(l, h, f) {
 
 var Task = /* module */[
   /* make */make,
-  /* run */run,
-  /* map */map,
   /* const */$$const,
+  /* andThen */andThen,
+  /* map */map,
+  /* map2 */map2,
+  /* run */run,
   /* randomInt */randomInt
 ];
 
@@ -74,18 +103,18 @@ function do_(action, mapper) {
         ];
 }
 
-function andThen(last, param) {
+function andThen$1(last, param) {
   if (param) {
     var match = param[0];
     if (match.tag) {
       return /* :: */[
               /* Task */Block.__(1, [match[0]]),
-              andThen(last, param[1])
+              andThen$1(last, param[1])
             ];
     } else {
       return /* :: */[
               /* Update */Block.__(0, [match[0]]),
-              andThen(last, param[1])
+              andThen$1(last, param[1])
             ];
     }
   } else {
@@ -177,7 +206,7 @@ var EffectImpl = /* module */[
   /* const */$$const$1,
   /* update */update,
   /* do_ */do_,
-  /* andThen */andThen,
+  /* andThen */andThen$1,
   /* map */map$1,
   /* step */step
 ];
@@ -238,51 +267,53 @@ function run$2(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
   var subs = $staropt$star$1 !== undefined ? $staropt$star$1 : (function (param) {
         return /* [] */0;
       });
-  var activeSubs = /* record */[/* contents */Belt_MapString.empty];
-  var model = /* record */[/* contents */Curry._1(init, arg)];
-  var updateSubs = function (param) {
-    var newSubs = List.fold_left((function (subs, sub) {
-            return Belt_MapString.set(subs, sub[/* id */0], sub);
-          }), Belt_MapString.empty, Curry._1(subs, model[0]));
-    var spawns = Belt_MapString.keep(newSubs, (function (key, param) {
-            return !Belt_MapString.has(activeSubs[0], key);
-          }));
-    var existing = Belt_MapString.keep(activeSubs[0], (function (key, param) {
-            return Belt_MapString.has(newSubs, key);
-          }));
-    var kills = Belt_MapString.keep(activeSubs[0], (function (key, param) {
-            return !Belt_MapString.has(newSubs, key);
-          }));
-    Belt_MapString.forEach(kills, (function (param) {
-            return unsub;
-          }));
-    activeSubs[0] = Belt_MapString.reduce(spawns, existing, (function (subs, id, sub) {
-            return Belt_MapString.set(subs, id, Curry._1(sub[/* spawner */1], dispatch));
-          }));
-    console.log("updateSubs", activeSubs[0]);
-    return /* () */0;
-  };
-  var dispatch = function (action) {
-    var runEffect = function (effect) {
-      var match = step(model[0], effect);
-      var nextEffect = match[1];
-      var maybeModel = match[0];
-      if (maybeModel !== undefined) {
-        var newModel = Caml_option.valFromOption(maybeModel);
-        console.log("model updated", newModel);
-        model[0] = newModel;
-        updateSubs(/* () */0);
-        return Curry._1(render, Curry._2(view, model[0], dispatch));
-      } else if (nextEffect !== undefined) {
-        return Curry._1(Caml_option.valFromOption(nextEffect), runEffect);
-      } else {
-        return /* () */0;
-      }
-    };
-    return runEffect(Curry._1(update, action));
-  };
-  updateSubs(/* () */0);
-  return Curry._1(mount, Curry._2(view, model[0], dispatch));
+  return Curry._2(init, arg, (function (initialModel) {
+                var activeSubs = /* record */[/* contents */Belt_MapString.empty];
+                var model = /* record */[/* contents */initialModel];
+                var updateSubs = function (param) {
+                  var newSubs = List.fold_left((function (subs, sub) {
+                          return Belt_MapString.set(subs, sub[/* id */0], sub);
+                        }), Belt_MapString.empty, Curry._1(subs, model[0]));
+                  var spawns = Belt_MapString.keep(newSubs, (function (key, param) {
+                          return !Belt_MapString.has(activeSubs[0], key);
+                        }));
+                  var existing = Belt_MapString.keep(activeSubs[0], (function (key, param) {
+                          return Belt_MapString.has(newSubs, key);
+                        }));
+                  var kills = Belt_MapString.keep(activeSubs[0], (function (key, param) {
+                          return !Belt_MapString.has(newSubs, key);
+                        }));
+                  Belt_MapString.forEach(kills, (function (param) {
+                          return unsub;
+                        }));
+                  activeSubs[0] = Belt_MapString.reduce(spawns, existing, (function (subs, id, sub) {
+                          return Belt_MapString.set(subs, id, Curry._1(sub[/* spawner */1], dispatch));
+                        }));
+                  console.log("updateSubs", activeSubs[0]);
+                  return /* () */0;
+                };
+                var dispatch = function (action) {
+                  var runEffect = function (effect) {
+                    var match = step(model[0], effect);
+                    var nextEffect = match[1];
+                    var maybeModel = match[0];
+                    if (maybeModel !== undefined) {
+                      var newModel = Caml_option.valFromOption(maybeModel);
+                      console.log("model updated", newModel);
+                      model[0] = newModel;
+                      updateSubs(/* () */0);
+                      return Curry._1(render, Curry._2(view, model[0], dispatch));
+                    } else if (nextEffect !== undefined) {
+                      return Curry._1(Caml_option.valFromOption(nextEffect), runEffect);
+                    } else {
+                      return /* () */0;
+                    }
+                  };
+                  return runEffect(Curry._1(update, action));
+                };
+                updateSubs(/* () */0);
+                return Curry._1(mount, Curry._2(view, model[0], dispatch));
+              }));
 }
 
 function map$2(getter, setter, element, dispatch) {

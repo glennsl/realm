@@ -8,10 +8,10 @@ var Core__String = require("../src/core/Core__String.bs.js");
 var Html = Realm.MakeHtml(/* module */[]);
 
 function init(param) {
-  return /* record */[
-          /* count */0,
-          /* mode : Fast */2
-        ];
+  return Realm.Task[/* const */1](/* record */[
+              /* count */0,
+              /* mode : Fast */2
+            ]);
 }
 
 function subs(model) {

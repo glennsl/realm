@@ -8,7 +8,7 @@ var Core__String = require("../src/core/Core__String.bs.js");
 var Html = Realm.MakeHtml(/* module */[]);
 
 function init(param) {
-  return /* record */[/* count */0];
+  return Realm.Task[/* const */1](/* record */[/* count */0]);
 }
 
 var click = Realm.Effect[/* update */2]((function (model) {

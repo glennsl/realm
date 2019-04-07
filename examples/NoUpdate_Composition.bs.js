@@ -7,7 +7,7 @@ var Realm__Core = require("../src/core/Realm__Core.bs.js");
 var Core__String = require("../src/core/Core__String.bs.js");
 
 function init(param) {
-  return /* record */[/* count */0];
+  return Realm.Task[/* const */1](/* record */[/* count */0]);
 }
 
 var click = Realm.Effect[/* update */2]((function (model) {
@@ -38,14 +38,14 @@ var Clicker = /* module */[
 ];
 
 function init$1(param) {
-  return /* record */[
-          /* show */true,
-          /* n */0
-        ];
+  return Realm.Task[/* const */1](/* record */[
+              /* show */true,
+              /* n */0
+            ]);
 }
 
 var toggle = Realm.Effect[/* do_ */3]((function (param) {
-        var partial_arg = Realm.Task[/* randomInt */4];
+        var partial_arg = Realm.Task[/* randomInt */6];
         return (function (param) {
             return partial_arg(0, 10, param);
           });
@@ -83,13 +83,15 @@ var Toggler = /* module */[
 ];
 
 function init$2(param) {
-  return /* record */[
-          /* clicker : record */[/* count */0],
-          /* toggler : record */[
-            /* show */true,
-            /* n */0
-          ]
-        ];
+  return Realm.Task[/* map2 */4]((function (clicker, toggler) {
+                return /* record */[
+                        /* clicker */clicker,
+                        /* toggler */toggler
+                      ];
+              }), Realm.Task[/* const */1](/* record */[/* count */0]), Realm.Task[/* const */1](/* record */[
+                  /* show */true,
+                  /* n */0
+                ]));
 }
 
 var Html$2 = Realm.MakeHtml(/* module */[]);

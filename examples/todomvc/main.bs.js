@@ -7,16 +7,16 @@ var Realm = require("../../src/Realm.bs.js");
 var TodoApp = require("./TodoApp.bs.js");
 
 function init(param) {
-  return /* record */[
-          /* entries : :: */[
-            Model.Todo[/* make */1]("Item 1"),
-            /* :: */[
-              Model.Todo[/* make */1]("Item 2"),
-              /* [] */0
-            ]
-          ],
-          /* visibility */"All"
-        ];
+  return Realm.Task[/* const */1](/* record */[
+              /* entries : :: */[
+                Model.Todo[/* make */1]("Item 1"),
+                /* :: */[
+                  Model.Todo[/* make */1]("Item 2"),
+                  /* [] */0
+                ]
+              ],
+              /* visibility */"All"
+            ]);
 }
 
 var infoFooter = Curry._4(Model.Html[/* footer */5], undefined, "info", undefined, /* :: */[

@@ -1,27 +1,5 @@
-module Task
-: sig
-    type 'a t
-    val make : (('a -> unit) -> unit) -> 'a t
-    val run : ('a -> unit) -> 'a t -> unit
-    val map : ('a -> 'b) -> 'a t -> 'b t
-    val const : 'a -> 'a t
 
-    val randomInt : int -> int -> int t
-  end =
-  struct
-    type 'a t = ('a -> unit) -> unit
-    let make f =
-      f
-    let run receiver task =
-      task receiver
-    let map f task resolve =
-      task (fun a  -> resolve (f a))
-    let const value =
-      make (fun f  -> f value)
-
-    let randomInt l h f =
-      f ((Random.int h) + l)
-  end 
+module Task = Realm.Task
 
 let () =
   let open Jest in
@@ -37,20 +15,37 @@ let () =
           task |> Task.run (fun value -> expect value |> toBe expected |> finish)
         end;
 
-      testAsync "map"
-        begin fun finish ->
-          let task = Task.make (fun callback  -> callback 3) in
-          task
-            |> Task.map (fun x -> x + 5)
-            |> Task.run (fun value -> expect value |> toBe 8 |> finish)
-        end;
-
       testAsync "const"
         begin fun finish ->
           let expected = "my-value" in
           let task = Task.const expected in
           task |> Task.run (fun value -> expect value |> toBe expected |> finish)
-        end
+        end;
+
+      testAsync "andThen"
+        begin fun finish ->
+          let task =
+            Task.const "a"
+              |> Task.andThen (fun a -> Task.const (a ^ "b"))
+            in
+          task |> Task.run (fun value -> expect value |> toBe "ab" |> finish)
+        end;
+
+      testAsync "map"
+        begin fun finish ->
+          Task.const 3
+            |> Task.map (fun x -> x + 5)
+            |> Task.run (fun value -> expect value |> toBe 8 |> finish)
+        end;
+
+      testAsync "map2"
+        begin fun finish ->
+          Task.map2
+            (fun x y -> x + y) 
+            (Task.const 3)
+            (Task.const 6)
+            |> Task.run (fun value -> expect value |> toBe 9 |> finish)
+        end;
 
     end
 

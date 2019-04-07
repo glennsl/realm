@@ -55,6 +55,7 @@ let init () =
   LocalStorage.getItem "realm-todo-save"
   |> Option.andThen Json.parse
   |> Option.withDefault emptyModel
+  |> Task.const
 
 let persist =
   Effect.map (fun model -> model) @@

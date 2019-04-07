@@ -9,9 +9,9 @@ module Html = MakeHtml({
   type nonrec model = model
 })
 
-let init = () => {
+let init = () => Task.const({
   count: 0
-};
+});
 
 let click =
   Effect.update(model => { count: model.count + 1 })
