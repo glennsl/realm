@@ -6,9 +6,9 @@ module Clicker = {
     count: int
   };
 
-  let init = () => {
+  let init = () => Task.const({
     count: 0
-  };
+  });
 
   let click =
     Effect.update(model => { count: model.count + 1 })
@@ -37,10 +37,10 @@ module Toggler = {
     n: int
   };
 
-  let init = () => {
+  let init = () => Task.const({
     show: true,
     n: 0
-  };
+  });
 
   let toggle =
     Effect.do_(
@@ -70,10 +70,13 @@ type model = {
 };
 
 
-let init = () => {
-  clicker: Clicker.init(),
-  toggler: Toggler.init()
-};
+let init = () =>
+  Task.map2(
+    (clicker, toggler) => {
+      clicker: clicker,
+      toggler: toggler
+    }, Clicker.init(), Toggler.init()
+  );
 
 
 module Html = MakeHtml({ type nonrec model = model; })

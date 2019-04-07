@@ -11,9 +11,10 @@ type model =
 module Html = MakeHtml (struct type nonrec model = model end)
 
 let init () =
-  { count = 0
-  ; mode = Fast
-  }
+  Task.const
+    { count = 0
+    ; mode = Fast
+    }
 
 let subs model =
   let tick () = Effect.update (fun model -> { model with count = (model.count + 1) }) in

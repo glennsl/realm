@@ -1,23 +1,37 @@
 module Task
 : sig
     type 'a t
+
     val make : (('a -> unit) -> unit) -> 'a t
-    val run : ('a -> unit) -> 'a t -> unit
-    val map : ('a -> 'b) -> 'a t -> 'b t
     val const : 'a -> 'a t
+    val andThen : ('a -> 'b t) -> 'a t -> 'b t
+    val map : ('a -> 'b) -> 'a t -> 'b t
+    val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+
+    val run : ('a -> unit) -> 'a t -> unit
 
     val randomInt : int -> int -> int t
   end =
   struct
     type 'a t = ('a -> unit) -> unit
+
     let make f =
       f
+    let const value =
+      make (fun f -> f value)
+    let andThen f task =
+      fun resolve ->
+        task (fun a -> f a resolve)
+    let map f task =
+      fun resolve ->
+        task (fun a -> resolve (f a))
+    let map2 f taskA taskB =
+      taskA
+      |> andThen (fun a -> taskB
+      |> andThen (fun b -> const (f a b)))
+
     let run receiver task =
       task receiver
-    let map f task resolve =
-      task (fun a  -> resolve (f a))
-    let const value =
-      make (fun f  -> f value)
 
     let randomInt l h f =
       f ((Random.int h) + l)
@@ -154,54 +168,58 @@ module SubMap = Belt.Map.String
 
 let run
   ~mount:(mount : htmlElement -> unit)
-  ~render:(render : htmlElement -> unit)  ~init:(init : 'arg -> 'model) 
-  ?update:((update : 'action -> 'model Effect.t)= fun x  -> x) 
-  ?subs:((subs : 'model -> 'action Sub.t list)= fun _  -> []) 
+  ~render:(render : htmlElement -> unit)
+  ~init:(init : 'arg -> 'model Task.t)
+  ?update:(update : 'action -> 'model Effect.t = fun x  -> x) 
+  ?subs:(subs : 'model -> 'action Sub.t list = fun _  -> []) 
   ~view:(view : 'model -> 'model element) 
   (arg : 'arg)
 =
-  let activeSubs = ref SubMap.empty in
-  let model = ref (init arg) in
+  let run' initialModel =
+    let activeSubs = ref SubMap.empty in
+    let model = ref initialModel in
 
-  let rec updateSubs () =
-    let newSubs =
-      subs !model |>
-        List.fold_left
-          (fun subs sub -> SubMap.set subs (Sub.id sub) sub)
-          SubMap.empty
+    let rec updateSubs () =
+      let newSubs =
+        subs !model |>
+          List.fold_left
+            (fun subs sub -> SubMap.set subs (Sub.id sub) sub)
+            SubMap.empty
+        in
+      let spawns = SubMap.keep newSubs (fun key _ -> not (SubMap.has !activeSubs key)) in
+      let existing = SubMap.keep (!activeSubs) (fun key _ -> SubMap.has newSubs key) in
+      let kills = SubMap.keep (!activeSubs) (fun key _ -> not (SubMap.has newSubs key)) in
+
+      SubMap.forEach kills (fun _ -> Sub.unsub);
+
+      activeSubs :=
+        SubMap.reduce spawns existing
+          (fun subs id sub -> SubMap.set subs id (Sub.run dispatch sub));
+
+      Js.log2 "updateSubs" !activeSubs
+
+    and dispatch action =
+      let rec runEffect effect =
+        let maybeModel, nextEffect = EffectImpl.step !model effect in
+        match maybeModel with
+        | Some newModel ->
+          _log newModel;
+          model := newModel;
+          updateSubs ();
+          render (view !model dispatch)
+        | None -> ();
+        match nextEffect with
+        | Some task -> Task.run runEffect task
+        | None      -> ()
+        in
+
+      action |> update |> runEffect
       in
-    let spawns = SubMap.keep newSubs (fun key _ -> not (SubMap.has !activeSubs key)) in
-    let existing = SubMap.keep (!activeSubs) (fun key _ -> SubMap.has newSubs key) in
-    let kills = SubMap.keep (!activeSubs) (fun key _ -> not (SubMap.has newSubs key)) in
 
-    SubMap.forEach kills (fun _ -> Sub.unsub);
-
-    activeSubs :=
-      SubMap.reduce spawns existing
-        (fun subs id sub -> SubMap.set subs id (Sub.run dispatch sub));
-
-    Js.log2 "updateSubs" !activeSubs
-
-  and dispatch action =
-    let rec runEffect effect =
-      let maybeModel, nextEffect = EffectImpl.step !model effect in
-      match maybeModel with
-      | Some newModel ->
-        _log newModel;
-        model := newModel;
-        updateSubs ();
-        render (view !model dispatch)
-      | None -> ();
-      match nextEffect with
-      | Some task -> Task.run runEffect task
-      | None      -> ()
-      in
-
-    action |> update |> runEffect
+    updateSubs ();
+    mount (view !model dispatch)
     in
-
-  updateSubs ();
-  mount (view !model dispatch)
+  Task.run run' (init arg)
 
 let map getter setter element =
     fun dispatch ->

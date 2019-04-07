@@ -33,13 +33,13 @@ var LocalStorage = /* module */[];
 var Json = /* module */[];
 
 function init(param) {
-  return Realm__Core.$pipe$great(Realm__Core.$pipe$great(Caml_option.nullable_to_opt(localStorage.getItem("realm-todo-save")), (function (param) {
-                    return Core__Option.andThen((function (prim) {
-                                  return Caml_option.nullable_to_opt(JSON.parse(prim));
-                                }), param);
-                  })), (function (param) {
-                return Core__Option.withDefault(emptyModel, param);
-              }));
+  return Realm__Core.$pipe$great(Realm__Core.$pipe$great(Realm__Core.$pipe$great(Caml_option.nullable_to_opt(localStorage.getItem("realm-todo-save")), (function (param) {
+                        return Core__Option.andThen((function (prim) {
+                                      return Caml_option.nullable_to_opt(JSON.parse(prim));
+                                    }), param);
+                      })), (function (param) {
+                    return Core__Option.withDefault(emptyModel, param);
+                  })), Realm.Task[/* const */1]);
 }
 
 var partial_arg = Realm.Effect[/* map */5];
