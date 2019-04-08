@@ -5,14 +5,9 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
 var Realm = require("../../src/Realm.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
-var Realm__Core = require("../../src/core/Realm__Core.bs.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
-var partial_arg = "What needs to be done?";
-
-var addTextInput = Realm__Core.$pipe$great((function (param) {
-        return TodoTextInput.view("new-todo", partial_arg, "", param);
-      }), (function (param, param$1) {
+var addTextInput = Realm.Core[/* |> */11](TodoTextInput.view("new-todo", "What needs to be done?", ""), (function (param, param$1) {
         return Realm.map((function (param) {
                       return "";
                     }), (function (model, name) {
@@ -27,9 +22,9 @@ var addTextInput = Realm__Core.$pipe$great((function (param) {
       }));
 
 function view(param) {
-  return Curry._4(Model.Html[/* header */7], undefined, undefined, undefined, /* :: */[
-              Curry._4(Model.Html[/* h1 */8], undefined, undefined, undefined, /* :: */[
-                    Curry._1(Model.Html[/* text */3], "todos"),
+  return Curry._4(Model.Html[/* header */6], undefined, undefined, undefined, /* :: */[
+              Curry._4(Model.Html[/* h1 */7], undefined, undefined, undefined, /* :: */[
+                    Curry._1(Model.Html[/* text */2], "todos"),
                     /* [] */0
                   ]),
               /* :: */[

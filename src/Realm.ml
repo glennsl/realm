@@ -1,236 +1,194 @@
-module Task
-: sig
-    type 'a t
+module Task = struct
+  type 'a t = ('a -> unit) -> unit
 
-    val make : (('a -> unit) -> unit) -> 'a t
-    val const : 'a -> 'a t
-    val andThen : ('a -> 'b t) -> 'a t -> 'b t
-    val map : ('a -> 'b) -> 'a t -> 'b t
-    val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+  let make f =
+    f
+  let const value =
+    make (fun f -> f value)
+  let andThen f task =
+    fun resolve ->
+      task (fun a -> f a resolve)
+  let map f task =
+    fun resolve ->
+      task (fun a -> resolve (f a))
+  let map2 f taskA taskB =
+    taskA
+    |> andThen (fun a -> taskB
+    |> andThen (fun b -> const (f a b)))
 
-    val run : ('a -> unit) -> 'a t -> unit
+  let run receiver task =
+    task receiver
 
-    val randomInt : int -> int -> int t
-  end =
-  struct
-    type 'a t = ('a -> unit) -> unit
-
-    let make f =
-      f
-    let const value =
-      make (fun f -> f value)
-    let andThen f task =
-      fun resolve ->
-        task (fun a -> f a resolve)
-    let map f task =
-      fun resolve ->
-        task (fun a -> resolve (f a))
-    let map2 f taskA taskB =
-      taskA
-      |> andThen (fun a -> taskB
-      |> andThen (fun b -> const (f a b)))
-
-    let run receiver task =
-      task receiver
-
-    let randomInt l h f =
-      f ((Random.int h) + l)
-  end 
-
-module EffectImpl
-: sig
-    type 'model t
-
-    val none : 'model t
-    val const : 'model -> 'model t
-    val update : ('model -> 'model) -> 'model t
-    val do_ : ('model -> 'result Task.t) -> ('result -> 'model -> 'model) -> 'model t
-    val andThen : 'model t -> 'model t -> 'model t
-    val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
-
-    val step : 'model -> 'model t -> ('model option* 'model t Task.t option)
-  end
-  = struct
-    type 'model t =
-      'model node list
-    and 'model node =
-      | Update of ('model -> 'model)
-      | Task   of ('model -> ('model -> 'model) Task.t)
-
-    let none =
-      []
-
-    let const value =
-      [ Update (fun _ -> value) ]
-
-    let update updater =
-      [ Update updater ]
-
-    let do_ action mapper =
-      [ Task (fun model -> action model |> Task.map mapper) ]
-
-    let rec andThen last =
-      function
-      | []               -> last
-      | Update f :: rest -> Update f :: andThen last rest
-      | Task f   :: rest -> Task   f :: andThen last rest
-
-    let rec map get set =
-      function
-      | [] -> []
-
-      | Update f :: rest ->
-        Update (fun model -> model |> get |> f |> set model)
-          :: map get set rest
-
-      | Task f :: rest ->
-        Task (fun model -> model |> get |> f |> Task.map (fun f model -> model |> get |> f |> set model))
-          :: map get set rest
+  let randomInt l h f =
+    f ((Random.int h) + l)
+end 
 
 
-    let step model =
-      function
-      | []               -> ( None, None )
-      | Update f :: []   -> ( Some (f model), None )
-      | Update f :: rest -> ( Some (f model), Some (Task.const rest) )
-      | Task f   :: rest ->
-        let next = f model |> Task.map (fun f' -> Update f' :: rest) in
-        ( None, Some next )
-  end
+module Effect = struct
+  type 'model t =
+    'model node list
+  and 'model node =
+    | Update of ('model -> 'model)
+    | Task   of ('model -> ('model -> 'model) Task.t)
 
-module Effect
-: sig
-    type 'model t
+  let none =
+    []
 
-    val none : 'model t
-    val const : 'model -> 'model t
-    val update : ('model -> 'model) -> 'model t
-    val do_ : ('model -> 'result Task.t) -> ('result -> 'model -> 'model) -> 'model t
-    val andThen : 'model t -> 'model t -> 'model t
-    val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
+  let const value =
+    [ Update (fun _ -> value) ]
 
-    val step : 'model -> 'model t -> ('model option* 'model t Task.t option)
-  end with type 'model t =  'model EffectImpl.t
-= EffectImpl
+  let update updater =
+    [ Update updater ]
 
-module EventSource = struct type t end
+  let do_ action mapper =
+    [ Task (fun model -> action model |> Task.map mapper) ]
 
-module Sub
-: sig
-    type 'action t
-    type unsubber = unit -> unit
-    type 'a callback = 'a -> unit
-    val make :
-      string -> ('a -> 'action) -> ('a callback -> unsubber) -> 'action t
-    val run : ('action -> unit) -> 'action t -> unsubber
-    val unsub : unsubber -> unit
-    val id : _ t -> string
-  end
-= struct
-    type unsubber = unit -> unit
-    type 'a callback = 'a -> unit
-    type 'a dispatcher = 'a -> unit
-    type 'action t = {
-      id: string;
-      spawner: 'action dispatcher -> unsubber;}
-    let make id action spawner =
-      {
-        id;
-        spawner =
-          (fun dispatch  ->
-             spawner (fun value  -> (value |> action) |> dispatch))
-      }
-    let run dispatch sub = sub.spawner dispatch
-    let unsub unsubber = unsubber ()
-    let id sub = sub.id
-  end 
+  let rec andThen last =
+    function
+    | []               -> last
+    | Update f :: rest -> Update f :: andThen last rest
+    | Task f   :: rest -> Task   f :: andThen last rest
 
-module Time
-: sig
-    val every : string -> float -> (unit -> 'action) -> 'action Sub.t
-  end
-= struct
-    let every id ms action =
-      Sub.make id action
-        begin fun callback ->
-          let intervalId = Js.Global.setIntervalFloat callback ms in
-          fun () -> Js.Global.clearInterval intervalId
-        end
-  end 
+  let rec map get set =
+    function
+    | [] -> []
 
-type 'model dispatcher = 'model Effect.t -> unit
-type 'model element = 'model dispatcher -> htmlElement
-and htmlElement = ReasonReact.reactElement
+    | Update f :: rest ->
+      Update (fun model -> model |> get |> f |> set model)
+        :: map get set rest
 
-let _log value = Js.log2 "model updated" value
+    | Task f :: rest ->
+      Task (fun model -> model |> get |> f |> Task.map (fun f model -> model |> get |> f |> set model))
+        :: map get set rest
 
-module SubMap = Belt.Map.String
 
-let run
-  ~mount:(mount : htmlElement -> unit)
-  ~render:(render : htmlElement -> unit)
-  ~init:(init : 'arg -> 'model Task.t)
-  ?update:(update : 'action -> 'model Effect.t = fun x  -> x) 
-  ?subs:(subs : 'model -> 'action Sub.t list = fun _  -> []) 
-  ~view:(view : 'model -> 'model element) 
-  (arg : 'arg)
-=
-  let run' initialModel =
-    let activeSubs = ref SubMap.empty in
-    let model = ref initialModel in
+  let step model =
+    function
+    | []               -> ( None, None )
+    | Update f :: []   -> ( Some (f model), None )
+    | Update f :: rest -> ( Some (f model), Some (Task.const rest) )
+    | Task f   :: rest ->
+      let next = f model |> Task.map (fun f' -> Update f' :: rest) in
+      ( None, Some next )
+end
 
-    let rec updateSubs () =
-      let newSubs =
-        subs !model |>
-          List.fold_left
-            (fun subs sub -> SubMap.set subs (Sub.id sub) sub)
-            SubMap.empty
-        in
-      let spawns = SubMap.keep newSubs (fun key _ -> not (SubMap.has !activeSubs key)) in
-      let existing = SubMap.keep (!activeSubs) (fun key _ -> SubMap.has newSubs key) in
-      let kills = SubMap.keep (!activeSubs) (fun key _ -> not (SubMap.has newSubs key)) in
 
-      SubMap.forEach kills (fun _ -> Sub.unsub);
+module Sub = struct
+  type unsubber = unit -> unit
+  type 'a callback = 'a -> unit
+  type 'a dispatcher = 'a -> unit
+  type 'action t =
+    { id: string
+    ; spawner: 'action dispatcher -> unsubber
+  }
 
-      activeSubs :=
-        SubMap.reduce spawns existing
-          (fun subs id sub -> SubMap.set subs id (Sub.run dispatch sub));
+  let make id action spawner =
+    { id
+    ; spawner = fun dispatch -> spawner (fun value -> value |> action |> dispatch)
+    }
 
-      Js.log2 "updateSubs" !activeSubs
+  let run dispatch sub =
+    sub.spawner dispatch
+  let unsub unsubber =
+    unsubber ()
+  let id sub =
+    sub.id
+end 
 
-    and dispatch action =
-      let rec runEffect effect =
-        let maybeModel, nextEffect = EffectImpl.step !model effect in
-        match maybeModel with
-        | Some newModel ->
-          _log newModel;
-          model := newModel;
-          updateSubs ();
-          render (view !model dispatch)
-        | None -> ();
-        match nextEffect with
-        | Some task -> Task.run runEffect task
-        | None      -> ()
+
+module Time = struct
+  let every id ms action =
+    Sub.make id action
+      begin fun callback ->
+        let intervalId = Js.Global.setIntervalFloat callback ms in
+        fun () -> Js.Global.clearInterval intervalId
+      end
+end 
+
+
+module Runtime = struct
+  type 'model dispatcher = 'model Effect.t -> unit
+  type 'model element = 'model dispatcher -> htmlElement
+  and htmlElement = ReasonReact.reactElement
+
+  module SubMap = Belt.Map.String
+
+  let run
+    (* :
+    'action.
+    mount : (htmlElement -> unit) ->
+    render : (htmlElement -> unit) ->
+    init : ('arg -> 'model Task.t) ->
+    update : ('action -> 'model Effect.t) ->
+    ?subs : ('model -> 'action Sub.t list) ->
+    view : ('model -> 'model element) ->
+    'arg ->
+    unit *)
+    = fun ~mount ~render ~init ?(update = fun x -> x) ?(subs = fun _ -> []) ~view arg ->
+  (* let run
+    ~mount:(mount : htmlElement -> unit)
+    ~render:(render : htmlElement -> unit)
+    ~init:(init : 'arg -> 'model Task.t)
+    ~update:(update : 'action -> 'model Effect.t) 
+    ?subs:(subs : 'model -> 'action Sub.t list = fun _ -> []) 
+    ~view:(view : 'model -> 'model element) 
+    (arg : 'arg)
+  = *)
+    let run' initialModel =
+      let activeSubs = ref SubMap.empty in
+      let model = ref initialModel in
+
+      let rec updateSubs () =
+        let newSubs =
+          subs !model |>
+            List.fold_left
+              (fun subs sub -> SubMap.set subs (Sub.id sub) sub)
+              SubMap.empty
+          in
+        let spawns = SubMap.keep newSubs (fun key _ -> not (SubMap.has !activeSubs key)) in
+        let existing = SubMap.keep !activeSubs (fun key _ -> SubMap.has newSubs key) in
+        let kills = SubMap.keep !activeSubs (fun key _ -> not (SubMap.has newSubs key)) in
+
+        SubMap.forEach kills (fun _ -> Sub.unsub);
+
+        activeSubs :=
+          SubMap.reduce spawns existing
+            (fun subs id sub -> SubMap.set subs id (Sub.run dispatch sub));
+
+        Js.log2 "updateSubs" !activeSubs
+
+      and dispatch action =
+        let rec runEffect effect =
+          let maybeModel, nextEffect = Effect.step !model effect in
+          match maybeModel with
+          | Some newModel ->
+            Js.log2 "model updated" newModel;
+            model := newModel;
+            updateSubs ();
+            render (view !model dispatch)
+          | None -> ();
+          match nextEffect with
+          | Some task -> Task.run runEffect task
+          | None      -> ()
+          in
+
+        action |> update |> runEffect
         in
 
-      action |> update |> runEffect
+      updateSubs ();
+      mount (view !model dispatch)
       in
+    Task.run run' (init arg)
 
-    updateSubs ();
-    mount (view !model dispatch)
-    in
-  Task.run run' (init arg)
+  let map getter setter element =
+      fun dispatch ->
+        element (fun effect -> dispatch (effect |> Effect.map getter setter))
 
-let map getter setter element =
-    fun dispatch ->
-      element (fun effect -> dispatch (effect |> Effect.map getter setter))
-
-let mountHtml ~at:(at : string)  =
-  let render component = ReactDOMRe.renderToElementWithId component at in
-  run ~mount:render ~render
-
-module MakeHtml(T:sig type model end) =
-  struct
+  let mountHtml ~at:(at : string)  =
+    let render component = ReactDOMRe.renderToElementWithId component at in
+    run ~mount:render ~render
+   
+  module MakeHtml(T:sig type model end) = struct
     type event
     type attr =
       | Raw of string* string
@@ -294,14 +252,22 @@ module MakeHtml(T:sig type model end) =
       _element "a" ~attrs:([Raw ("href", href)] @ attrs)
     let label ?(for_= "")  ?(attrs= [])  =
       _element "label" ~attrs:([Raw ("htmlFor", for_)] @ attrs)
-    let input ?(placeholder= "")  ?id  ?className  ?(attrs= [])  ~value  =
+    let input ?(placeholder= "") ~value ?id ?className ?(attrs= []) children =
       match value with
       | `Text value ->
-        _element "input" ?id ?className ~attrs:([Raw ("placeholder", placeholder); Raw ("value", value)] @ attrs) []
+        _element "input" ?id ?className ~attrs:([Raw ("placeholder", placeholder); Raw ("value", value)] @ attrs) children
       | `Checkbox checked ->
-        _element "input" ?id ?className ~attrs:([Raw ("type", "checkbox"); Raw ("checked", Obj.magic checked)] @ attrs) []
+        _element "input" ?id ?className ~attrs:([Raw ("type", "checkbox"); Raw ("checked", Obj.magic checked)] @ attrs) children
+
+    let reactComponent f =
+      f
   end
 
-module Html = MakeHtml(struct type nonrec model = unit end)
+  module Html = MakeHtml(struct type nonrec model = unit end)
+
+end
+
+include Runtime
+
 
 module Core = Realm__Core

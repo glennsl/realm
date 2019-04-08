@@ -19,28 +19,28 @@ function init(param) {
             ]);
 }
 
-var infoFooter = Curry._4(Model.Html[/* footer */5], undefined, "info", undefined, /* :: */[
-      Curry._4(Model.Html[/* p */14], undefined, undefined, undefined, /* :: */[
-            Curry._1(Model.Html[/* text */3], "Double-click to edit a todo"),
+var infoFooter = Curry._4(Model.Html[/* footer */4], undefined, "info", undefined, /* :: */[
+      Curry._4(Model.Html[/* p */13], undefined, undefined, undefined, /* :: */[
+            Curry._1(Model.Html[/* text */2], "Double-click to edit a todo"),
             /* [] */0
           ]),
       /* :: */[
-        Curry._4(Model.Html[/* p */14], undefined, undefined, undefined, /* :: */[
-              Curry._1(Model.Html[/* text */3], "Written by "),
+        Curry._4(Model.Html[/* p */13], undefined, undefined, undefined, /* :: */[
+              Curry._1(Model.Html[/* text */2], "Written by "),
               /* :: */[
-                Curry._5(Model.Html[/* a */15], "https://github.com/glennsl", undefined, undefined, undefined, /* :: */[
-                      Curry._1(Model.Html[/* text */3], "Glenn Slotte"),
+                Curry._5(Model.Html[/* a */14], "https://github.com/glennsl", undefined, undefined, undefined, /* :: */[
+                      Curry._1(Model.Html[/* text */2], "Glenn Slotte"),
                       /* [] */0
                     ]),
                 /* [] */0
               ]
             ]),
         /* :: */[
-          Curry._4(Model.Html[/* p */14], undefined, undefined, undefined, /* :: */[
-                Curry._1(Model.Html[/* text */3], "Part of "),
+          Curry._4(Model.Html[/* p */13], undefined, undefined, undefined, /* :: */[
+                Curry._1(Model.Html[/* text */2], "Part of "),
                 /* :: */[
-                  Curry._5(Model.Html[/* a */15], "http://todomvc.com", undefined, undefined, undefined, /* :: */[
-                        Curry._1(Model.Html[/* text */3], "TodoMVC"),
+                  Curry._5(Model.Html[/* a */14], "http://todomvc.com", undefined, undefined, undefined, /* :: */[
+                        Curry._1(Model.Html[/* text */2], "TodoMVC"),
                         /* [] */0
                       ]),
                   /* [] */0
@@ -52,7 +52,7 @@ var infoFooter = Curry._4(Model.Html[/* footer */5], undefined, "info", undefine
     ]);
 
 function view(param) {
-  return Curry._4(Model.Html[/* div */6], undefined, undefined, undefined, /* :: */[
+  return Curry._4(Model.Html[/* div */5], undefined, undefined, undefined, /* :: */[
               TodoApp.view(param[/* entries */0], param[/* visibility */1]),
               /* :: */[
                 infoFooter,

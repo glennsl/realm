@@ -67,12 +67,17 @@ var TextInput = /* module */[
   /* make */make
 ];
 
-function view(className, placeholder, initialValue, dispatch) {
-  return ReasonReact.element(undefined, undefined, make(className, placeholder, (function (value) {
-                    return Curry._1(dispatch, Realm.Effect[/* const */1](value));
-                  }), initialValue, /* array */[]));
+var Html = Realm.MakeHtml(/* module */[]);
+
+function view(className, placeholder, initialValue) {
+  return Curry._1(Html[/* reactComponent */17], (function (dispatch) {
+                return ReasonReact.element(undefined, undefined, make(className, placeholder, (function (value) {
+                                  return Curry._1(dispatch, Realm.Effect[/* const */1](value));
+                                }), initialValue, /* array */[]));
+              }));
 }
 
 exports.TextInput = TextInput;
+exports.Html = Html;
 exports.view = view;
 /* component Not a pure module */

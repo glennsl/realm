@@ -6,10 +6,20 @@ var $$Array = require("bs-platform/lib/js/array.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Random = require("bs-platform/lib/js/random.js");
+var Core__Fn = require("./core/Core__Fn.bs.js");
+var Core__Int = require("./core/Core__Int.bs.js");
+var Core__Bool = require("./core/Core__Bool.bs.js");
+var Core__List = require("./core/Core__List.bs.js");
+var Core__Math = require("./core/Core__Math.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
+var Core__Tuple = require("./core/Core__Tuple.bs.js");
+var Realm__Core = require("./core/Realm__Core.bs.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
+var Core__Option = require("./core/Core__Option.bs.js");
+var Core__Result = require("./core/Core__Result.bs.js");
+var Core__String = require("./core/Core__String.bs.js");
 var Belt_MapString = require("bs-platform/lib/js/belt_MapString.js");
 
 function make(f) {
@@ -174,7 +184,7 @@ function step(model, param) {
       };
       return /* tuple */[
               undefined,
-              Caml_option.some(next)
+              next
             ];
     } else {
       var rest$1 = param[1];
@@ -182,9 +192,9 @@ function step(model, param) {
       if (rest$1) {
         return /* tuple */[
                 Caml_option.some(Curry._1(f, model)),
-                Caml_option.some((function (f) {
-                        return Curry._1(f, rest$1);
-                      }))
+                (function (f) {
+                    return Curry._1(f, rest$1);
+                  })
               ];
       } else {
         return /* tuple */[
@@ -201,18 +211,6 @@ function step(model, param) {
   }
 }
 
-var EffectImpl = /* module */[
-  /* none : [] */0,
-  /* const */$$const$1,
-  /* update */update,
-  /* do_ */do_,
-  /* andThen */andThen$1,
-  /* map */map$1,
-  /* step */step
-];
-
-var EventSource = /* module */[];
-
 function make$1(id, action, spawner) {
   return /* record */[
           /* id */id,
@@ -224,24 +222,9 @@ function make$1(id, action, spawner) {
         ];
 }
 
-function run$1(dispatch, sub) {
-  return Curry._1(sub[/* spawner */1], dispatch);
-}
-
 function unsub(unsubber) {
   return Curry._1(unsubber, /* () */0);
 }
-
-function id(sub) {
-  return sub[/* id */0];
-}
-
-var Sub = /* module */[
-  /* make */make$1,
-  /* run */run$1,
-  /* unsub */unsub,
-  /* id */id
-];
 
 function every(id, ms, action) {
   return make$1(id, action, (function (callback) {
@@ -255,67 +238,6 @@ function every(id, ms, action) {
 
 var Time = /* module */[/* every */every];
 
-function _log(value) {
-  console.log("model updated", value);
-  return /* () */0;
-}
-
-function run$2(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
-  var update = $staropt$star !== undefined ? $staropt$star : (function (x) {
-        return x;
-      });
-  var subs = $staropt$star$1 !== undefined ? $staropt$star$1 : (function (param) {
-        return /* [] */0;
-      });
-  return Curry._2(init, arg, (function (initialModel) {
-                var activeSubs = /* record */[/* contents */Belt_MapString.empty];
-                var model = /* record */[/* contents */initialModel];
-                var updateSubs = function (param) {
-                  var newSubs = List.fold_left((function (subs, sub) {
-                          return Belt_MapString.set(subs, sub[/* id */0], sub);
-                        }), Belt_MapString.empty, Curry._1(subs, model[0]));
-                  var spawns = Belt_MapString.keep(newSubs, (function (key, param) {
-                          return !Belt_MapString.has(activeSubs[0], key);
-                        }));
-                  var existing = Belt_MapString.keep(activeSubs[0], (function (key, param) {
-                          return Belt_MapString.has(newSubs, key);
-                        }));
-                  var kills = Belt_MapString.keep(activeSubs[0], (function (key, param) {
-                          return !Belt_MapString.has(newSubs, key);
-                        }));
-                  Belt_MapString.forEach(kills, (function (param) {
-                          return unsub;
-                        }));
-                  activeSubs[0] = Belt_MapString.reduce(spawns, existing, (function (subs, id, sub) {
-                          return Belt_MapString.set(subs, id, Curry._1(sub[/* spawner */1], dispatch));
-                        }));
-                  console.log("updateSubs", activeSubs[0]);
-                  return /* () */0;
-                };
-                var dispatch = function (action) {
-                  var runEffect = function (effect) {
-                    var match = step(model[0], effect);
-                    var nextEffect = match[1];
-                    var maybeModel = match[0];
-                    if (maybeModel !== undefined) {
-                      var newModel = Caml_option.valFromOption(maybeModel);
-                      console.log("model updated", newModel);
-                      model[0] = newModel;
-                      updateSubs(/* () */0);
-                      return Curry._1(render, Curry._2(view, model[0], dispatch));
-                    } else if (nextEffect !== undefined) {
-                      return Curry._1(Caml_option.valFromOption(nextEffect), runEffect);
-                    } else {
-                      return /* () */0;
-                    }
-                  };
-                  return runEffect(Curry._1(update, action));
-                };
-                updateSubs(/* () */0);
-                return Curry._1(mount, Curry._2(view, model[0], dispatch));
-              }));
-}
-
 function map$2(getter, setter, element, dispatch) {
   return Curry._1(element, (function (effect) {
                 return Curry._1(dispatch, map$1(getter, setter, effect));
@@ -327,270 +249,67 @@ function mountHtml(at) {
     return ReactDOMRe.renderToElementWithId(component, at);
   };
   return (function (param, param$1, param$2, param$3, param$4) {
-      return run$2(render, render, param, param$1, param$2, param$3, param$4);
+      var mount = render;
+      var render$1 = render;
+      var init = param;
+      var $staropt$star = param$1;
+      var $staropt$star$1 = param$2;
+      var view = param$3;
+      var arg = param$4;
+      var update = $staropt$star !== undefined ? $staropt$star : (function (x) {
+            return x;
+          });
+      var subs = $staropt$star$1 !== undefined ? $staropt$star$1 : (function (param) {
+            return /* [] */0;
+          });
+      return Curry._2(init, arg, (function (initialModel) {
+                    var activeSubs = /* record */[/* contents */Belt_MapString.empty];
+                    var model = /* record */[/* contents */initialModel];
+                    var updateSubs = function (param) {
+                      var newSubs = List.fold_left((function (subs, sub) {
+                              return Belt_MapString.set(subs, sub[/* id */0], sub);
+                            }), Belt_MapString.empty, Curry._1(subs, model[0]));
+                      var spawns = Belt_MapString.keep(newSubs, (function (key, param) {
+                              return !Belt_MapString.has(activeSubs[0], key);
+                            }));
+                      var existing = Belt_MapString.keep(activeSubs[0], (function (key, param) {
+                              return Belt_MapString.has(newSubs, key);
+                            }));
+                      var kills = Belt_MapString.keep(activeSubs[0], (function (key, param) {
+                              return !Belt_MapString.has(newSubs, key);
+                            }));
+                      Belt_MapString.forEach(kills, (function (param) {
+                              return unsub;
+                            }));
+                      activeSubs[0] = Belt_MapString.reduce(spawns, existing, (function (subs, id, sub) {
+                              return Belt_MapString.set(subs, id, Curry._1(sub[/* spawner */1], dispatch));
+                            }));
+                      console.log("updateSubs", activeSubs[0]);
+                      return /* () */0;
+                    };
+                    var dispatch = function (action) {
+                      var runEffect = function (effect) {
+                        var match = step(model[0], effect);
+                        var nextEffect = match[1];
+                        var maybeModel = match[0];
+                        if (maybeModel !== undefined) {
+                          var newModel = Caml_option.valFromOption(maybeModel);
+                          console.log("model updated", newModel);
+                          model[0] = newModel;
+                          updateSubs(/* () */0);
+                          return Curry._1(render$1, Curry._2(view, model[0], dispatch));
+                        } else if (nextEffect !== undefined) {
+                          return Curry._1(nextEffect, runEffect);
+                        } else {
+                          return /* () */0;
+                        }
+                      };
+                      return runEffect(Curry._1(update, action));
+                    };
+                    updateSubs(/* () */0);
+                    return Curry._1(mount, Curry._2(view, model[0], dispatch));
+                  }));
     });
-}
-
-function MakeHtml(T) {
-  var className = function (name) {
-    return /* Raw */Block.__(0, [
-              "className",
-              name
-            ]);
-  };
-  var autofocus = function (value) {
-    return /* Raw */Block.__(0, [
-              "autoFocus",
-              value
-            ]);
-  };
-  var hidden = function (value) {
-    return /* Raw */Block.__(0, [
-              "hidden",
-              value
-            ]);
-  };
-  var name = function (name$1) {
-    return /* Raw */Block.__(0, [
-              "name",
-              name$1
-            ]);
-  };
-  var onClick = function (command) {
-    return /* Event */Block.__(1, [
-              "onClick",
-              (function (param) {
-                  return command;
-                })
-            ]);
-  };
-  var onDoubleClick = function (command) {
-    return /* Event */Block.__(1, [
-              "onDoubleClick",
-              (function (param) {
-                  return command;
-                })
-            ]);
-  };
-  var onChange = function (command) {
-    return /* Event */Block.__(1, [
-              "onChange",
-              (function (param) {
-                  return command;
-                })
-            ]);
-  };
-  var onBlur = function (command) {
-    return /* Event */Block.__(1, [
-              "onBlur",
-              (function (param) {
-                  return command;
-                })
-            ]);
-  };
-  var onInput = function (callback) {
-    return /* Event */Block.__(1, [
-              "onInput",
-              (function ($$event) {
-                  return Curry._1(callback, $$event.target.value);
-                })
-            ]);
-  };
-  var onKeyDown = function (callback) {
-    return /* Event */Block.__(1, [
-              "onKeyDown",
-              (function ($$event) {
-                  return Curry._1(callback, $$event.keyCode);
-                })
-            ]);
-  };
-  var Attr = /* module */[
-    /* className */className,
-    /* autofocus */autofocus,
-    /* hidden */hidden,
-    /* name */name,
-    /* onClick */onClick,
-    /* onDoubleClick */onDoubleClick,
-    /* onChange */onChange,
-    /* onBlur */onBlur,
-    /* onInput */onInput,
-    /* onKeyDown */onKeyDown
-  ];
-  var _element = function (elementName, $staropt$star, $staropt$star$1, $staropt$star$2, children, dispatch) {
-    var id = $staropt$star !== undefined ? $staropt$star : "";
-    var className = $staropt$star$1 !== undefined ? $staropt$star$1 : "";
-    var attrs = $staropt$star$2 !== undefined ? $staropt$star$2 : /* [] */0;
-    var attrs_000 = /* Raw */Block.__(0, [
-        "id",
-        id
-      ]);
-    var attrs_001 = /* :: */[
-      /* Raw */Block.__(0, [
-          "className",
-          className
-        ]),
-      attrs
-    ];
-    var attrs$1 = /* :: */[
-      attrs_000,
-      attrs_001
-    ];
-    var attrs$2 = List.fold_left((function (attrs, param) {
-            if (param.tag) {
-              var callback = param[1];
-              attrs[param[0]] = (function ($$event) {
-                  return Curry._1(dispatch, Curry._1(callback, $$event));
-                });
-              return attrs;
-            } else {
-              attrs[param[0]] = param[1];
-              return attrs;
-            }
-          }), { }, attrs$1);
-    return ReasonReact.createDomElement(elementName, attrs$2, $$Array.of_list(List.map((function (el) {
-                          return Curry._1(el, dispatch);
-                        }), children)));
-  };
-  var $$null$1 = function (_dispatch) {
-    return null;
-  };
-  var text = function (text$1, _dispatch) {
-    return text$1;
-  };
-  var button = function (param, param$1, param$2, param$3, param$4) {
-    return _element("button", param, param$1, param$2, param$3, param$4);
-  };
-  var footer = function (param, param$1, param$2, param$3, param$4) {
-    return _element("footer", param, param$1, param$2, param$3, param$4);
-  };
-  var div = function (param, param$1, param$2, param$3, param$4) {
-    return _element("div", param, param$1, param$2, param$3, param$4);
-  };
-  var header = function (param, param$1, param$2, param$3, param$4) {
-    return _element("header", param, param$1, param$2, param$3, param$4);
-  };
-  var h1 = function (param, param$1, param$2, param$3, param$4) {
-    return _element("h1", param, param$1, param$2, param$3, param$4);
-  };
-  var section = function (param, param$1, param$2, param$3, param$4) {
-    return _element("section", param, param$1, param$2, param$3, param$4);
-  };
-  var span = function (param, param$1, param$2, param$3, param$4) {
-    return _element("span", param, param$1, param$2, param$3, param$4);
-  };
-  var ul = function (param, param$1, param$2, param$3, param$4) {
-    return _element("ul", param, param$1, param$2, param$3, param$4);
-  };
-  var li = function (param, param$1, param$2, param$3, param$4) {
-    return _element("li", param, param$1, param$2, param$3, param$4);
-  };
-  var strong = function (param, param$1, param$2, param$3, param$4) {
-    return _element("strong", param, param$1, param$2, param$3, param$4);
-  };
-  var p = function (param, param$1, param$2, param$3, param$4) {
-    return _element("p", param, param$1, param$2, param$3, param$4);
-  };
-  var a = function ($staropt$star, $staropt$star$1) {
-    var href = $staropt$star !== undefined ? $staropt$star : "";
-    var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
-    var arg = Pervasives.$at(/* :: */[
-          /* Raw */Block.__(0, [
-              "href",
-              href
-            ]),
-          /* [] */0
-        ], attrs);
-    return (function (param, param$1) {
-        return (function (param$2, param$3) {
-            var param$4 = param;
-            var param$5 = param$1;
-            var param$6 = arg;
-            var param$7 = param$2;
-            var param$8 = param$3;
-            return _element("a", param$4, param$5, param$6, param$7, param$8);
-          });
-      });
-  };
-  var label = function ($staropt$star, $staropt$star$1) {
-    var for_ = $staropt$star !== undefined ? $staropt$star : "";
-    var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
-    var arg = Pervasives.$at(/* :: */[
-          /* Raw */Block.__(0, [
-              "htmlFor",
-              for_
-            ]),
-          /* [] */0
-        ], attrs);
-    return (function (param, param$1) {
-        return (function (param$2, param$3) {
-            var param$4 = param;
-            var param$5 = param$1;
-            var param$6 = arg;
-            var param$7 = param$2;
-            var param$8 = param$3;
-            return _element("label", param$4, param$5, param$6, param$7, param$8);
-          });
-      });
-  };
-  var input = function ($staropt$star, id, className, $staropt$star$1, value) {
-    var placeholder = $staropt$star !== undefined ? $staropt$star : "";
-    var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
-    if (value[0] >= 936573133) {
-      var partial_arg = Pervasives.$at(/* :: */[
-            /* Raw */Block.__(0, [
-                "placeholder",
-                placeholder
-              ]),
-            /* :: */[
-              /* Raw */Block.__(0, [
-                  "value",
-                  value[1]
-                ]),
-              /* [] */0
-            ]
-          ], attrs);
-      return (function (param) {
-          return _element("input", id, className, partial_arg, /* [] */0, param);
-        });
-    } else {
-      var partial_arg$1 = Pervasives.$at(/* :: */[
-            /* Raw */Block.__(0, [
-                "type",
-                "checkbox"
-              ]),
-            /* :: */[
-              /* Raw */Block.__(0, [
-                  "checked",
-                  value[1]
-                ]),
-              /* [] */0
-            ]
-          ], attrs);
-      return (function (param) {
-          return _element("input", id, className, partial_arg$1, /* [] */0, param);
-        });
-    }
-  };
-  return /* module */[
-          /* Attr */Attr,
-          /* _element */_element,
-          /* null */$$null$1,
-          /* text */text,
-          /* button */button,
-          /* footer */footer,
-          /* div */div,
-          /* header */header,
-          /* h1 */h1,
-          /* section */section,
-          /* span */span,
-          /* ul */ul,
-          /* li */li,
-          /* strong */strong,
-          /* p */p,
-          /* a */a,
-          /* label */label,
-          /* input */input
-        ];
 }
 
 function className(name) {
@@ -820,7 +539,7 @@ function label($staropt$star, $staropt$star$1) {
     });
 }
 
-function input($staropt$star, id, className, $staropt$star$1, value) {
+function input($staropt$star, value, id, className, $staropt$star$1, children) {
   var placeholder = $staropt$star !== undefined ? $staropt$star : "";
   var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
   if (value[0] >= 936573133) {
@@ -838,7 +557,7 @@ function input($staropt$star, id, className, $staropt$star$1, value) {
           ]
         ], attrs);
     return (function (param) {
-        return _element("input", id, className, partial_arg, /* [] */0, param);
+        return _element("input", id, className, partial_arg, children, param);
       });
   } else {
     var partial_arg$1 = Pervasives.$at(/* :: */[
@@ -855,47 +574,469 @@ function input($staropt$star, id, className, $staropt$star$1, value) {
           ]
         ], attrs);
     return (function (param) {
-        return _element("input", id, className, partial_arg$1, /* [] */0, param);
+        return _element("input", id, className, partial_arg$1, children, param);
       });
   }
 }
 
-var Html = /* module */[
-  /* Attr */Attr,
-  /* _element */_element,
-  /* null */$$null$1,
-  /* text */text,
-  /* button */button,
-  /* footer */footer,
-  /* div */div,
-  /* header */header,
-  /* h1 */h1,
-  /* section */section,
-  /* span */span,
-  /* ul */ul,
-  /* li */li,
-  /* strong */strong,
-  /* p */p,
-  /* a */a,
-  /* label */label,
-  /* input */input
+var Effect = [
+  /* [] */0,
+  $$const$1,
+  update,
+  do_,
+  andThen$1,
+  map$1
 ];
 
-var Effect = EffectImpl;
+var Sub = [make$1];
 
-var SubMap = 0;
+function MakeHtml(funarg) {
+  var className = function (name) {
+    return /* Raw */Block.__(0, [
+              "className",
+              name
+            ]);
+  };
+  var autofocus = function (value) {
+    return /* Raw */Block.__(0, [
+              "autoFocus",
+              value
+            ]);
+  };
+  var hidden = function (value) {
+    return /* Raw */Block.__(0, [
+              "hidden",
+              value
+            ]);
+  };
+  var name = function (name$1) {
+    return /* Raw */Block.__(0, [
+              "name",
+              name$1
+            ]);
+  };
+  var onClick = function (command) {
+    return /* Event */Block.__(1, [
+              "onClick",
+              (function (param) {
+                  return command;
+                })
+            ]);
+  };
+  var onDoubleClick = function (command) {
+    return /* Event */Block.__(1, [
+              "onDoubleClick",
+              (function (param) {
+                  return command;
+                })
+            ]);
+  };
+  var onChange = function (command) {
+    return /* Event */Block.__(1, [
+              "onChange",
+              (function (param) {
+                  return command;
+                })
+            ]);
+  };
+  var onBlur = function (command) {
+    return /* Event */Block.__(1, [
+              "onBlur",
+              (function (param) {
+                  return command;
+                })
+            ]);
+  };
+  var onInput = function (callback) {
+    return /* Event */Block.__(1, [
+              "onInput",
+              (function ($$event) {
+                  return Curry._1(callback, $$event.target.value);
+                })
+            ]);
+  };
+  var onKeyDown = function (callback) {
+    return /* Event */Block.__(1, [
+              "onKeyDown",
+              (function ($$event) {
+                  return Curry._1(callback, $$event.keyCode);
+                })
+            ]);
+  };
+  var Attr = /* module */[
+    /* className */className,
+    /* autofocus */autofocus,
+    /* hidden */hidden,
+    /* name */name,
+    /* onClick */onClick,
+    /* onDoubleClick */onDoubleClick,
+    /* onChange */onChange,
+    /* onBlur */onBlur,
+    /* onInput */onInput,
+    /* onKeyDown */onKeyDown
+  ];
+  var _element = function (elementName, $staropt$star, $staropt$star$1, $staropt$star$2, children, dispatch) {
+    var id = $staropt$star !== undefined ? $staropt$star : "";
+    var className = $staropt$star$1 !== undefined ? $staropt$star$1 : "";
+    var attrs = $staropt$star$2 !== undefined ? $staropt$star$2 : /* [] */0;
+    var attrs_000 = /* Raw */Block.__(0, [
+        "id",
+        id
+      ]);
+    var attrs_001 = /* :: */[
+      /* Raw */Block.__(0, [
+          "className",
+          className
+        ]),
+      attrs
+    ];
+    var attrs$1 = /* :: */[
+      attrs_000,
+      attrs_001
+    ];
+    var attrs$2 = List.fold_left((function (attrs, param) {
+            if (param.tag) {
+              var callback = param[1];
+              attrs[param[0]] = (function ($$event) {
+                  return Curry._1(dispatch, Curry._1(callback, $$event));
+                });
+              return attrs;
+            } else {
+              attrs[param[0]] = param[1];
+              return attrs;
+            }
+          }), { }, attrs$1);
+    return ReasonReact.createDomElement(elementName, attrs$2, $$Array.of_list(List.map((function (el) {
+                          return Curry._1(el, dispatch);
+                        }), children)));
+  };
+  var $$null$2 = function (_dispatch) {
+    return null;
+  };
+  var text = function (text$1, _dispatch) {
+    return text$1;
+  };
+  var button = Curry._1(_element, "button");
+  var footer = Curry._1(_element, "footer");
+  var div = Curry._1(_element, "div");
+  var header = Curry._1(_element, "header");
+  var h1 = Curry._1(_element, "h1");
+  var section = Curry._1(_element, "section");
+  var span = Curry._1(_element, "span");
+  var ul = Curry._1(_element, "ul");
+  var li = Curry._1(_element, "li");
+  var strong = Curry._1(_element, "strong");
+  var p = Curry._1(_element, "p");
+  var a = function ($staropt$star, $staropt$star$1) {
+    var href = $staropt$star !== undefined ? $staropt$star : "";
+    var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
+    var func = Curry._1(_element, "a");
+    var arg = Pervasives.$at(/* :: */[
+          /* Raw */Block.__(0, [
+              "href",
+              href
+            ]),
+          /* [] */0
+        ], attrs);
+    return (function (param, param$1) {
+        return Curry._3(func, param, param$1, arg);
+      });
+  };
+  var label = function ($staropt$star, $staropt$star$1) {
+    var for_ = $staropt$star !== undefined ? $staropt$star : "";
+    var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
+    var func = Curry._1(_element, "label");
+    var arg = Pervasives.$at(/* :: */[
+          /* Raw */Block.__(0, [
+              "htmlFor",
+              for_
+            ]),
+          /* [] */0
+        ], attrs);
+    return (function (param, param$1) {
+        return Curry._3(func, param, param$1, arg);
+      });
+  };
+  var input = function ($staropt$star, value, id, className, $staropt$star$1, children) {
+    var placeholder = $staropt$star !== undefined ? $staropt$star : "";
+    var attrs = $staropt$star$1 !== undefined ? $staropt$star$1 : /* [] */0;
+    if (value[0] >= 936573133) {
+      return Curry._5(_element, "input", id, className, Pervasives.$at(/* :: */[
+                      /* Raw */Block.__(0, [
+                          "placeholder",
+                          placeholder
+                        ]),
+                      /* :: */[
+                        /* Raw */Block.__(0, [
+                            "value",
+                            value[1]
+                          ]),
+                        /* [] */0
+                      ]
+                    ], attrs), children);
+    } else {
+      return Curry._5(_element, "input", id, className, Pervasives.$at(/* :: */[
+                      /* Raw */Block.__(0, [
+                          "type",
+                          "checkbox"
+                        ]),
+                      /* :: */[
+                        /* Raw */Block.__(0, [
+                            "checked",
+                            value[1]
+                          ]),
+                        /* [] */0
+                      ]
+                    ], attrs), children);
+    }
+  };
+  var reactComponent = function (f) {
+    return f;
+  };
+  return [
+          /* Attr */Attr,
+          /* null */$$null$2,
+          /* text */text,
+          /* button */button,
+          /* footer */footer,
+          /* div */div,
+          /* header */header,
+          /* h1 */h1,
+          /* section */section,
+          /* span */span,
+          /* ul */ul,
+          /* li */li,
+          /* strong */strong,
+          /* p */p,
+          /* a */a,
+          /* label */label,
+          /* input */input,
+          /* reactComponent */reactComponent
+        ];
+}
 
-var Core = 0;
+var Html = [
+  Attr,
+  $$null$1,
+  text,
+  button,
+  footer,
+  div,
+  header,
+  h1,
+  section,
+  span,
+  ul,
+  li,
+  strong,
+  p,
+  a,
+  label,
+  input
+];
+
+var Core_000 = /* Core__Bool */[
+  Core__Bool.not,
+  Core__Bool.or_,
+  Core__Bool.and_,
+  Core__Bool.xor
+];
+
+var Core_001 = /* Core__Fn */[
+  Core__Fn.id,
+  Core__Fn.always,
+  Core__Fn.never,
+  Core__Fn.tap,
+  Core__Fn.$great$great,
+  Core__Fn.$less$less,
+  Core__Fn.$pipe$great,
+  Core__Fn.$less$pipe
+];
+
+var Core_002 = /* Core__Int */[
+  Core__Int.add,
+  Core__Int.subtract,
+  Core__Int.multiply,
+  Core__Int.divide,
+  Core__Int.pow,
+  Core__Int.toFloat,
+  Core__Int.equals,
+  Core__Int.notEquals,
+  Core__Int.lessThan,
+  Core__Int.greaterThan,
+  Core__Int.lessThanOrEqual,
+  Core__Int.greaterThanOrEqual,
+  Core__Int.min,
+  Core__Int.max,
+  Core__Int.compare,
+  Core__Int.modBy,
+  Core__Int.remainderBy,
+  Core__Int.negate,
+  Core__Int.clamp,
+  Core__Int.round,
+  Core__Int.floor,
+  Core__Int.ceiling,
+  Core__Int.truncate,
+  Core__Int.toInt,
+  Core__Int.$$isNaN,
+  Core__Int.$$isFinite
+];
+
+var Core_003 = /* Core__List */[
+  Core__List.singleton,
+  Core__List.repeat,
+  Core__List.range,
+  Core__List.cons,
+  Core__List.map,
+  Core__List.mapi,
+  Core__List.reduce,
+  Core__List.reduceRight,
+  Core__List.filter,
+  Core__List.filterMap,
+  Core__List.length,
+  Core__List.reverse,
+  Core__List.has,
+  Core__List.all,
+  Core__List.any,
+  Core__List.max,
+  Core__List.min,
+  Core__List.sum,
+  Core__List.product,
+  Core__List.append,
+  Core__List.concat,
+  Core__List.concatMap,
+  Core__List.intersperse,
+  Core__List.map2,
+  Core__List.map3,
+  Core__List.map4,
+  Core__List.map5,
+  Core__List.sort,
+  Core__List.sortBy,
+  Core__List.sortWith,
+  Core__List.isEmpty,
+  Core__List.head,
+  Core__List.tail,
+  Core__List.take,
+  Core__List.drop,
+  Core__List.partition,
+  Core__List.unzip,
+  Core__List.$plus$plus
+];
+
+var Core_004 = /* Core__Math */[
+  Core__Math.sqrt,
+  Core__Math.logBase,
+  Core__Math.e,
+  Core__Math.pi,
+  Core__Math.cos,
+  Core__Math.sin,
+  Core__Math.tan,
+  Core__Math.acos,
+  Core__Math.asin,
+  Core__Math.atan,
+  Core__Math.atan2
+];
+
+var Core_005 = /* Core__Option */[
+  Core__Option.withDefault,
+  Core__Option.map,
+  Core__Option.map2,
+  Core__Option.map3,
+  Core__Option.map4,
+  Core__Option.map5,
+  Core__Option.andThen
+];
+
+var Core_006 = /* Core__Result */[
+  Core__Result.map,
+  Core__Result.map2,
+  Core__Result.map3,
+  Core__Result.map4,
+  Core__Result.map5,
+  Core__Result.andThen,
+  Core__Result.withDefault,
+  Core__Result.toOption,
+  Core__Result.fromOption,
+  Core__Result.mapError
+];
+
+var Core_007 = /* Core__String */[
+  Core__String.isEmpty,
+  Core__String.length,
+  Core__String.reverse,
+  Core__String.repeat,
+  Core__String.replace,
+  Core__String.append,
+  Core__String.concat,
+  Core__String.split,
+  Core__String.join,
+  Core__String.words,
+  Core__String.lines,
+  Core__String.slice,
+  Core__String.left,
+  Core__String.right,
+  Core__String.dropLeft,
+  Core__String.dropRight,
+  Core__String.contains,
+  Core__String.startsWith,
+  Core__String.endsWith,
+  Core__String.indexes,
+  Core__String.indices,
+  Core__String.toInt,
+  Core__String.fromInt,
+  Core__String.toFloat,
+  Core__String.fromFloat,
+  Core__String.fromChar,
+  Core__String.cons,
+  Core__String.uncons,
+  Core__String.toList,
+  Core__String.fromList,
+  Core__String.toUpper,
+  Core__String.toLower,
+  Core__String.pad,
+  Core__String.padLeft,
+  Core__String.padRight,
+  Core__String.trim,
+  Core__String.trimLeft,
+  Core__String.trimRight,
+  Core__String.map,
+  Core__String.filter,
+  Core__String.reduce,
+  Core__String.reduceRight,
+  Core__String.any,
+  Core__String.all
+];
+
+var Core_008 = /* Core__Tuple */[
+  Core__Tuple.pair,
+  Core__Tuple.first,
+  Core__Tuple.second,
+  Core__Tuple.mapFirst,
+  Core__Tuple.mapSecond,
+  Core__Tuple.mapBoth
+];
+
+var Core = [
+  Core_000,
+  Core_001,
+  Core_002,
+  Core_003,
+  Core_004,
+  Core_005,
+  Core_006,
+  Core_007,
+  Core_008,
+  Realm__Core.$great$great,
+  Realm__Core.$less$less,
+  Realm__Core.$pipe$great,
+  Realm__Core.$less$pipe,
+  Realm__Core.$plus$plus
+];
 
 exports.Task = Task;
-exports.EffectImpl = EffectImpl;
 exports.Effect = Effect;
-exports.EventSource = EventSource;
 exports.Sub = Sub;
 exports.Time = Time;
-exports._log = _log;
-exports.SubMap = SubMap;
-exports.run = run$2;
 exports.map = map$2;
 exports.mountHtml = mountHtml;
 exports.MakeHtml = MakeHtml;
