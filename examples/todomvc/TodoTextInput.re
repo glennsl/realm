@@ -28,5 +28,7 @@ module TextInput = {
   };
 }
 
+module Html = Realm.MakeHtml({ type model = string });
+
 let view = (~className, ~placeholder=?, initialValue) =>
-  dispatch => <TextInput className ?placeholder initialValue onEnter=(value => dispatch(Effect.const(value))) />
+  Html.reactComponent(dispatch => <TextInput className ?placeholder initialValue onEnter=(value => dispatch(Effect.const(value))) />)

@@ -3,9 +3,8 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
+var Realm = require("../../src/Realm.bs.js");
 var TodoItem = require("./TodoItem.bs.js");
-var Core__List = require("../../src/core/Core__List.bs.js");
-var Realm__Core = require("../../src/core/Realm__Core.bs.js");
 
 function view(entries, visibility) {
   var isVisible = function (entry) {
@@ -18,9 +17,7 @@ function view(entries, visibility) {
         return true;
     }
   };
-  return Curry._4(Model.Html[/* ul */11], undefined, "todo-list", undefined, Realm__Core.$pipe$great(Realm__Core.$pipe$great(entries, Core__List.filter(isVisible)), (function (param) {
-                    return Core__List.map(TodoItem.view, param);
-                  })));
+  return Curry._4(Model.Html[/* ul */10], undefined, "todo-list", undefined, Realm.Core[/* |> */11](Realm.Core[/* |> */11](entries, Curry._1(Realm.Core[/* List */3][/* filter */8], isVisible)), Curry._1(Realm.Core[/* List */3][/* map */4], TodoItem.view)));
 }
 
 exports.view = view;

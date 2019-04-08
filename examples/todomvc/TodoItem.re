@@ -15,7 +15,8 @@ let view = (entry: Todo.t) => {
       Model.Html.input(
         ~className="toggle",
         ~attrs=[onChange(Actions.toggle(entry))], 
-        ~value=`Checkbox(entry.completed)),
+        ~value=`Checkbox(entry.completed),
+        []),
       label(~attrs=[onDoubleClick(Actions.edit(entry, ~editing=true))], [text(entry.title)]),
       button(~className="destroy", ~attrs=[Attr.onClick(Actions.remove(entry))], [])
     ]),

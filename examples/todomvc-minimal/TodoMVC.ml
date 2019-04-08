@@ -173,13 +173,14 @@ let viewInput task =
     ; Html.input
         ~className: "new-todo"
         ~placeholder: "What needs to be done?"
-        ~value: (`Text task)
         ~attrs:
           [ autofocus true
           ; name "newTodo"
           ; onInput updateField
           ; onEnter add
           ]
+        ~value: (`Text task)
+        []
     ]
 
 let viewEntry todo =
@@ -192,6 +193,7 @@ let viewEntry todo =
             ~className: "toggle"
             ~value: (`Checkbox todo.completed)
             ~attrs: [ onClick (check todo.id (not todo.completed)) ]
+            []
         ; label
             ~attrs: [ onDoubleClick (editingEntry todo.id true) ]
             [ text todo.description ]
@@ -209,6 +211,7 @@ let viewEntry todo =
           ; onBlur (editingEntry todo.id false)
           ; onEnter (editingEntry todo.id false)
           ]
+        []
     ]
 
 
@@ -239,6 +242,7 @@ let viewEntries visibility entries =
         ~className: "toggle-all"
         ~value: (`Checkbox allCompleted)
         ~attrs: [ name "toggle-all"; onClick (checkAll (not allCompleted)) ]
+        []
     ; label
         ~for_: "toggle-all"
         [ text "Mark all as complete" ]

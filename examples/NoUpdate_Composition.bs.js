@@ -3,8 +3,6 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
-var Realm__Core = require("../src/core/Realm__Core.bs.js");
-var Core__String = require("../src/core/Core__String.bs.js");
 
 function init(param) {
   return Realm.Task[/* const */1](/* record */[/* count */0]);
@@ -17,13 +15,13 @@ var click = Realm.Effect[/* update */2]((function (model) {
 var Html = Realm.MakeHtml(/* module */[]);
 
 function view(model) {
-  var message = "You've clicked this " + (Core__String.fromInt(model[/* count */0]) + " times(s)");
-  return Curry._4(Html[/* div */6], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html[/* button */4], undefined, undefined, /* :: */[
+  var message = "You've clicked this " + (Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* count */0]) + " times(s)");
+  return Curry._4(Html[/* div */5], undefined, undefined, undefined, /* :: */[
+              Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
                     Curry._1(Html[/* Attr */0][/* onClick */4], click),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html[/* text */3], message),
+                    Curry._1(Html[/* text */2], message),
                     /* [] */0
                   ]),
               /* [] */0
@@ -60,16 +58,16 @@ var Html$1 = Realm.MakeHtml(/* module */[]);
 
 function view$1(greeting, model) {
   var match = model[/* show */0];
-  return Curry._4(Html$1[/* div */6], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html$1[/* button */4], undefined, undefined, /* :: */[
+  return Curry._4(Html$1[/* div */5], undefined, undefined, undefined, /* :: */[
+              Curry._4(Html$1[/* button */3], undefined, undefined, /* :: */[
                     Curry._1(Html$1[/* Attr */0][/* onClick */4], toggle),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html$1[/* text */3], "Toggle greeting " + Core__String.fromInt(model[/* n */1])),
+                    Curry._1(Html$1[/* text */2], "Toggle greeting " + Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* n */1])),
                     /* [] */0
                   ]),
               /* :: */[
-                match ? Curry._1(Html$1[/* text */3], greeting) : Html$1[/* null */2],
+                match ? Curry._1(Html$1[/* text */2], greeting) : Html$1[/* null */1],
                 /* [] */0
               ]
             ]);
@@ -97,7 +95,7 @@ function init$2(param) {
 var Html$2 = Realm.MakeHtml(/* module */[]);
 
 function clicker(model) {
-  return Realm__Core.$pipe$great(view(model[/* clicker */0]), (function (param, param$1) {
+  return Realm.Core[/* |> */11](view(model[/* clicker */0]), (function (param, param$1) {
                 return Realm.map((function (model) {
                               return model[/* clicker */0];
                             }), (function (model, clickerModel) {
@@ -110,7 +108,7 @@ function clicker(model) {
 }
 
 function toggler(greeting, model) {
-  return Realm__Core.$pipe$great(view$1(greeting, model[/* toggler */1]), (function (param, param$1) {
+  return Realm.Core[/* |> */11](view$1(greeting, model[/* toggler */1]), (function (param, param$1) {
                 return Realm.map((function (model) {
                               return model[/* toggler */1];
                             }), (function (model, togglerModel) {
@@ -128,7 +126,7 @@ var Components = /* module */[
 ];
 
 function view$2(greeting, model) {
-  return Curry._4(Html$2[/* div */6], undefined, undefined, undefined, /* :: */[
+  return Curry._4(Html$2[/* div */5], undefined, undefined, undefined, /* :: */[
               clicker(model),
               /* :: */[
                 toggler(greeting, model),

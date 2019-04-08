@@ -3,12 +3,8 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../../src/Realm.bs.js");
-var Core__List = require("../../src/core/Core__List.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
-var Realm__Core = require("../../src/core/Realm__Core.bs.js");
-var Core__Option = require("../../src/core/Core__Option.bs.js");
-var Core__String = require("../../src/core/Core__String.bs.js");
 
 function create(description, id) {
   return /* record */[
@@ -33,13 +29,9 @@ var LocalStorage = /* module */[];
 var Json = /* module */[];
 
 function init(param) {
-  return Realm__Core.$pipe$great(Realm__Core.$pipe$great(Realm__Core.$pipe$great(Caml_option.nullable_to_opt(localStorage.getItem("realm-todo-save")), (function (param) {
-                        return Core__Option.andThen((function (prim) {
-                                      return Caml_option.nullable_to_opt(JSON.parse(prim));
-                                    }), param);
-                      })), (function (param) {
-                    return Core__Option.withDefault(emptyModel, param);
-                  })), Realm.Task[/* const */1]);
+  return Realm.Core[/* |> */11](Realm.Core[/* |> */11](Realm.Core[/* |> */11](Caml_option.nullable_to_opt(localStorage.getItem("realm-todo-save")), Curry._1(Realm.Core[/* Option */5][/* andThen */6], (function (prim) {
+                            return Caml_option.nullable_to_opt(JSON.parse(prim));
+                          }))), Curry._1(Realm.Core[/* Option */5][/* withDefault */0], emptyModel)), Realm.Task[/* const */1]);
 }
 
 var partial_arg = Realm.Effect[/* map */5];
@@ -48,12 +40,10 @@ function persist(param) {
   return partial_arg((function (model) {
                 return model;
               }), (function (param, model) {
-                Realm__Core.$pipe$great(Caml_option.nullable_to_opt(JSON.stringify(model)), (function (param) {
-                        return Core__Option.map((function (param) {
-                                      localStorage.setItem("realm-todo-save", param);
-                                      return /* () */0;
-                                    }), param);
-                      }));
+                Realm.Core[/* |> */11](Caml_option.nullable_to_opt(JSON.stringify(model)), Curry._1(Realm.Core[/* Option */5][/* map */1], (function (param) {
+                            localStorage.setItem("realm-todo-save", param);
+                            return /* () */0;
+                          })));
                 return model;
               }), param);
 }
@@ -96,7 +86,7 @@ function editingEntry(id, isEditing) {
   };
   return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
-                        /* entries */Core__List.map(updateEntry, model[/* entries */0]),
+                        /* entries */Curry._2(Realm.Core[/* List */3][/* map */4], updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
                         /* uid */model[/* uid */2],
                         /* visibility */model[/* visibility */3]
@@ -119,7 +109,7 @@ function updateEntry(id, task) {
   };
   return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
-                        /* entries */Core__List.map(updateEntry$1, model[/* entries */0]),
+                        /* entries */Curry._2(Realm.Core[/* List */3][/* map */4], updateEntry$1, model[/* entries */0]),
                         /* field */model[/* field */1],
                         /* uid */model[/* uid */2],
                         /* visibility */model[/* visibility */3]
@@ -130,9 +120,9 @@ function updateEntry(id, task) {
 function $$delete(id) {
   return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
-                        /* entries */Core__List.filter((function (t) {
-                                  return t[/* id */3] !== id;
-                                }))(model[/* entries */0]),
+                        /* entries */Curry._2(Realm.Core[/* List */3][/* filter */8], (function (t) {
+                                return t[/* id */3] !== id;
+                              }), model[/* entries */0]),
                         /* field */model[/* field */1],
                         /* uid */model[/* uid */2],
                         /* visibility */model[/* visibility */3]
@@ -142,9 +132,9 @@ function $$delete(id) {
 
 var deleteComplete = Realm.Effect[/* update */2]((function (model) {
         return /* record */[
-                /* entries */Core__List.filter((function (t) {
-                          return !t[/* completed */1];
-                        }))(model[/* entries */0]),
+                /* entries */Curry._2(Realm.Core[/* List */3][/* filter */8], (function (t) {
+                        return !t[/* completed */1];
+                      }), model[/* entries */0]),
                 /* field */model[/* field */1],
                 /* uid */model[/* uid */2],
                 /* visibility */model[/* visibility */3]
@@ -166,7 +156,7 @@ function check(id, isCompleted) {
   };
   return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
-                        /* entries */Core__List.map(updateEntry, model[/* entries */0]),
+                        /* entries */Curry._2(Realm.Core[/* List */3][/* map */4], updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
                         /* uid */model[/* uid */2],
                         /* visibility */model[/* visibility */3]
@@ -185,7 +175,7 @@ function checkAll(isCompleted) {
   };
   return Realm.Effect[/* update */2]((function (model) {
                 return /* record */[
-                        /* entries */Core__List.map(updateEntry, model[/* entries */0]),
+                        /* entries */Curry._2(Realm.Core[/* List */3][/* map */4], updateEntry, model[/* entries */0]),
                         /* field */model[/* field */1],
                         /* uid */model[/* uid */2],
                         /* visibility */model[/* visibility */3]
@@ -209,7 +199,7 @@ var update = persist;
 var Html = Realm.MakeHtml(/* module */[]);
 
 function onEnter(action) {
-  return Realm__Core.$less$pipe(Html[/* Attr */0][/* onKeyDown */9], (function (keyCode) {
+  return Realm.Core[/* <| */12](Html[/* Attr */0][/* onKeyDown */9], (function (keyCode) {
                 if (keyCode === 13) {
                   return action;
                 } else {
@@ -219,93 +209,54 @@ function onEnter(action) {
 }
 
 function viewInput(task) {
-  var func = Html[/* input */17];
-  var arg = /* :: */[
-    Curry._1(Html[/* Attr */0][/* autofocus */1], true),
-    /* :: */[
-      Curry._1(Html[/* Attr */0][/* name */3], "newTodo"),
-      /* :: */[
-        Curry._1(Html[/* Attr */0][/* onInput */8], updateField),
-        /* :: */[
-          onEnter(add),
-          /* [] */0
-        ]
-      ]
-    ]
-  ];
-  var arg$1 = /* `Text */[
-    936573133,
-    task
-  ];
-  var arg$2 = function (param) {
-    return Curry._5(func, "What needs to be done?", param, "new-todo", arg, arg$1);
-  };
-  return Curry._4(Html[/* header */7], undefined, "header", undefined, /* :: */[
-              Curry._4(Html[/* h1 */8], undefined, undefined, undefined, /* :: */[
-                    Curry._1(Html[/* text */3], "todos"),
+  return Curry._4(Html[/* header */6], undefined, "header", undefined, /* :: */[
+              Curry._4(Html[/* h1 */7], undefined, undefined, undefined, /* :: */[
+                    Curry._1(Html[/* text */2], "todos"),
                     /* [] */0
                   ]),
               /* :: */[
-                (function (eta) {
-                    return Curry._1(arg$2(undefined), eta);
-                  }),
+                Curry._6(Html[/* input */16], "What needs to be done?", /* `Text */[
+                      936573133,
+                      task
+                    ], undefined, "new-todo", /* :: */[
+                      Curry._1(Html[/* Attr */0][/* autofocus */1], true),
+                      /* :: */[
+                        Curry._1(Html[/* Attr */0][/* name */3], "newTodo"),
+                        /* :: */[
+                          Curry._1(Html[/* Attr */0][/* onInput */8], updateField),
+                          /* :: */[
+                            onEnter(add),
+                            /* [] */0
+                          ]
+                        ]
+                      ]
+                    ], /* [] */0),
                 /* [] */0
               ]
             ]);
 }
 
 function viewEntry(todo) {
-  var func = Html[/* input */17];
-  var arg = /* :: */[
-    Curry._1(Html[/* Attr */0][/* onClick */4], check(todo[/* id */3], !todo[/* completed */1])),
-    /* [] */0
-  ];
-  var arg_001 = todo[/* completed */1];
-  var arg$1 = /* `Checkbox */[
-    111644259,
-    arg_001
-  ];
-  var arg$2 = function (param, param$1) {
-    return Curry._5(func, param, param$1, "toggle", arg, arg$1);
-  };
-  var func$1 = Html[/* input */17];
-  var arg$3 = "todo-" + String(todo[/* id */3]);
   var partial_arg = todo[/* id */3];
-  var arg$4 = /* :: */[
-    Curry._1(Html[/* Attr */0][/* onInput */8], (function (param) {
-            return updateEntry(partial_arg, param);
-          })),
-    /* :: */[
-      Curry._1(Html[/* Attr */0][/* onBlur */7], editingEntry(todo[/* id */3], false)),
-      /* :: */[
-        onEnter(editingEntry(todo[/* id */3], false)),
-        /* [] */0
-      ]
-    ]
-  ];
-  var arg_001$1 = todo[/* description */0];
-  var arg$5 = /* `Text */[
-    936573133,
-    arg_001$1
-  ];
-  var arg$6 = function (param) {
-    return Curry._5(func$1, param, arg$3, "edit", arg$4, arg$5);
-  };
-  return Curry._4(Html[/* li */12], undefined, todo[/* editing */2] ? "editing" : "", undefined, /* :: */[
-              Curry._4(Html[/* div */6], undefined, "view", undefined, /* :: */[
-                    (function (eta) {
-                        return Curry._1(arg$2(undefined, undefined), eta);
-                      }),
+  return Curry._4(Html[/* li */11], undefined, todo[/* editing */2] ? "editing" : "", undefined, /* :: */[
+              Curry._4(Html[/* div */5], undefined, "view", undefined, /* :: */[
+                    Curry._6(Html[/* input */16], undefined, /* `Checkbox */[
+                          111644259,
+                          todo[/* completed */1]
+                        ], undefined, "toggle", /* :: */[
+                          Curry._1(Html[/* Attr */0][/* onClick */4], check(todo[/* id */3], !todo[/* completed */1])),
+                          /* [] */0
+                        ], /* [] */0),
                     /* :: */[
-                      Curry._5(Html[/* label */16], undefined, /* :: */[
+                      Curry._5(Html[/* label */15], undefined, /* :: */[
                             Curry._1(Html[/* Attr */0][/* onDoubleClick */5], editingEntry(todo[/* id */3], true)),
                             /* [] */0
                           ], undefined, undefined, /* :: */[
-                            Curry._1(Html[/* text */3], todo[/* description */0]),
+                            Curry._1(Html[/* text */2], todo[/* description */0]),
                             /* [] */0
                           ]),
                       /* :: */[
-                        Curry._4(Html[/* button */4], undefined, "destroy", /* :: */[
+                        Curry._4(Html[/* button */3], undefined, "destroy", /* :: */[
                               Curry._1(Html[/* Attr */0][/* onClick */4], $$delete(todo[/* id */3])),
                               /* [] */0
                             ], /* [] */0),
@@ -314,9 +265,21 @@ function viewEntry(todo) {
                     ]
                   ]),
               /* :: */[
-                (function (eta) {
-                    return Curry._1(arg$6(undefined), eta);
-                  }),
+                Curry._6(Html[/* input */16], undefined, /* `Text */[
+                      936573133,
+                      todo[/* description */0]
+                    ], "todo-" + String(todo[/* id */3]), "edit", /* :: */[
+                      Curry._1(Html[/* Attr */0][/* onInput */8], (function (param) {
+                              return updateEntry(partial_arg, param);
+                            })),
+                      /* :: */[
+                        Curry._1(Html[/* Attr */0][/* onBlur */7], editingEntry(todo[/* id */3], false)),
+                        /* :: */[
+                          onEnter(editingEntry(todo[/* id */3], false)),
+                          /* [] */0
+                        ]
+                      ]
+                    ], /* [] */0),
                 /* [] */0
               ]
             ]);
@@ -333,42 +296,32 @@ function viewEntries(visibility, entries) {
         return true;
     }
   };
-  var allCompleted = Core__List.all((function (t) {
+  var allCompleted = Curry._2(Realm.Core[/* List */3][/* all */13], (function (t) {
           return t[/* completed */1];
         }), entries);
-  var func = Html[/* input */17];
-  var arg = /* :: */[
-    Curry._1(Html[/* Attr */0][/* name */3], "toggle-all"),
-    /* :: */[
-      Curry._1(Html[/* Attr */0][/* onClick */4], checkAll(!allCompleted)),
-      /* [] */0
-    ]
-  ];
-  var arg$1 = /* `Checkbox */[
-    111644259,
-    allCompleted
-  ];
-  var arg$2 = function (param, param$1) {
-    return Curry._5(func, param, param$1, "toggle-all", arg, arg$1);
-  };
-  return Curry._4(Html[/* section */9], undefined, "main", undefined, /* :: */[
-              (function (eta) {
-                  return Curry._1(arg$2(undefined, undefined), eta);
-                }),
+  return Curry._4(Html[/* section */8], undefined, "main", undefined, /* :: */[
+              Curry._6(Html[/* input */16], undefined, /* `Checkbox */[
+                    111644259,
+                    allCompleted
+                  ], undefined, "toggle-all", /* :: */[
+                    Curry._1(Html[/* Attr */0][/* name */3], "toggle-all"),
+                    /* :: */[
+                      Curry._1(Html[/* Attr */0][/* onClick */4], checkAll(!allCompleted)),
+                      /* [] */0
+                    ]
+                  ], /* [] */0),
               /* :: */[
-                Curry._5(Html[/* label */16], "toggle-all", undefined, undefined, undefined, /* :: */[
-                      Curry._1(Html[/* text */3], "Mark all as complete"),
+                Curry._5(Html[/* label */15], "toggle-all", undefined, undefined, undefined, /* :: */[
+                      Curry._1(Html[/* text */2], "Mark all as complete"),
                       /* [] */0
                     ]),
                 /* :: */[
-                  Realm__Core.$less$pipe((function (eta) {
-                          var func = Html[/* ul */11];
+                  Realm.Core[/* <| */12]((function (eta) {
+                          var func = Html[/* ul */10];
                           return Curry._2((function (param) {
                                           return Curry._2(func, param, "todo-list");
                                         })(undefined), undefined, eta);
-                        }), Realm__Core.$pipe$great(Realm__Core.$pipe$great(entries, Core__List.filter(isVisible)), (function (param) {
-                              return Core__List.map(viewEntry, param);
-                            }))),
+                        }), Realm.Core[/* |> */11](Realm.Core[/* |> */11](entries, Curry._1(Realm.Core[/* List */3][/* filter */8], isVisible)), Curry._1(Realm.Core[/* List */3][/* map */4], viewEntry))),
                   /* [] */0
                 ]
               ]
@@ -377,25 +330,25 @@ function viewEntries(visibility, entries) {
 
 function viewControlsCount(entriesLeft) {
   var item = entriesLeft === 1 ? " item" : " items";
-  return Curry._4(Html[/* span */10], undefined, "todo-count", undefined, /* :: */[
-              Curry._4(Html[/* strong */13], undefined, undefined, undefined, /* :: */[
-                    Curry._1(Html[/* text */3], Core__String.fromInt(entriesLeft)),
+  return Curry._4(Html[/* span */9], undefined, "todo-count", undefined, /* :: */[
+              Curry._4(Html[/* strong */12], undefined, undefined, undefined, /* :: */[
+                    Curry._1(Html[/* text */2], Curry._1(Realm.Core[/* String */7][/* fromInt */22], entriesLeft)),
                     /* [] */0
                   ]),
               /* :: */[
-                Curry._1(Html[/* text */3], item + " left"),
+                Curry._1(Html[/* text */2], item + " left"),
                 /* [] */0
               ]
             ]);
 }
 
 function visibilitySwap(uri, visibility, actualVisibility) {
-  return Curry._4(Html[/* li */12], undefined, undefined, /* :: */[
+  return Curry._4(Html[/* li */11], undefined, undefined, /* :: */[
               Curry._1(Html[/* Attr */0][/* onClick */4], changeVisibility(visibility)),
               /* [] */0
             ], /* :: */[
-              Curry._5(Html[/* a */15], uri, undefined, undefined, visibility === actualVisibility ? "selected" : "", /* :: */[
-                    Curry._1(Html[/* text */3], visibility),
+              Curry._5(Html[/* a */14], uri, undefined, undefined, visibility === actualVisibility ? "selected" : "", /* :: */[
+                    Curry._1(Html[/* text */2], visibility),
                     /* [] */0
                   ]),
               /* [] */0
@@ -403,14 +356,14 @@ function visibilitySwap(uri, visibility, actualVisibility) {
 }
 
 function viewControlsFilters(visibility) {
-  return Curry._4(Html[/* ul */11], undefined, "filters", undefined, /* :: */[
+  return Curry._4(Html[/* ul */10], undefined, "filters", undefined, /* :: */[
               visibilitySwap("#/", "All", visibility),
               /* :: */[
-                Curry._1(Html[/* text */3], " "),
+                Curry._1(Html[/* text */2], " "),
                 /* :: */[
                   visibilitySwap("#/active", "Active", visibility),
                   /* :: */[
-                    Curry._1(Html[/* text */3], " "),
+                    Curry._1(Html[/* text */2], " "),
                     /* :: */[
                       visibilitySwap("#/completed", "Completed", visibility),
                       /* [] */0
@@ -422,24 +375,24 @@ function viewControlsFilters(visibility) {
 }
 
 function viewControlsClear(entriesCompleted) {
-  return Curry._4(Html[/* button */4], undefined, "clear-completed", /* :: */[
+  return Curry._4(Html[/* button */3], undefined, "clear-completed", /* :: */[
               Curry._1(Html[/* Attr */0][/* hidden */2], entriesCompleted === 0),
               /* :: */[
                 Curry._1(Html[/* Attr */0][/* onClick */4], deleteComplete),
                 /* [] */0
               ]
             ], /* :: */[
-              Curry._1(Html[/* text */3], "Clear completed (" + (Core__String.fromInt(entriesCompleted) + ")")),
+              Curry._1(Html[/* text */2], "Clear completed (" + (Curry._1(Realm.Core[/* String */7][/* fromInt */22], entriesCompleted) + ")")),
               /* [] */0
             ]);
 }
 
 function viewControls(visibility, entries) {
-  var entriesCompleted = Realm__Core.$pipe$great(Realm__Core.$pipe$great(entries, Core__List.filter((function (t) {
+  var entriesCompleted = Realm.Core[/* |> */11](Realm.Core[/* |> */11](entries, Curry._1(Realm.Core[/* List */3][/* filter */8], (function (t) {
                   return t[/* completed */1];
-                }))), Core__List.length);
-  var entriesLeft = Core__List.length(entries) - entriesCompleted | 0;
-  return Curry._4(Html[/* footer */5], undefined, "footer", /* :: */[
+                }))), Realm.Core[/* List */3][/* length */10]);
+  var entriesLeft = Curry._1(Realm.Core[/* List */3][/* length */10], entries) - entriesCompleted | 0;
+  return Curry._4(Html[/* footer */4], undefined, "footer", /* :: */[
               Curry._1(Html[/* Attr */0][/* hidden */2], entries === /* [] */0),
               /* [] */0
             ], /* :: */[
@@ -454,39 +407,39 @@ function viewControls(visibility, entries) {
             ]);
 }
 
-var infoFooter = Curry._4(Html[/* footer */5], undefined, "info", undefined, /* :: */[
-      Curry._4(Html[/* p */14], undefined, undefined, undefined, /* :: */[
-            Curry._1(Html[/* text */3], "Double-click to edit a todo"),
+var infoFooter = Curry._4(Html[/* footer */4], undefined, "info", undefined, /* :: */[
+      Curry._4(Html[/* p */13], undefined, undefined, undefined, /* :: */[
+            Curry._1(Html[/* text */2], "Double-click to edit a todo"),
             /* [] */0
           ]),
       /* :: */[
-        Curry._4(Html[/* p */14], undefined, undefined, undefined, /* :: */[
-              Curry._1(Html[/* text */3], "Written by "),
+        Curry._4(Html[/* p */13], undefined, undefined, undefined, /* :: */[
+              Curry._1(Html[/* text */2], "Written by "),
               /* :: */[
-                Curry._5(Html[/* a */15], "https://github.com/glennsl", undefined, undefined, undefined, /* :: */[
-                      Curry._1(Html[/* text */3], "Glenn Slotte"),
+                Curry._5(Html[/* a */14], "https://github.com/glennsl", undefined, undefined, undefined, /* :: */[
+                      Curry._1(Html[/* text */2], "Glenn Slotte"),
                       /* [] */0
                     ]),
                 /* [] */0
               ]
             ]),
         /* :: */[
-          Curry._4(Html[/* p */14], undefined, undefined, undefined, /* :: */[
-                Curry._1(Html[/* text */3], "Based on "),
+          Curry._4(Html[/* p */13], undefined, undefined, undefined, /* :: */[
+                Curry._1(Html[/* text */2], "Based on "),
                 /* :: */[
-                  Curry._5(Html[/* a */15], "https://github.com/evancz/elm-todomvc", undefined, undefined, undefined, /* :: */[
-                        Curry._1(Html[/* text */3], "evancz/elm-todomvc"),
+                  Curry._5(Html[/* a */14], "https://github.com/evancz/elm-todomvc", undefined, undefined, undefined, /* :: */[
+                        Curry._1(Html[/* text */2], "evancz/elm-todomvc"),
                         /* [] */0
                       ]),
                   /* [] */0
                 ]
               ]),
           /* :: */[
-            Curry._4(Html[/* p */14], undefined, undefined, undefined, /* :: */[
-                  Curry._1(Html[/* text */3], "Part of "),
+            Curry._4(Html[/* p */13], undefined, undefined, undefined, /* :: */[
+                  Curry._1(Html[/* text */2], "Part of "),
                   /* :: */[
-                    Curry._5(Html[/* a */15], "http://todomvc.com", undefined, undefined, undefined, /* :: */[
-                          Curry._1(Html[/* text */3], "TodoMVC"),
+                    Curry._5(Html[/* a */14], "http://todomvc.com", undefined, undefined, undefined, /* :: */[
+                          Curry._1(Html[/* text */2], "TodoMVC"),
                           /* [] */0
                         ]),
                     /* [] */0
@@ -499,8 +452,8 @@ var infoFooter = Curry._4(Html[/* footer */5], undefined, "info", undefined, /* 
     ]);
 
 function view(model) {
-  return Curry._4(Html[/* div */6], undefined, "todomvc-wrapper", undefined, /* :: */[
-              Curry._4(Html[/* section */9], undefined, "todoapp", undefined, /* :: */[
+  return Curry._4(Html[/* div */5], undefined, "todomvc-wrapper", undefined, /* :: */[
+              Curry._4(Html[/* section */8], undefined, "todoapp", undefined, /* :: */[
                     viewInput(model[/* field */1]),
                     /* :: */[
                       viewEntries(model[/* visibility */3], model[/* entries */0]),

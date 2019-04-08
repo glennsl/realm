@@ -6,21 +6,15 @@ var Model = require("./Model.bs.js");
 var TodoList = require("./TodoList.bs.js");
 
 function toggleAllCheckbox(param) {
-  var func = Model.Html[/* input */17];
-  return (function (param, param$1, param$2) {
-      return Curry._5(func, param, param$1, "toggle-all", param$2, /* `Checkbox */[
-                  111644259,
-                  false
-                ]);
-    });
+  return Curry._6(Model.Html[/* input */16], undefined, /* `Checkbox */[
+              111644259,
+              false
+            ], undefined, "toggle-all", undefined, /* [] */0);
 }
 
 function view(entries, visibility) {
-  var arg = toggleAllCheckbox(entries);
-  return Curry._4(Model.Html[/* section */9], undefined, undefined, undefined, /* :: */[
-              (function (eta) {
-                  return Curry._4(arg, undefined, undefined, undefined, eta);
-                }),
+  return Curry._4(Model.Html[/* section */8], undefined, undefined, undefined, /* :: */[
+              toggleAllCheckbox(entries),
               /* :: */[
                 TodoList.view(entries, visibility),
                 /* [] */0

@@ -3,19 +3,17 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var Model = require("./Model.bs.js");
+var Realm = require("../../src/Realm.bs.js");
 var Actions = require("./Actions.bs.js");
-var Core__List = require("../../src/core/Core__List.bs.js");
-var Realm__Core = require("../../src/core/Realm__Core.bs.js");
-var Core__String = require("../../src/core/Core__String.bs.js");
 
 function visibilityButton(uri, visibility, actualVisibility) {
   var match = visibility === actualVisibility;
-  return Curry._4(Model.Html[/* li */12], undefined, undefined, /* :: */[
+  return Curry._4(Model.Html[/* li */11], undefined, undefined, /* :: */[
               Curry._1(Model.Html[/* Attr */0][/* onClick */4], Actions.changeVisibility(visibility)),
               /* [] */0
             ], /* :: */[
-              Curry._5(Model.Html[/* a */15], uri, undefined, undefined, match ? "selected" : "", /* :: */[
-                    Curry._1(Model.Html[/* text */3], visibility),
+              Curry._5(Model.Html[/* a */14], uri, undefined, undefined, match ? "selected" : "", /* :: */[
+                    Curry._1(Model.Html[/* text */2], visibility),
                     /* [] */0
                   ]),
               /* [] */0
@@ -23,27 +21,27 @@ function visibilityButton(uri, visibility, actualVisibility) {
 }
 
 function clearButton(completedCount) {
-  return Curry._4(Model.Html[/* button */4], undefined, "clear-completed", /* :: */[
+  return Curry._4(Model.Html[/* button */3], undefined, "clear-completed", /* :: */[
               Curry._1(Model.Html[/* Attr */0][/* hidden */2], completedCount === 0),
               /* :: */[
                 Curry._1(Model.Html[/* Attr */0][/* onClick */4], Actions.clearCompleted),
                 /* [] */0
               ]
             ], /* :: */[
-              Curry._1(Model.Html[/* text */3], "Clear completed"),
+              Curry._1(Model.Html[/* text */2], "Clear completed"),
               /* [] */0
             ]);
 }
 
 function filters(visibility) {
-  return Curry._4(Model.Html[/* ul */11], undefined, "filters", undefined, /* :: */[
+  return Curry._4(Model.Html[/* ul */10], undefined, "filters", undefined, /* :: */[
               visibilityButton("#/", "All", visibility),
               /* :: */[
-                Curry._1(Model.Html[/* text */3], " "),
+                Curry._1(Model.Html[/* text */2], " "),
                 /* :: */[
                   visibilityButton("#/active", "Active", visibility),
                   /* :: */[
-                    Curry._1(Model.Html[/* text */3], " "),
+                    Curry._1(Model.Html[/* text */2], " "),
                     /* :: */[
                       visibilityButton("#/completed", "Completed", visibility),
                       /* [] */0
@@ -55,21 +53,21 @@ function filters(visibility) {
 }
 
 function view(entries, visibility) {
-  var completedCount = Realm__Core.$pipe$great(Realm__Core.$pipe$great(entries, Core__List.filter((function (entry) {
+  var completedCount = Realm.Core[/* |> */11](Realm.Core[/* |> */11](entries, Curry._1(Realm.Core[/* List */3][/* filter */8], (function (entry) {
                   return entry[/* completed */2];
-                }))), Core__List.length);
-  var activeCount = Core__List.length(entries) - completedCount | 0;
-  return Curry._4(Model.Html[/* footer */5], undefined, "footer", /* :: */[
+                }))), Realm.Core[/* List */3][/* length */10]);
+  var activeCount = Curry._1(Realm.Core[/* List */3][/* length */10], entries) - completedCount | 0;
+  return Curry._4(Model.Html[/* footer */4], undefined, "footer", /* :: */[
               Curry._1(Model.Html[/* Attr */0][/* hidden */2], entries === /* [] */0),
               /* [] */0
             ], /* :: */[
-              Curry._4(Model.Html[/* span */10], undefined, "todo-count", undefined, /* :: */[
-                    Curry._4(Model.Html[/* strong */13], undefined, undefined, undefined, /* :: */[
-                          Curry._1(Model.Html[/* text */3], Realm__Core.$pipe$great(activeCount, Core__String.fromInt)),
+              Curry._4(Model.Html[/* span */9], undefined, "todo-count", undefined, /* :: */[
+                    Curry._4(Model.Html[/* strong */12], undefined, undefined, undefined, /* :: */[
+                          Curry._1(Model.Html[/* text */2], Realm.Core[/* |> */11](activeCount, Realm.Core[/* String */7][/* fromInt */22])),
                           /* [] */0
                         ]),
                     /* :: */[
-                      Curry._1(Model.Html[/* text */3], " items"),
+                      Curry._1(Model.Html[/* text */2], " items"),
                       /* [] */0
                     ]
                   ]),

@@ -6,13 +6,10 @@ var Model = require("./Model.bs.js");
 var Realm = require("../../src/Realm.bs.js");
 var Actions = require("./Actions.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
-var Realm__Core = require("../../src/core/Realm__Core.bs.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
 function editTextInput(initialValue) {
-  return Realm__Core.$pipe$great((function (param) {
-                return TodoTextInput.view("edit", undefined, initialValue, param);
-              }), (function (param, param$1) {
+  return Realm.Core[/* |> */11](TodoTextInput.view("edit", undefined, initialValue), (function (param, param$1) {
                 return Realm.map((function (param) {
                               return "";
                             }), (function (model, name) {
@@ -29,35 +26,26 @@ function editTextInput(initialValue) {
 
 function view(entry) {
   var match = entry[/* editing */3];
-  var func = Model.Html[/* input */17];
-  var arg = /* :: */[
-    Curry._1(Model.Html[/* Attr */0][/* onChange */6], Actions.toggle(entry)),
-    /* [] */0
-  ];
-  var arg_001 = entry[/* completed */2];
-  var arg$1 = /* `Checkbox */[
-    111644259,
-    arg_001
-  ];
-  var arg$2 = function (param, param$1) {
-    return Curry._5(func, param, param$1, "toggle", arg, arg$1);
-  };
   var match$1 = entry[/* editing */3];
-  return Curry._4(Model.Html[/* li */12], undefined, match ? "editing" : "", undefined, /* :: */[
-              Curry._4(Model.Html[/* div */6], undefined, "view", undefined, /* :: */[
-                    (function (eta) {
-                        return Curry._1(arg$2(undefined, undefined), eta);
-                      }),
+  return Curry._4(Model.Html[/* li */11], undefined, match ? "editing" : "", undefined, /* :: */[
+              Curry._4(Model.Html[/* div */5], undefined, "view", undefined, /* :: */[
+                    Curry._6(Model.Html[/* input */16], undefined, /* `Checkbox */[
+                          111644259,
+                          entry[/* completed */2]
+                        ], undefined, "toggle", /* :: */[
+                          Curry._1(Model.Html[/* Attr */0][/* onChange */6], Actions.toggle(entry)),
+                          /* [] */0
+                        ], /* [] */0),
                     /* :: */[
-                      Curry._5(Model.Html[/* label */16], undefined, /* :: */[
+                      Curry._5(Model.Html[/* label */15], undefined, /* :: */[
                             Curry._1(Model.Html[/* Attr */0][/* onDoubleClick */5], Actions.edit(entry, true)),
                             /* [] */0
                           ], undefined, undefined, /* :: */[
-                            Curry._1(Model.Html[/* text */3], entry[/* title */1]),
+                            Curry._1(Model.Html[/* text */2], entry[/* title */1]),
                             /* [] */0
                           ]),
                       /* :: */[
-                        Curry._4(Model.Html[/* button */4], undefined, "destroy", /* :: */[
+                        Curry._4(Model.Html[/* button */3], undefined, "destroy", /* :: */[
                               Curry._1(Model.Html[/* Attr */0][/* onClick */4], Actions.remove(entry)),
                               /* [] */0
                             ], /* [] */0),
@@ -66,7 +54,7 @@ function view(entry) {
                     ]
                   ]),
               /* :: */[
-                match$1 ? editTextInput(entry[/* title */1]) : Model.Html[/* null */2],
+                match$1 ? editTextInput(entry[/* title */1]) : Model.Html[/* null */1],
                 /* [] */0
               ]
             ]);
