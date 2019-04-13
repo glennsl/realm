@@ -5,7 +5,7 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
 function init(param) {
-  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[/* count */0]);
+  return /* record */[/* count */0];
 }
 
 var click = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {

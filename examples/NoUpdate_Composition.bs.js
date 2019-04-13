@@ -5,7 +5,7 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
 function init(param) {
-  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[/* count */0]);
+  return /* record */[/* count */0];
 }
 
 var click = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
@@ -33,14 +33,14 @@ var Clicker = /* module */[
 ];
 
 function init$1(param) {
-  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[
-              /* show */true,
-              /* n */0
-            ]);
+  return /* record */[
+          /* show */true,
+          /* n */0
+        ];
 }
 
 var toggle = Curry._2(Realm.Core[/* Effect */15][/* do_ */3], (function (param) {
-        return Curry._2(Realm.Core[/* Task */14][/* randomInt */6], 0, 10);
+        return Curry._2(Realm.Core[/* Future */14][/* randomInt */6], 0, 10);
       }), (function (n, model) {
         return /* record */[
                 /* show */!model[/* show */0],
@@ -72,12 +72,13 @@ var Toggler = /* module */[
 ];
 
 function init$2(param) {
-  return Curry._3(Realm.Core[/* Task */14][/* map2 */4], (function (clicker, toggler) {
-                return /* record */[
-                        /* clicker */clicker,
-                        /* toggler */toggler
-                      ];
-              }), Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[/* count */0]), init$1(/* () */0));
+  return /* record */[
+          /* clicker : record */[/* count */0],
+          /* toggler : record */[
+            /* show */true,
+            /* n */0
+          ]
+        ];
 }
 
 function clicker(model) {

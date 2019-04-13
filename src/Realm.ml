@@ -1,9 +1,8 @@
 
-
 module Core = struct
   include Realm__Core
 
-  module Task = struct
+  module Future = struct
     type 'a t = ('a -> unit) -> unit
 
     let make f =
@@ -34,7 +33,7 @@ module Core = struct
       'model node list
     and 'model node =
       | Update of ('model -> 'model)
-      | Task   of ('model -> ('model -> 'model) Task.t)
+      | Task   of ('model -> ('model -> 'model) Future.t)
 
     let none =
       []
@@ -46,7 +45,7 @@ module Core = struct
       [ Update updater ]
 
     let do_ action mapper =
-      [ Task (fun model -> action model |> Task.map mapper) ]
+      [ Task (fun model -> action model |> Future.map mapper) ]
 
     let rec andThen last =
       function
@@ -63,7 +62,7 @@ module Core = struct
           :: map get set rest
 
       | Task f :: rest ->
-        Task (fun model -> model |> get |> f |> Task.map (fun f model -> model |> get |> f |> set model))
+        Task (fun model -> model |> get |> f |> Future.map (fun f model -> model |> get |> f |> set model))
           :: map get set rest
 
 
@@ -71,9 +70,9 @@ module Core = struct
       function
       | []               -> ( None, None )
       | Update f :: []   -> ( Some (f model), None )
-      | Update f :: rest -> ( Some (f model), Some (Task.const rest) )
+      | Update f :: rest -> ( Some (f model), Some (Future.const rest) )
       | Task f   :: rest ->
-        let next = f model |> Task.map (fun f' -> Update f' :: rest) in
+        let next = f model |> Future.map (fun f' -> Update f' :: rest) in
         ( None, Some next )
   end
 
@@ -179,7 +178,7 @@ module Runtime(Config : RuntimeConfig) = struct
             render (view !model dispatch)
           | None -> ();
           match nextEffect with
-          | Some task -> Task.run runEffect task
+          | Some task -> Future.run runEffect task
           | None      -> ()
           in
 
@@ -189,7 +188,7 @@ module Runtime(Config : RuntimeConfig) = struct
       updateSubs ();
       mount (view !model dispatch)
       in
-    Task.run run' (init arg)
+    Future.run run' (init arg)
 end
 
 
@@ -276,7 +275,7 @@ module React = struct
   module type AppSpec = sig
     type model
 
-    val init : unit -> model Task.t
+    val init : unit -> model Future.t
     val update : model Effect.t -> model Effect.t
     val subs : model -> model Effect.t Sub.t list
     val view : model -> model Html.t
@@ -286,7 +285,7 @@ module React = struct
     type model
     (* type action *)
 
-    val init : unit -> model Task.t
+    val init : unit -> model
     val view : model -> model Html.t
   end
 
@@ -305,6 +304,7 @@ module React = struct
   module SimpleApp(Spec : SimpleAppSpec) = struct
     include App(struct
       include Spec
+      let init () = Future.const (Spec.init ())
       let update x = x
       let subs _ = []
     end)

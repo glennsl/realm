@@ -6,9 +6,9 @@ module Clicker = {
     count: int
   };
 
-  let init = () => Task.const({
+  let init = () => {
     count: 0
-  });
+  };
 
   let click =
     Effect.update(model => { count: model.count + 1 })
@@ -35,14 +35,14 @@ module Toggler = {
     n: int
   };
 
-  let init = () => Task.const({
+  let init = () => {
     show: true,
     n: 0
-  });
+  };
 
   let toggle =
     Effect.do_(
-      _ => Task.randomInt(0, 10),
+      _ => Future.randomInt(0, 10),
       (n, model) => { n, show: !model.show }
     )
 
@@ -67,13 +67,10 @@ module App = SimpleApp({
   };
 
 
-  let init = () =>
-    Task.map2(
-      (clicker, toggler) => {
-        clicker: clicker,
-        toggler: toggler
-      }, Clicker.init(), Toggler.init()
-    );
+  let init = () => {
+    clicker: Clicker.init(),
+    toggler: Toggler.init()
+  };
 
   module Components = {
     open Html;

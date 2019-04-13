@@ -72,7 +72,7 @@ function randomInt(l, h, f) {
   return Curry._1(f, Random.$$int(h) + l | 0);
 }
 
-var Task = /* module */[
+var Future = /* module */[
   /* make */make,
   /* const */$$const,
   /* andThen */andThen,
@@ -590,8 +590,13 @@ function App(Spec) {
 }
 
 function SimpleApp(Spec) {
-  var init = Spec[0];
   var view = Spec[1];
+  var init = function (param) {
+    var value = Curry._1(Spec[/* init */0], /* () */0);
+    return (function (f) {
+        return Curry._1(f, value);
+      });
+  };
   var update = function (x) {
     return x;
   };
@@ -814,7 +819,7 @@ var Core = [
   Realm__Core.$pipe$great,
   Realm__Core.$less$pipe,
   Realm__Core.$plus$plus,
-  Task,
+  Future,
   Core_015,
   Core_016,
   Time

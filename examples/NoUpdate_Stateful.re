@@ -6,9 +6,9 @@ module App = SimpleApp({
     count: int
   };
 
-  let init = () => Task.const({
+  let init = () => {
     count: 0
-  });
+  };
 
   let click =
     Effect.update(model => { count: model.count + 1 })
