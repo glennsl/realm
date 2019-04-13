@@ -4,37 +4,32 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
-var Html = Realm.MakeHtml(/* module */[]);
-
 function init(param) {
-  return Realm.Task[/* const */1](/* record */[/* count */0]);
+  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[/* count */0]);
 }
 
-var click = Realm.Effect[/* update */2]((function (model) {
+var click = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
         return /* record */[/* count */model[/* count */0] + 1 | 0];
       }));
 
 function view(model) {
   var message = "You've clicked this " + (Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* count */0]) + " times(s)");
-  return Curry._4(Html[/* div */5], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
-                    Curry._1(Html[/* Attr */0][/* onClick */4], click),
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                    Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], click),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html[/* text */2], message),
+                    Curry._1(Realm.React[/* Html */0][/* text */2], message),
                     /* [] */0
                   ]),
               /* [] */0
             ]);
 }
 
-function mount(at) {
-  return Realm.mountHtml(at)(init, undefined, undefined, view, /* () */0);
-}
+var App = Realm.React[/* SimpleApp */2](/* module */[
+      /* init */init,
+      /* view */view
+    ]);
 
-exports.Html = Html;
-exports.init = init;
-exports.click = click;
-exports.view = view;
-exports.mount = mount;
-/* Html Not a pure module */
+exports.App = App;
+/* App Not a pure module */

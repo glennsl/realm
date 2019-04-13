@@ -16,9 +16,9 @@ var map = List.map;
 
 var mapi = /* () */0;
 
-var reduce = /* () */0;
+var foldl = List.fold_left;
 
-var reduceRight = /* () */0;
+var foldr = List.fold_right;
 
 var filter = List.filter;
 
@@ -86,8 +86,8 @@ exports.range = range;
 exports.cons = cons;
 exports.map = map;
 exports.mapi = mapi;
-exports.reduce = reduce;
-exports.reduceRight = reduceRight;
+exports.foldl = foldl;
+exports.foldr = foldr;
 exports.filter = filter;
 exports.filterMap = filterMap;
 exports.length = length;

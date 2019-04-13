@@ -7,24 +7,22 @@ var Realm = require("../../src/Realm.bs.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
-var addTextInput = Realm.Core[/* |> */11](TodoTextInput.view("new-todo", "What needs to be done?", ""), (function (param, param$1) {
-        return Realm.map((function (param) {
-                      return "";
-                    }), (function (model, name) {
-                      return /* record */[
-                              /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
-                                    Model.Todo[/* make */1](name),
-                                    /* [] */0
-                                  ]),
-                              /* visibility */model[/* visibility */1]
-                            ];
-                    }), param, param$1);
-      }));
+var addTextInput = Realm.Core[/* |> */11](TodoTextInput.view("new-todo", "What needs to be done?", ""), Curry._2(Realm.React[/* Html */0][/* map */17], (function (param) {
+            return "";
+          }), (function (model, name) {
+            return /* record */[
+                    /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
+                          Model.Todo[/* make */1](name),
+                          /* [] */0
+                        ]),
+                    /* visibility */model[/* visibility */1]
+                  ];
+          })));
 
 function view(param) {
-  return Curry._4(Model.Html[/* header */6], undefined, undefined, undefined, /* :: */[
-              Curry._4(Model.Html[/* h1 */7], undefined, undefined, undefined, /* :: */[
-                    Curry._1(Model.Html[/* text */2], "todos"),
+  return Curry._4(Realm.React[/* Html */0][/* header */6], undefined, undefined, undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* h1 */7], undefined, undefined, undefined, /* :: */[
+                    Curry._1(Realm.React[/* Html */0][/* text */2], "todos"),
                     /* [] */0
                   ]),
               /* :: */[

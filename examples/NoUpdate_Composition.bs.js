@@ -5,23 +5,21 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
 function init(param) {
-  return Realm.Task[/* const */1](/* record */[/* count */0]);
+  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[/* count */0]);
 }
 
-var click = Realm.Effect[/* update */2]((function (model) {
+var click = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
         return /* record */[/* count */model[/* count */0] + 1 | 0];
       }));
 
-var Html = Realm.MakeHtml(/* module */[]);
-
 function view(model) {
   var message = "You've clicked this " + (Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* count */0]) + " times(s)");
-  return Curry._4(Html[/* div */5], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
-                    Curry._1(Html[/* Attr */0][/* onClick */4], click),
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                    Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], click),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html[/* text */2], message),
+                    Curry._1(Realm.React[/* Html */0][/* text */2], message),
                     /* [] */0
                   ]),
               /* [] */0
@@ -31,22 +29,18 @@ function view(model) {
 var Clicker = /* module */[
   /* init */init,
   /* click */click,
-  /* Html */Html,
   /* view */view
 ];
 
 function init$1(param) {
-  return Realm.Task[/* const */1](/* record */[
+  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[
               /* show */true,
               /* n */0
             ]);
 }
 
-var toggle = Realm.Effect[/* do_ */3]((function (param) {
-        var partial_arg = Realm.Task[/* randomInt */6];
-        return (function (param) {
-            return partial_arg(0, 10, param);
-          });
+var toggle = Curry._2(Realm.Core[/* Effect */15][/* do_ */3], (function (param) {
+        return Curry._2(Realm.Core[/* Task */14][/* randomInt */6], 0, 10);
       }), (function (n, model) {
         return /* record */[
                 /* show */!model[/* show */0],
@@ -54,20 +48,18 @@ var toggle = Realm.Effect[/* do_ */3]((function (param) {
               ];
       }));
 
-var Html$1 = Realm.MakeHtml(/* module */[]);
-
 function view$1(greeting, model) {
   var match = model[/* show */0];
-  return Curry._4(Html$1[/* div */5], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html$1[/* button */3], undefined, undefined, /* :: */[
-                    Curry._1(Html$1[/* Attr */0][/* onClick */4], toggle),
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                    Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], toggle),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html$1[/* text */2], "Toggle greeting " + Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* n */1])),
+                    Curry._1(Realm.React[/* Html */0][/* text */2], "Toggle greeting " + Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* n */1])),
                     /* [] */0
                   ]),
               /* :: */[
-                match ? Curry._1(Html$1[/* text */2], greeting) : Html$1[/* null */1],
+                match ? Curry._1(Realm.React[/* Html */0][/* text */2], greeting) : Realm.React[/* Html */0][/* null */1],
                 /* [] */0
               ]
             ]);
@@ -76,76 +68,56 @@ function view$1(greeting, model) {
 var Toggler = /* module */[
   /* init */init$1,
   /* toggle */toggle,
-  /* Html */Html$1,
   /* view */view$1
 ];
 
 function init$2(param) {
-  return Realm.Task[/* map2 */4]((function (clicker, toggler) {
+  return Curry._3(Realm.Core[/* Task */14][/* map2 */4], (function (clicker, toggler) {
                 return /* record */[
                         /* clicker */clicker,
                         /* toggler */toggler
                       ];
-              }), Realm.Task[/* const */1](/* record */[/* count */0]), Realm.Task[/* const */1](/* record */[
-                  /* show */true,
-                  /* n */0
-                ]));
+              }), Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[/* count */0]), init$1(/* () */0));
 }
 
-var Html$2 = Realm.MakeHtml(/* module */[]);
-
 function clicker(model) {
-  return Realm.Core[/* |> */11](view(model[/* clicker */0]), (function (param, param$1) {
-                return Realm.map((function (model) {
-                              return model[/* clicker */0];
-                            }), (function (model, clickerModel) {
-                              return /* record */[
-                                      /* clicker */clickerModel,
-                                      /* toggler */model[/* toggler */1]
-                                    ];
-                            }), param, param$1);
-              }));
+  return Realm.Core[/* |> */11](view(model[/* clicker */0]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (model) {
+                    return model[/* clicker */0];
+                  }), (function (model, clickerModel) {
+                    return /* record */[
+                            /* clicker */clickerModel,
+                            /* toggler */model[/* toggler */1]
+                          ];
+                  })));
 }
 
 function toggler(greeting, model) {
-  return Realm.Core[/* |> */11](view$1(greeting, model[/* toggler */1]), (function (param, param$1) {
-                return Realm.map((function (model) {
-                              return model[/* toggler */1];
-                            }), (function (model, togglerModel) {
-                              return /* record */[
-                                      /* clicker */model[/* clicker */0],
-                                      /* toggler */togglerModel
-                                    ];
-                            }), param, param$1);
-              }));
+  return Realm.Core[/* |> */11](view$1(greeting, model[/* toggler */1]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (model) {
+                    return model[/* toggler */1];
+                  }), (function (model, togglerModel) {
+                    return /* record */[
+                            /* clicker */model[/* clicker */0],
+                            /* toggler */togglerModel
+                          ];
+                  })));
 }
 
-var Components = /* module */[
-  /* clicker */clicker,
-  /* toggler */toggler
-];
-
-function view$2(greeting, model) {
-  return Curry._4(Html$2[/* div */5], undefined, undefined, undefined, /* :: */[
+function view$2(model) {
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
               clicker(model),
               /* :: */[
-                toggler(greeting, model),
+                toggler("Hello", model),
                 /* [] */0
               ]
             ]);
 }
 
-function mount(at) {
-  return Realm.mountHtml(at)(init$2, undefined, undefined, (function (param) {
-                return view$2("hello", param);
-              }), /* () */0);
-}
+var App = Realm.React[/* SimpleApp */2](/* module */[
+      /* init */init$2,
+      /* view */view$2
+    ]);
 
 exports.Clicker = Clicker;
 exports.Toggler = Toggler;
-exports.init = init$2;
-exports.Html = Html$2;
-exports.Components = Components;
-exports.view = view$2;
-exports.mount = mount;
+exports.App = App;
 /* click Not a pure module */

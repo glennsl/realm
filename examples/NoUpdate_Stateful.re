@@ -1,36 +1,29 @@
-open Realm;
-open! Core;
+open! Realm.Core;
+open Realm.React;
 
-type model = {
-  count: int
-};
+module App = SimpleApp({
+  type model = {
+    count: int
+  };
 
-module Html = MakeHtml({
-  type nonrec model = model
+  let init = () => Task.const({
+    count: 0
+  });
+
+  let click =
+    Effect.update(model => { count: model.count + 1 })
+
+  let view = model => {
+    open Html;
+    open Attr;
+
+    let message =
+      "You've clicked this " ++ String.fromInt(model.count) ++ " times(s)";
+
+    div([
+      button(~attrs=[ onClick(click) ], [
+        text(message)
+      ])
+    ]);
+  };
 })
-
-let init = () => Task.const({
-  count: 0
-});
-
-let click =
-  Effect.update(model => { count: model.count + 1 })
-
-let view = model => {
-  open Html;
-  open Attr;
-
-  let message =
-    "You've clicked this " ++ String.fromInt(model.count) ++ " times(s)";
-
-  div([
-    button(~attrs=[ onClick(click) ], [
-      text(message)
-    ])
-  ]);
-};
-
-let mount 
-  : (~at: string) => unit
-  = (~at) =>
-    mountHtml(~at, ~init, ~view, ());

@@ -2,13 +2,13 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var Model = require("./Model.bs.js");
+var Realm = require("../../src/Realm.bs.js");
 var Header = require("./Header.bs.js");
 var TodoFooter = require("./TodoFooter.bs.js");
 var MainSection = require("./MainSection.bs.js");
 
 function view(entries, visibility) {
-  return Curry._4(Model.Html[/* div */5], undefined, "todoapp", undefined, /* :: */[
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, "todoapp", undefined, /* :: */[
               Header.view(/* () */0),
               /* :: */[
                 MainSection.view(entries, visibility),
@@ -21,4 +21,4 @@ function view(entries, visibility) {
 }
 
 exports.view = view;
-/* Model Not a pure module */
+/* Realm Not a pure module */

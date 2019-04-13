@@ -20,12 +20,8 @@ module Todo = {
   };
 };
 
-type model = {
+type t = {
   entries : list(Todo.t),
   visibility : string
-};
-
-module Html = Realm.MakeHtml({
-  type nonrec model = model
-})
+}
 

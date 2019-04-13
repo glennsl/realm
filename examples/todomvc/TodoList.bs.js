@@ -2,7 +2,6 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var Model = require("./Model.bs.js");
 var Realm = require("../../src/Realm.bs.js");
 var TodoItem = require("./TodoItem.bs.js");
 
@@ -17,8 +16,8 @@ function view(entries, visibility) {
         return true;
     }
   };
-  return Curry._4(Model.Html[/* ul */10], undefined, "todo-list", undefined, Realm.Core[/* |> */11](Realm.Core[/* |> */11](entries, Curry._1(Realm.Core[/* List */3][/* filter */8], isVisible)), Curry._1(Realm.Core[/* List */3][/* map */4], TodoItem.view)));
+  return Curry._4(Realm.React[/* Html */0][/* ul */10], undefined, "todo-list", undefined, Realm.Core[/* |> */11](Realm.Core[/* |> */11](entries, Curry._1(Realm.Core[/* List */3][/* filter */8], isVisible)), Curry._1(Realm.Core[/* List */3][/* map */4], TodoItem.view)));
 }
 
 exports.view = view;
-/* Model Not a pure module */
+/* Realm Not a pure module */

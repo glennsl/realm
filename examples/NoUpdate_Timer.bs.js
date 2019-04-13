@@ -4,26 +4,28 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../src/Realm.bs.js");
 
-var Html = Realm.MakeHtml(/* module */[]);
-
 function init(param) {
-  return Realm.Task[/* const */1](/* record */[
+  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[
               /* count */0,
               /* mode : Fast */2
             ]);
 }
 
+function update(x) {
+  return x;
+}
+
 function subs(model) {
   var tick = function (param) {
-    return Realm.Effect[/* update */2]((function (model) {
+    return Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
                   return /* record */[
                           /* count */model[/* count */0] + 1 | 0,
                           /* mode */model[/* mode */1]
                         ];
                 }));
   };
-  var slow = Realm.Time[/* every */0]("slow", 2000, tick);
-  var fast = Realm.Time[/* every */0]("fast", 1000, tick);
+  var slow = Curry._3(Realm.Core[/* Time */17][/* every */0], "slow", 2000, tick);
+  var fast = Curry._3(Realm.Core[/* Time */17][/* every */0], "fast", 1000, tick);
   var match = model[/* mode */1];
   switch (match) {
     case 0 : 
@@ -51,7 +53,7 @@ function subs(model) {
 }
 
 function setMode(mode) {
-  return Realm.Effect[/* update */2]((function (model) {
+  return Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
                 return /* record */[
                         /* count */model[/* count */0],
                         /* mode */mode
@@ -61,37 +63,37 @@ function setMode(mode) {
 
 function view(model) {
   var message = Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* count */0]) + " seconds since page load";
-  return Curry._4(Html[/* div */5], undefined, undefined, undefined, /* :: */[
-              Curry._4(Html[/* div */5], undefined, undefined, undefined, /* :: */[
-                    Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
-                          Curry._1(Html[/* Attr */0][/* onClick */4], setMode(/* Off */0)),
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
+                    Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                          Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], setMode(/* Off */0)),
                           /* [] */0
                         ], /* :: */[
-                          Curry._1(Html[/* text */2], "Off"),
+                          Curry._1(Realm.React[/* Html */0][/* text */2], "Off"),
                           /* [] */0
                         ]),
                     /* :: */[
-                      Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
-                            Curry._1(Html[/* Attr */0][/* onClick */4], setMode(/* Slow */1)),
+                      Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                            Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], setMode(/* Slow */1)),
                             /* [] */0
                           ], /* :: */[
-                            Curry._1(Html[/* text */2], "Slow"),
+                            Curry._1(Realm.React[/* Html */0][/* text */2], "Slow"),
                             /* [] */0
                           ]),
                       /* :: */[
-                        Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
-                              Curry._1(Html[/* Attr */0][/* onClick */4], setMode(/* Fast */2)),
+                        Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                              Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], setMode(/* Fast */2)),
                               /* [] */0
                             ], /* :: */[
-                              Curry._1(Html[/* text */2], "Fast"),
+                              Curry._1(Realm.React[/* Html */0][/* text */2], "Fast"),
                               /* [] */0
                             ]),
                         /* :: */[
-                          Curry._4(Html[/* button */3], undefined, undefined, /* :: */[
-                                Curry._1(Html[/* Attr */0][/* onClick */4], setMode(/* Both */3)),
+                          Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                                Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], setMode(/* Both */3)),
                                 /* [] */0
                               ], /* :: */[
-                                Curry._1(Html[/* text */2], "Both"),
+                                Curry._1(Realm.React[/* Html */0][/* text */2], "Both"),
                                 /* [] */0
                               ]),
                           /* [] */0
@@ -100,20 +102,18 @@ function view(model) {
                     ]
                   ]),
               /* :: */[
-                Curry._1(Html[/* text */2], message),
+                Curry._1(Realm.React[/* Html */0][/* text */2], message),
                 /* [] */0
               ]
             ]);
 }
 
-function mount(at) {
-  return Realm.mountHtml(at)(init, undefined, subs, view, /* () */0);
-}
+var App = Realm.React[/* App */1](/* module */[
+      /* init */init,
+      /* update */update,
+      /* subs */subs,
+      /* view */view
+    ]);
 
-exports.Html = Html;
-exports.init = init;
-exports.subs = subs;
-exports.setMode = setMode;
-exports.view = view;
-exports.mount = mount;
-/* Html Not a pure module */
+exports.App = App;
+/* App Not a pure module */

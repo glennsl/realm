@@ -1,5 +1,5 @@
-open Realm;
-open! Core;
+open! Realm.Core;
+open Realm.React;
 
 module Clicker = {
   type model = {
@@ -12,8 +12,6 @@ module Clicker = {
 
   let click =
     Effect.update(model => { count: model.count + 1 })
-
-  module Html = MakeHtml({ type nonrec model = model; })
 
   let view = model => {
     open Html;
@@ -48,8 +46,6 @@ module Toggler = {
       (n, model) => { n, show: !model.show }
     )
 
-  module Html = MakeHtml({ type nonrec model = model; })
-
   let view = (~greeting, model) => {
     open Html;
     open Attr;
@@ -64,44 +60,41 @@ module Toggler = {
 };
 
 
-type model = {
-  clicker: Clicker.model,
-  toggler: Toggler.model
-};
+module App = SimpleApp({
+  type model = {
+    clicker: Clicker.model,
+    toggler: Toggler.model
+  };
 
 
-let init = () =>
-  Task.map2(
-    (clicker, toggler) => {
-      clicker: clicker,
-      toggler: toggler
-    }, Clicker.init(), Toggler.init()
-  );
+  let init = () =>
+    Task.map2(
+      (clicker, toggler) => {
+        clicker: clicker,
+        toggler: toggler
+      }, Clicker.init(), Toggler.init()
+    );
 
+  module Components = {
+    open Html;
 
-module Html = MakeHtml({ type nonrec model = model; })
+    let clicker = model => 
+      Clicker.view(model.clicker)
+        |> map( model => model.clicker,
+                (model, clickerModel) => { ...model, clicker: clickerModel });
+    
+    let toggler = (~greeting, model) =>
+      Toggler.view(~greeting, model.toggler)
+        |> map( model => model.toggler,
+                (model, togglerModel) => { ...model, toggler: togglerModel });
+  }
 
-module Components = {
-  let clicker = model => 
-    Clicker.view(model.clicker)
-      |> map( model => model.clicker,
-              (model, clickerModel) => { ...model, clicker: clickerModel });
-  
-  let toggler = (~greeting, model) =>
-    Toggler.view(~greeting, model.toggler)
-      |> map( model => model.toggler,
-              (model, togglerModel) => { ...model, toggler: togglerModel });
-}
+  let view = model => {
+    open Html;
 
-let view = (~greeting, model) => {
-  open Html;
-
-  div([
-    Components.clicker(model),
-    Components.toggler(~greeting, model)
-  ])
-};
-
-
-let mount = (~at) =>
-  mountHtml(~at, ~init, ~view=view(~greeting="hello"), ());
+    div([
+      Components.clicker(model),
+      Components.toggler(~greeting="Hello", model)
+    ])
+  };
+})

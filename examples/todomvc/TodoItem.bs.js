@@ -9,44 +9,42 @@ var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
 function editTextInput(initialValue) {
-  return Realm.Core[/* |> */11](TodoTextInput.view("edit", undefined, initialValue), (function (param, param$1) {
-                return Realm.map((function (param) {
-                              return "";
-                            }), (function (model, name) {
-                              return /* record */[
-                                      /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
-                                            Model.Todo[/* make */1](name),
-                                            /* [] */0
-                                          ]),
-                                      /* visibility */model[/* visibility */1]
-                                    ];
-                            }), param, param$1);
-              }));
+  return Realm.Core[/* |> */11](TodoTextInput.view("edit", undefined, initialValue), Curry._2(Realm.React[/* Html */0][/* map */17], (function (param) {
+                    return "";
+                  }), (function (model, name) {
+                    return /* record */[
+                            /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
+                                  Model.Todo[/* make */1](name),
+                                  /* [] */0
+                                ]),
+                            /* visibility */model[/* visibility */1]
+                          ];
+                  })));
 }
 
 function view(entry) {
   var match = entry[/* editing */3];
   var match$1 = entry[/* editing */3];
-  return Curry._4(Model.Html[/* li */11], undefined, match ? "editing" : "", undefined, /* :: */[
-              Curry._4(Model.Html[/* div */5], undefined, "view", undefined, /* :: */[
-                    Curry._6(Model.Html[/* input */16], undefined, /* `Checkbox */[
+  return Curry._4(Realm.React[/* Html */0][/* li */11], undefined, match ? "editing" : "", undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* div */4], undefined, "view", undefined, /* :: */[
+                    Curry._6(Realm.React[/* Html */0][/* input */16], undefined, /* `Checkbox */[
                           111644259,
                           entry[/* completed */2]
                         ], undefined, "toggle", /* :: */[
-                          Curry._1(Model.Html[/* Attr */0][/* onChange */6], Actions.toggle(entry)),
+                          Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onChange */6], Actions.toggle(entry)),
                           /* [] */0
                         ], /* [] */0),
                     /* :: */[
-                      Curry._5(Model.Html[/* label */15], undefined, /* :: */[
-                            Curry._1(Model.Html[/* Attr */0][/* onDoubleClick */5], Actions.edit(entry, true)),
+                      Curry._5(Realm.React[/* Html */0][/* label */15], undefined, /* :: */[
+                            Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onDoubleClick */5], Actions.edit(entry, true)),
                             /* [] */0
                           ], undefined, undefined, /* :: */[
-                            Curry._1(Model.Html[/* text */2], entry[/* title */1]),
+                            Curry._1(Realm.React[/* Html */0][/* text */2], entry[/* title */1]),
                             /* [] */0
                           ]),
                       /* :: */[
-                        Curry._4(Model.Html[/* button */3], undefined, "destroy", /* :: */[
-                              Curry._1(Model.Html[/* Attr */0][/* onClick */4], Actions.remove(entry)),
+                        Curry._4(Realm.React[/* Html */0][/* button */3], undefined, "destroy", /* :: */[
+                              Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], Actions.remove(entry)),
                               /* [] */0
                             ], /* [] */0),
                         /* [] */0
@@ -54,7 +52,7 @@ function view(entry) {
                     ]
                   ]),
               /* :: */[
-                match$1 ? editTextInput(entry[/* title */1]) : Model.Html[/* null */1],
+                match$1 ? editTextInput(entry[/* title */1]) : Realm.React[/* Html */0][/* null */1],
                 /* [] */0
               ]
             ]);
@@ -62,4 +60,4 @@ function view(entry) {
 
 exports.editTextInput = editTextInput;
 exports.view = view;
-/* Model Not a pure module */
+/* Realm Not a pure module */

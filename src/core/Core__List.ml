@@ -8,8 +8,8 @@ let cons = ()
 (* Transform *)
 let map = List.map
 let mapi = ()
-let reduce = ()
-let reduceRight = ()
+let foldl = List.fold_left
+let foldr = List.fold_right
 let filter = List.filter
 let filterMap = ()
 

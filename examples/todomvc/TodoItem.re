@@ -1,18 +1,18 @@
-open Realm;
-open! Core;
+open Realm.React;
+open! Realm.Core;
 open Model;
 
 let editTextInput = initialValue =>
   TodoTextInput.view(~className="edit", initialValue)
-    |> map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] })
+    |> Html.map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] })
 
 let view = (entry: Todo.t) => {
-  open Model.Html;
+  open Html;
   open Attr;
 
   li(~className=entry.editing ? "editing" : "", [
     div(~className="view", [
-      Model.Html.input(
+      Html.input(
         ~className="toggle",
         ~attrs=[onChange(Actions.toggle(entry))], 
         ~value=`Checkbox(entry.completed),
