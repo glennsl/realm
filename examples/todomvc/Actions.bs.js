@@ -5,7 +5,7 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Realm = require("../../src/Realm.bs.js");
 
 function toggle(entry) {
-  return Realm.Effect[/* update */2]((function (model) {
+  return Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
                 return /* record */[
                         /* entries */Curry._2(Realm.Core[/* List */3][/* map */4], (function (it) {
                                 var match = it[/* id */0] === entry[/* id */0];
@@ -27,7 +27,7 @@ function toggle(entry) {
 }
 
 function edit(entry, editing) {
-  return Realm.Effect[/* update */2]((function (model) {
+  return Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
                 return /* record */[
                         /* entries */Curry._2(Realm.Core[/* List */3][/* map */4], (function (it) {
                                 var match = it[/* id */0] === entry[/* id */0];
@@ -49,7 +49,7 @@ function edit(entry, editing) {
 }
 
 function remove(entry) {
-  return Realm.Effect[/* update */2]((function (model) {
+  return Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
                 return /* record */[
                         /* entries */Curry._2(Realm.Core[/* List */3][/* filter */8], (function (it) {
                                 return it[/* id */0] !== entry[/* id */0];
@@ -59,7 +59,7 @@ function remove(entry) {
               }));
 }
 
-var clearCompleted = Realm.Effect[/* update */2]((function (model) {
+var clearCompleted = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
         return /* record */[
                 /* entries */Curry._2(Realm.Core[/* List */3][/* filter */8], (function (it) {
                         return !it[/* completed */2];
@@ -69,7 +69,7 @@ var clearCompleted = Realm.Effect[/* update */2]((function (model) {
       }));
 
 function changeVisibility(visibility) {
-  return Realm.Effect[/* update */2]((function (model) {
+  return Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
                 return /* record */[
                         /* entries */model[/* entries */0],
                         /* visibility */visibility

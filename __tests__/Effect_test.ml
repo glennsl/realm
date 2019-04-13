@@ -1,5 +1,5 @@
 
-module Task = Realm.Task
+module Task = Realm.Core.Task
 
 let () =
   let open Jest in

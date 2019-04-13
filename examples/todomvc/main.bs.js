@@ -7,7 +7,7 @@ var Realm = require("../../src/Realm.bs.js");
 var TodoApp = require("./TodoApp.bs.js");
 
 function init(param) {
-  return Realm.Task[/* const */1](/* record */[
+  return Curry._1(Realm.Core[/* Task */14][/* const */1], /* record */[
               /* entries : :: */[
                 Model.Todo[/* make */1]("Item 1"),
                 /* :: */[
@@ -19,28 +19,28 @@ function init(param) {
             ]);
 }
 
-var infoFooter = Curry._4(Model.Html[/* footer */4], undefined, "info", undefined, /* :: */[
-      Curry._4(Model.Html[/* p */13], undefined, undefined, undefined, /* :: */[
-            Curry._1(Model.Html[/* text */2], "Double-click to edit a todo"),
+var infoFooter = Curry._4(Realm.React[/* Html */0][/* footer */5], undefined, "info", undefined, /* :: */[
+      Curry._4(Realm.React[/* Html */0][/* p */13], undefined, undefined, undefined, /* :: */[
+            Curry._1(Realm.React[/* Html */0][/* text */2], "Double-click to edit a todo"),
             /* [] */0
           ]),
       /* :: */[
-        Curry._4(Model.Html[/* p */13], undefined, undefined, undefined, /* :: */[
-              Curry._1(Model.Html[/* text */2], "Written by "),
+        Curry._4(Realm.React[/* Html */0][/* p */13], undefined, undefined, undefined, /* :: */[
+              Curry._1(Realm.React[/* Html */0][/* text */2], "Written by "),
               /* :: */[
-                Curry._5(Model.Html[/* a */14], "https://github.com/glennsl", undefined, undefined, undefined, /* :: */[
-                      Curry._1(Model.Html[/* text */2], "Glenn Slotte"),
+                Curry._5(Realm.React[/* Html */0][/* a */14], "https://github.com/glennsl", undefined, undefined, undefined, /* :: */[
+                      Curry._1(Realm.React[/* Html */0][/* text */2], "Glenn Slotte"),
                       /* [] */0
                     ]),
                 /* [] */0
               ]
             ]),
         /* :: */[
-          Curry._4(Model.Html[/* p */13], undefined, undefined, undefined, /* :: */[
-                Curry._1(Model.Html[/* text */2], "Part of "),
+          Curry._4(Realm.React[/* Html */0][/* p */13], undefined, undefined, undefined, /* :: */[
+                Curry._1(Realm.React[/* Html */0][/* text */2], "Part of "),
                 /* :: */[
-                  Curry._5(Model.Html[/* a */14], "http://todomvc.com", undefined, undefined, undefined, /* :: */[
-                        Curry._1(Model.Html[/* text */2], "TodoMVC"),
+                  Curry._5(Realm.React[/* Html */0][/* a */14], "http://todomvc.com", undefined, undefined, undefined, /* :: */[
+                        Curry._1(Realm.React[/* Html */0][/* text */2], "TodoMVC"),
                         /* [] */0
                       ]),
                   /* [] */0
@@ -52,7 +52,7 @@ var infoFooter = Curry._4(Model.Html[/* footer */4], undefined, "info", undefine
     ]);
 
 function view(param) {
-  return Curry._4(Model.Html[/* div */5], undefined, undefined, undefined, /* :: */[
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
               TodoApp.view(param[/* entries */0], param[/* visibility */1]),
               /* :: */[
                 infoFooter,
@@ -61,9 +61,10 @@ function view(param) {
             ]);
 }
 
-Realm.mountHtml("todoapp")(init, undefined, undefined, view, /* () */0);
+var App = Realm.React[/* SimpleApp */2](/* module */[
+      /* init */init,
+      /* view */view
+    ]);
 
-exports.init = init;
-exports.infoFooter = infoFooter;
-exports.view = view;
-/* infoFooter Not a pure module */
+exports.App = App;
+/* App Not a pure module */

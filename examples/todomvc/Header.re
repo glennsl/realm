@@ -1,13 +1,13 @@
-open Realm;
-open! Core;
+open! Realm.Core;
+open Realm.React;
 open Model;
 
 let addTextInput =
   TodoTextInput.view(~className="new-todo", ~placeholder="What needs to be done?", "")
-    |> map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] })
+    |> Html.map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] })
 
 let view = () => {
-  open Model.Html;
+  open Html;
 
   header(
     [ h1([text("todos")])

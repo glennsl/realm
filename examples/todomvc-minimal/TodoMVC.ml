@@ -1,5 +1,5 @@
-open Realm
-open! Core
+open! Realm.Core
+open Realm.React
 
 
 
@@ -57,8 +57,8 @@ let init () =
   |> Option.withDefault emptyModel
   |> Task.const
 
-let persist =
-  Effect.map (fun model -> model) @@
+let persist effect =
+  effect |> Effect.map (fun model -> model) @@
     fun _ model ->
       let _: unit option =
         Json.stringify model
@@ -148,10 +148,6 @@ let update cmd =
 
 (* VIEW *)
 
-
-module Html = MakeHtml (struct
-  type nonrec model = model
-end)
 
 open Html
 open Attr
@@ -348,6 +344,8 @@ let view model =
     ; infoFooter
     ]
 
-
-let () =
-  mountHtml ~at:"todoapp" ~init ~update ~view ()
+module App = SimpleApp(struct
+  type nonrec model = model
+  let init = init
+  let view = view
+end)

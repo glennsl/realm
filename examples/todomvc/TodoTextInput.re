@@ -1,5 +1,5 @@
-open Realm;
-open! Core;
+open! Realm.Core;
+open Realm.React
 
 module TextInput = {
   let component = ReasonReact.reducerComponent("Greeting");
@@ -28,7 +28,5 @@ module TextInput = {
   };
 }
 
-module Html = Realm.MakeHtml({ type model = string });
-
 let view = (~className, ~placeholder=?, initialValue) =>
-  Html.reactComponent(dispatch => <TextInput className ?placeholder initialValue onEnter=(value => dispatch(Effect.const(value))) />)
+  Html.raw(dispatch => <TextInput className ?placeholder initialValue onEnter=(value => dispatch(Effect.const(value))) />)

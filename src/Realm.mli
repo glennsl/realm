@@ -1,288 +1,195 @@
-module Task : sig
-  type 'a t
+module Core : sig
+  include module type of Realm__Core
 
-  val make : (('a -> unit) -> unit) -> 'a t
-  val const : 'a -> 'a t
-  val andThen : ('a -> 'b t) -> 'a t -> 'b t
-  val map : ('a -> 'b) -> 'a t -> 'b t
-  val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
+  module Task : sig
+    type 'a t
 
-  val run : ('a -> unit) -> 'a t -> unit
+    val make : (('a -> unit) -> unit) -> 'a t
+    val const : 'a -> 'a t
+    val andThen : ('a -> 'b t) -> 'a t -> 'b t
+    val map : ('a -> 'b) -> 'a t -> 'b t
+    val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
 
-  val randomInt : int -> int -> int t
+    val run : ('a -> unit) -> 'a t -> unit
+
+    val randomInt : int -> int -> int t
+  end
+
+
+  module Effect : sig
+    type 'model t
+
+    val none : 'model t
+    val const : 'model -> 'model t
+    val update : ('model -> 'model) -> 'model t
+    val do_ : ('model -> 'result Task.t) -> ('result -> 'model -> 'model) -> 'model t
+    val andThen : 'model t -> 'model t -> 'model t
+    val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
+
+    (* val step : 'model -> 'model t -> ('model option* 'model t Task.t option) *)
+  end
+
+
+  module Sub : sig
+    type 'action t
+    type unsubber = unit -> unit
+    type 'a callback = 'a -> unit
+
+    val make :
+      string -> ('a -> 'action) -> ('a callback -> unsubber) -> 'action t
+
+    (* val id : _ t -> string
+    val run : ('action -> unit) -> 'action t -> unsubber
+    val unsub : unsubber -> unit *)
+  end
+
+
+  module Time : sig
+    val every : string -> float -> (unit -> 'action) -> 'action Sub.t
+  end
+
 end
 
+open Core
 
-module Effect : sig
-  type 'model t
+module React : sig
 
-  val none : 'model t
-  val const : 'model -> 'model t
-  val update : ('model -> 'model) -> 'model t
-  val do_ : ('model -> 'result Task.t) -> ('result -> 'model -> 'model) -> 'model t
-  val andThen : 'model t -> 'model t -> 'model t
-  val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
+  module Html : sig
+    type 'model t
 
-  (* val step : 'model -> 'model t -> ('model option* 'model t Task.t option) *)
-end
+    module Attr : sig
+      type 'model t
 
+      val className : string -> _ t
+      val autofocus : 'a -> _ t
+      val hidden : 'a -> _ t
+      val name : string -> _ t
+      val onClick : 'model Effect.t -> 'model t
+      val onDoubleClick : 'model  Effect.t -> 'model t
+      val onChange : 'model Effect.t -> 'model t
+      val onBlur : 'model Effect.t -> 'model t
+      val onInput : ('a -> 'model Effect.t) -> 'model t
+      val onKeyDown : ('a -> 'model Effect.t) -> 'model t
+    end
 
-module Sub : sig
-  type 'action t
-  type unsubber = unit -> unit
-  type 'a callback = 'a -> unit
-
-  val make :
-    string -> ('a -> 'action) -> ('a callback -> unsubber) -> 'action t
-
-  (* val id : _ t -> string
-  val run : ('action -> unit) -> 'action t -> unsubber
-  val unsub : unsubber -> unit *)
-end
-
-
-module Time : sig
-  val every : string -> float -> (unit -> 'action) -> 'action Sub.t
-end
-
-type 'model element
-
-val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a element -> 'b element
-
-val mountHtml
-  (* at: string ->
-  init : ('arg -> 'model Task.t) ->
-  update : ('action -> 'model Effect.t) ->
-  ?subs : ('model -> 'action Sub.t list) ->
-  view : ('model -> 'model element) ->
-  'arg ->
-  unit *)
-  :  at: string
-  -> init : ('arg -> 'model Task.t)
-  -> ?update : ('model Effect.t -> 'model Effect.t)
-  -> ?subs : ('model -> 'model Effect.t Sub.t list)
-  -> view : ('model -> 'model element) 
-  -> 'arg 
-  -> unit
-
-module MakeHtml : 
-  functor (T : sig type model end) -> sig
-    type event
-    type attr
-    module Attr :
-      sig
-        val className : string -> attr
-        val autofocus : 'a -> attr
-        val hidden : 'a -> attr
-        val name : string -> attr
-        val onClick : T.model Effect.t -> attr
-        val onDoubleClick : T.model Effect.t -> attr
-        val onChange : T.model Effect.t -> attr
-        val onBlur : T.model Effect.t -> attr
-        val onInput : ('a -> T.model Effect.t) -> attr
-        val onKeyDown : ('a -> T.model Effect.t) -> attr
-      end
-    val null : T.model element
-    val text : string -> T.model element
+    val null : _ t
+    val text : string -> _ t
     val button
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
-    val footer
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val div
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
+    val footer
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val header
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val h1
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val section
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val span
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val ul
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val li
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val strong
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val p
-      :  ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      :  ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
     val a
       :  ?href:string
-      -> ?attrs:attr list
-      -> ?id:string
-      -> ?className:string
-      -> T.model element list
-      -> T.model element
+      -> ?attrs: 'model Attr.t list
+      -> ?id: string
+      -> ?className: string
+      -> 'model t list
+      -> 'model t
     val label
       :  ?for_:string
-      -> ?attrs:attr list
-      -> ?id:string
-      -> ?className:string
-      -> T.model element list
-      -> T.model element
+      -> ?attrs: 'model Attr.t list
+      -> ?id: string
+      -> ?className: string
+      -> 'model t list
+      -> 'model t
     val input
       :  ?placeholder:string
       -> value:[< `Checkbox of 'a | `Text of string ]
-      -> ?id:string
-      -> ?className:string
-      -> ?attrs:attr list
-      -> T.model element list
-      -> T.model element
+      -> ?id: string
+      -> ?className: string
+      -> ?attrs: 'model Attr.t list
+      -> 'model t list
+      -> 'model t
 
-    val reactComponent : ((T.model Effect.t -> unit) -> ReasonReact.reactElement) -> T.model element
+    val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
+
+    val raw : (('model Effect.t -> unit) -> ReasonReact.reactElement) -> 'model t
   end
 
-module Html : sig
-  type event
-  type attr
+  module type AppSpec = sig
+    type model
+    (* type action *)
 
-  module Attr : sig
-    val className : string -> attr
-    val autofocus : 'a -> attr
-    val hidden : 'a -> attr
-    val name : string -> attr
-    val onClick : unit Effect.t -> attr
-    val onDoubleClick : unit Effect.t -> attr
-    val onChange : unit Effect.t -> attr
-    val onBlur : unit Effect.t -> attr
-    val onInput : ('a -> unit Effect.t) -> attr
-    val onKeyDown : ('a -> unit Effect.t) -> attr
+    val init : unit -> model Task.t
+    val update : model Effect.t -> model Effect.t
+    val subs : model -> model Effect.t Sub.t list
+    val view : model -> model Html.t
   end
 
-  val null : unit element
-  val text : string -> unit element
-  val button
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val footer
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val div
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val header
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val h1
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val section
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val span
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val ul
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val li
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val strong
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val p
-  :  ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
-val a
-  :  ?href:string
-  -> ?attrs:attr list
-  -> ?id:string
-  -> ?className:string
-  -> unit element list
-  -> unit element
-val label
-  :  ?for_:string
-  -> ?attrs:attr list
-  -> ?id:string
-  -> ?className:string
-  -> unit element list
-  -> unit element
-val input
-  :  ?placeholder:string
-  -> value:[< `Checkbox of 'a | `Text of string ]
-  -> ?id:string
-  -> ?className:string
-  -> ?attrs:attr list
-  -> unit element list
-  -> unit element
+  module type SimpleAppSpec = sig
+    type model
+    (* type action *)
+
+    val init : unit -> model Task.t
+    val view : model -> model Html.t
+  end
+
+  module type App = sig
+    val mount : at:string -> unit
+  end
+
+  module App : functor(Spec : AppSpec) -> App
+  module SimpleApp : functor(Spec : SimpleAppSpec) -> App
 end
-
-module Core : module type of Realm__Core

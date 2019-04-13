@@ -1,5 +1,5 @@
 open! Realm.Core;
-open Model;
+open Realm.React;
 
 let toggleAllCheckbox = (~entries as _) =>
   Html.input(

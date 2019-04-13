@@ -1,4 +1,5 @@
 open! Realm.Core;
+open Realm.React;
 open Model;
 
 let view = (~entries, ~visibility) => {
