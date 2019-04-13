@@ -11,7 +11,7 @@ module App = App(struct
     }
 
   let init () =
-    Task.const
+    Future.const
       { count = 0
       ; mode = Fast
       }

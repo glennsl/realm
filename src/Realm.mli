@@ -1,7 +1,7 @@
 module Core : sig
   include module type of Realm__Core
 
-  module Task : sig
+  module Future : sig
     type 'a t
 
     val make : (('a -> unit) -> unit) -> 'a t
@@ -22,7 +22,7 @@ module Core : sig
     val none : 'model t
     val const : 'model -> 'model t
     val update : ('model -> 'model) -> 'model t
-    val do_ : ('model -> 'result Task.t) -> ('result -> 'model -> 'model) -> 'model t
+    val do_ : ('model -> 'result Future.t) -> ('result -> 'model -> 'model) -> 'model t
     val andThen : 'model t -> 'model t -> 'model t
     val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
 
@@ -172,7 +172,7 @@ module React : sig
     type model
     (* type action *)
 
-    val init : unit -> model Task.t
+    val init : unit -> model Future.t
     val update : model Effect.t -> model Effect.t
     val subs : model -> model Effect.t Sub.t list
     val view : model -> model Html.t
@@ -182,7 +182,7 @@ module React : sig
     type model
     (* type action *)
 
-    val init : unit -> model Task.t
+    val init : unit -> model
     val view : model -> model Html.t
   end
 

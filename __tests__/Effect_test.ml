@@ -1,50 +1,50 @@
 
-module Task = Realm.Core.Task
+module Future = Realm.Core.Future
 
 let () =
   let open Jest in
   let open Expect in
 
-  describe "Task"
+  describe "Future"
     begin fun () ->
 
       testAsync "make"
         begin fun finish ->
           let expected = "my-value" in
-          let task = Task.make (fun callback -> callback expected) in
-          task |> Task.run (fun value -> expect value |> toBe expected |> finish)
+          let task = Future.make (fun callback -> callback expected) in
+          task |> Future.run (fun value -> expect value |> toBe expected |> finish)
         end;
 
       testAsync "const"
         begin fun finish ->
           let expected = "my-value" in
-          let task = Task.const expected in
-          task |> Task.run (fun value -> expect value |> toBe expected |> finish)
+          let task = Future.const expected in
+          task |> Future.run (fun value -> expect value |> toBe expected |> finish)
         end;
 
       testAsync "andThen"
         begin fun finish ->
           let task =
-            Task.const "a"
-              |> Task.andThen (fun a -> Task.const (a ^ "b"))
+            Future.const "a"
+              |> Future.andThen (fun a -> Future.const (a ^ "b"))
             in
-          task |> Task.run (fun value -> expect value |> toBe "ab" |> finish)
+          task |> Future.run (fun value -> expect value |> toBe "ab" |> finish)
         end;
 
       testAsync "map"
         begin fun finish ->
-          Task.const 3
-            |> Task.map (fun x -> x + 5)
-            |> Task.run (fun value -> expect value |> toBe 8 |> finish)
+          Future.const 3
+            |> Future.map (fun x -> x + 5)
+            |> Future.run (fun value -> expect value |> toBe 8 |> finish)
         end;
 
       testAsync "map2"
         begin fun finish ->
-          Task.map2
+          Future.map2
             (fun x y -> x + y) 
-            (Task.const 3)
-            (Task.const 6)
-            |> Task.run (fun value -> expect value |> toBe 9 |> finish)
+            (Future.const 3)
+            (Future.const 6)
+            |> Future.run (fun value -> expect value |> toBe 9 |> finish)
         end;
 
     end
@@ -56,18 +56,18 @@ module Effect
     val none : 'model t
     val const : 'model -> 'model t
     val update : ('model -> 'model) -> 'model t
-    val do_ : ('model -> 'result Task.t) -> ('result -> 'model -> 'model) -> 'model t
+    val do_ : ('model -> 'result Future.t) -> ('result -> 'model -> 'model) -> 'model t
     val andThen : 'model t -> 'model t -> 'model t
     val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
 
-    val step : 'model -> 'model t -> ('model option* 'model t Task.t option)
+    val step : 'model -> 'model t -> ('model option* 'model t Future.t option)
   end
 = struct
     type 'model t =
       'model node list
     and 'model node =
       | Update of ('model -> 'model)
-      | Task   of ('model -> ('model -> 'model) Task.t)
+      | Task   of ('model -> ('model -> 'model) Future.t)
 
     let none =
       []
@@ -79,7 +79,7 @@ module Effect
       [ Update updater ]
 
     let do_ action mapper =
-      [ Task (fun model -> action model |> Task.map mapper) ]
+      [ Task (fun model -> action model |> Future.map mapper) ]
 
     let rec andThen last =
       function
@@ -96,7 +96,7 @@ module Effect
           :: map get set rest
 
       | Task f :: rest ->
-        Task (fun model -> model |> get |> f |> Task.map (fun f model -> model |> get |> f |> set model))
+        Task (fun model -> model |> get |> f |> Future.map (fun f model -> model |> get |> f |> set model))
           :: map get set rest
 
 
@@ -104,9 +104,9 @@ module Effect
       function
       | []               -> ( None, None )
       | Update f :: []   -> ( Some (f model), None )
-      | Update f :: rest -> ( Some (f model), Some (Task.const rest) )
+      | Update f :: rest -> ( Some (f model), Some (Future.const rest) )
       | Task f   :: rest ->
-        let next = f model |> Task.map (fun f' -> Update f' :: rest) in
+        let next = f model |> Future.map (fun f' -> Update f' :: rest) in
         ( None, Some next )
   end
 
@@ -133,7 +133,7 @@ let () =
             | None       -> model, result
             in
           match next with
-          | Some task -> task |> Task.run (aux model result)
+          | Some task -> task |> Future.run (aux model result)
           | None      -> callback (List.rev result)
           in
         aux model [] effect in
@@ -156,7 +156,7 @@ let () =
         begin fun finish ->
           let effect =
             Effect.do_
-              (fun model -> Task.const (model + 1))
+              (fun model -> Future.const (model + 1))
               (fun model value -> model + value)
             in
           run effect 2 (fun result -> expect result |> toEqual [5] |> finish)
@@ -167,7 +167,7 @@ let () =
           let initial = { number = 1; text = "foo" } in
           let effect =
             Effect.(
-              do_ (fun model -> Task.const (model.number + 1))
+              do_ (fun model -> Future.const (model.number + 1))
                   (fun result model -> { model with number = result })
                 |> andThen (update (fun model -> { model with text = string_of_int model.number }))
             ) in

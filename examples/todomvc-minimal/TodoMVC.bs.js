@@ -29,9 +29,9 @@ var LocalStorage = /* module */[];
 var Json = /* module */[];
 
 function init(param) {
-  return Realm.Core[/* |> */11](Realm.Core[/* |> */11](Realm.Core[/* |> */11](Caml_option.nullable_to_opt(localStorage.getItem("realm-todo-save")), Curry._1(Realm.Core[/* Option */5][/* andThen */6], (function (prim) {
-                            return Caml_option.nullable_to_opt(JSON.parse(prim));
-                          }))), Curry._1(Realm.Core[/* Option */5][/* withDefault */0], emptyModel)), Realm.Core[/* Task */14][/* const */1]);
+  return Realm.Core[/* |> */11](Realm.Core[/* |> */11](Caml_option.nullable_to_opt(localStorage.getItem("realm-todo-save")), Curry._1(Realm.Core[/* Option */5][/* andThen */6], (function (prim) {
+                        return Caml_option.nullable_to_opt(JSON.parse(prim));
+                      }))), Curry._1(Realm.Core[/* Option */5][/* withDefault */0], emptyModel));
 }
 
 function persist(effect) {

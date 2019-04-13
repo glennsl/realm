@@ -5,15 +5,14 @@ open Model
 module App = SimpleApp({
   type model = Model.t
 
-  let init = () =>
-    Task.const(
-      { entries:
-        [ Todo.make("Item 1")
-        , Todo.make("Item 2")
-        ]
-      , visibility: "All"
-      }
-    );
+  let init = () => {
+    { entries:
+      [ Todo.make("Item 1")
+      , Todo.make("Item 2")
+      ]
+    , visibility: "All"
+    }
+  };
 
   open Html;
 
