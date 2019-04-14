@@ -1,5 +1,6 @@
 open! Realm.Core
 open Realm.React
+
 module App = SimpleApp(struct
   type model =
     { count: int }
