@@ -3,7 +3,7 @@
 
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
-var RealmOld = require("../src/RealmOld.bs.js");
+var RealmOld = require("../../src/RealmOld.bs.js");
 
 var Html = Curry._1(RealmOld.React[/* Html */0], /* module */[]);
 

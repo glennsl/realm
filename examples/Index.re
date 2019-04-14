@@ -1,7 +1,8 @@
-let () = Stateless.mount(~at="stateless");
-let () = Stateful.mount(~at="stateful");
-let () = ReactInterop.mount(~at="react-interop");
-let () = Composition.mount(~at="composition");
-let () = NoUpdate_Stateful.App.mount(~at="noupdate-stateful");
-let () = NoUpdate_Composition.App.mount(~at="noupdate-composition");
-let () = NoUpdate_Timer.App.mount(~at="noupdate-timer");
+let () = Stateful.App.mount(~at="stateful");
+let () = Composition.App.mount(~at="composition");
+let () = Timer.App.mount(~at="timer");
+
+let () = Old_Stateless.mount(~at="old-stateless");
+let () = Old_Stateful.mount(~at="old-stateful");
+let () = Old_ReactInterop.mount(~at="old-react-interop");
+let () = Old_Composition.mount(~at="old-composition");
