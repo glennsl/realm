@@ -2,26 +2,26 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
+var Timer = require("./Timer.bs.js");
 var Stateful = require("./Stateful.bs.js");
-var Stateless = require("./Stateless.bs.js");
 var Composition = require("./Composition.bs.js");
-var ReactInterop = require("./ReactInterop.bs.js");
-var NoUpdate_Timer = require("./NoUpdate_Timer.bs.js");
-var NoUpdate_Stateful = require("./NoUpdate_Stateful.bs.js");
-var NoUpdate_Composition = require("./NoUpdate_Composition.bs.js");
+var Old_Stateful = require("./old/Old_Stateful.bs.js");
+var Old_Stateless = require("./old/Old_Stateless.bs.js");
+var Old_Composition = require("./old/Old_Composition.bs.js");
+var Old_ReactInterop = require("./old/Old_ReactInterop.bs.js");
 
-Stateless.mount("stateless");
+Curry._1(Stateful.App[/* mount */0], "stateful");
 
-Stateful.mount("stateful");
+Curry._1(Composition.App[/* mount */0], "composition");
 
-ReactInterop.mount("react-interop");
+Curry._1(Timer.App[/* mount */0], "timer");
 
-Composition.mount("composition");
+Old_Stateless.mount("old-stateless");
 
-Curry._1(NoUpdate_Stateful.App[/* mount */0], "noupdate-stateful");
+Old_Stateful.mount("old-stateful");
 
-Curry._1(NoUpdate_Composition.App[/* mount */0], "noupdate-composition");
+Old_ReactInterop.mount("old-react-interop");
 
-Curry._1(NoUpdate_Timer.App[/* mount */0], "noupdate-timer");
+Old_Composition.mount("old-composition");
 
 /*  Not a pure module */

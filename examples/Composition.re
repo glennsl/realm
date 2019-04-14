@@ -1,8 +1,7 @@
+open! Realm.Core;
+open Realm.React;
 
 module Clicker = {
-  type msg =
-    | Click;
-
   type model = {
     count: int
   };
@@ -11,21 +10,18 @@ module Clicker = {
     count: 0
   };
 
-  let update = (msg, model) =>
-    switch (msg) {
-    | Click => { count: model.count + 1 }
-    };
-
-  module Html = RealmOld.React.Html({ type nonrec msg = msg; })
+  let click =
+    Effect.update(model => { count: model.count + 1 })
 
   let view = model => {
     open Html;
+    open Attr;
 
     let message =
-      "You've clicked this " ++ string_of_int(model.count) ++ " times(s)";
+      "You've clicked this " ++ String.fromInt(model.count) ++ " times(s)";
 
-    div([], [
-      button([ onClick(Click) ], [
+    div([
+      button(~attrs=[ onClick(click) ], [
         text(message)
       ]),
     ]);
@@ -34,30 +30,29 @@ module Clicker = {
 
 
 module Toggler = {
-  type msg =
-    | Toggle;
-
   type model = {
-    show: bool
+    show: bool,
+    n: int
   };
 
   let init = () => {
-    show: true
+    show: true,
+    n: 0
   };
 
-  let update = (msg, model) =>
-    switch (msg) {
-    | Toggle => { show: !model.show }
-    };
-
-  module Html = RealmOld.React.Html({ type nonrec msg = msg; })
+  let toggle =
+    Effect.do_(
+      _ => Future.randomInt(0, 10),
+      (n, model) => { n, show: !model.show }
+    )
 
   let view = (~greeting, model) => {
     open Html;
+    open Attr;
 
-    div([], [
-      button([ onClick(Toggle) ], [
-        text("Toggle greeting")
+    div([
+      button(~attrs=[ onClick(toggle) ], [
+        text("Toggle greeting " ++ String.fromInt(model.n))
       ]),
       model.show ? text(greeting) : null
     ]);
@@ -65,40 +60,38 @@ module Toggler = {
 };
 
 
-type msg =
-  | ClickerMsg(Clicker.msg)
-  | TogglerMsg(Toggler.msg);
-
-type model = {
-  clicker: Clicker.model,
-  toggler: Toggler.model
-};
-
-
-let init = () => {
-  clicker: Clicker.init(),
-  toggler: Toggler.init()
-};
-
-
-let update = (msg, model) =>
-  switch (msg) {
-  | ClickerMsg(msg) => { ...model, clicker: Clicker.update(msg, model.clicker) }
-  | TogglerMsg(msg) => { ...model, toggler: Toggler.update(msg, model.toggler) }
+module App = SimpleApp({
+  type model = {
+    clicker: Clicker.model,
+    toggler: Toggler.model
   };
 
-module Html = RealmOld.React.Html({ type nonrec msg = msg; })
 
-let view = (~greeting, model) => {
-  open Html;
+  let init = () => {
+    clicker: Clicker.init(),
+    toggler: Toggler.init()
+  };
 
-  div([], [
-    Clicker.view(model.clicker) |> RealmOld.React.map(msg => ClickerMsg(msg)),
-    Toggler.view(~greeting, model.toggler) |> RealmOld.React.map(msg => TogglerMsg(msg))
-  ])
+  module Components = {
+    open Html;
 
-};
+    let clicker = model => 
+      Clicker.view(model.clicker)
+        |> map( model => model.clicker,
+                (model, clickerModel) => { ...model, clicker: clickerModel });
+    
+    let toggler = (~greeting, model) =>
+      Toggler.view(~greeting, model.toggler)
+        |> map( model => model.toggler,
+                (model, togglerModel) => { ...model, toggler: togglerModel });
+  }
 
+  let view = model => {
+    open Html;
 
-let mount = (~at) =>
-  RealmOld.React.mount(~at, ~init, ~update, ~view=view(~greeting="hello"));
+    div([
+      Components.clicker(model),
+      Components.toggler(~greeting="Hello", model)
+    ])
+  };
+})

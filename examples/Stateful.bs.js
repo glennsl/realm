@@ -2,39 +2,34 @@
 'use strict';
 
 var Curry = require("bs-platform/lib/js/curry.js");
-var RealmOld = require("../src/RealmOld.bs.js");
-
-var Html = Curry._1(RealmOld.React[/* Html */0], /* module */[]);
+var Realm = require("../src/Realm.bs.js");
 
 function init(param) {
   return /* record */[/* count */0];
 }
 
-function update(msg, model) {
-  return /* record */[/* count */model[/* count */0] + 1 | 0];
-}
+var click = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (model) {
+        return /* record */[/* count */model[/* count */0] + 1 | 0];
+      }));
 
 function view(model) {
-  var message = "You've clicked this " + (String(model[/* count */0]) + " times(s)");
-  return Curry._2(Html[/* div */3], /* [] */0, /* :: */[
-              Curry._2(Html[/* button */4], /* :: */[
-                    Curry._1(Html[/* onClick */0], /* Click */0),
+  var message = "You've clicked this " + (Curry._1(Realm.Core[/* String */7][/* fromInt */22], model[/* count */0]) + " times(s)");
+  return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
+              Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
+                    Curry._1(Realm.React[/* Html */0][/* Attr */0][/* onClick */4], click),
                     /* [] */0
                   ], /* :: */[
-                    Curry._1(Html[/* text */2], message),
+                    Curry._1(Realm.React[/* Html */0][/* text */2], message),
                     /* [] */0
                   ]),
               /* [] */0
             ]);
 }
 
-function mount(at) {
-  return RealmOld.React[/* mount */1](at)(init, update, view);
-}
+var App = Realm.React[/* SimpleApp */2](/* module */[
+      /* init */init,
+      /* view */view
+    ]);
 
-exports.Html = Html;
-exports.init = init;
-exports.update = update;
-exports.view = view;
-exports.mount = mount;
-/* Html Not a pure module */
+exports.App = App;
+/* App Not a pure module */
