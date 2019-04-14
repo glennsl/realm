@@ -4,6 +4,7 @@
 var Curry = require("bs-platform/lib/js/curry.js");
 var Timer = require("./Timer.bs.js");
 var Stateful = require("./Stateful.bs.js");
+var ManyInput = require("./ManyInput.bs.js");
 var Composition = require("./Composition.bs.js");
 var Old_Stateful = require("./old/Old_Stateful.bs.js");
 var Old_Stateless = require("./old/Old_Stateless.bs.js");
@@ -15,6 +16,8 @@ Curry._1(Stateful.App[/* mount */0], "stateful");
 Curry._1(Composition.App[/* mount */0], "composition");
 
 Curry._1(Timer.App[/* mount */0], "timer");
+
+Curry._1(ManyInput.App[/* mount */0], "many-input");
 
 Old_Stateless.mount("old-stateless");
 
