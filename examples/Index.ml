@@ -1,6 +1,6 @@
 let () = Stateful.App.mount ~at:"stateful"
 let () = Composition.App.mount ~at:"composition"
-let () = Timer.App.mount ~at:"timer"
+let () = Clock.App.mount ~at:"clock"
 let () = ManyInput.App.mount ~at:"many-input"
 
 let () = Old_Stateless.mount ~at:"old-stateless"

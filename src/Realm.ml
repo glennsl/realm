@@ -8,7 +8,7 @@ module Core = struct
     let make f =
       f
     let const value =
-      make (fun f -> f value)
+      fun resolve -> resolve value
     let andThen f task =
       fun resolve ->
         task (fun a -> f a resolve)
@@ -101,12 +101,20 @@ module Core = struct
 
 
   module Time = struct
+    type t = Js.Date.t
+
+    let now =
+      Future.make (fun resolve -> Js.Date.now () |> Js.Date.fromFloat |> resolve)
+      
     let every id ms action =
       Sub.make id action
         begin fun callback ->
           let intervalId = Js.Global.setIntervalFloat callback ms in
           fun () -> Js.Global.clearInterval intervalId
         end
+
+    let toString =
+      Js.Date.toTimeString
   end 
 end
 

@@ -45,7 +45,12 @@ module Core : sig
 
 
   module Time : sig
+    type t
+
+    val now : t Future.t
     val every : string -> float -> (unit -> 'action) -> 'action Sub.t
+
+    val toString : t -> string
   end
 
 end
