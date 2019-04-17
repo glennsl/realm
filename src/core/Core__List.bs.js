@@ -2,7 +2,12 @@
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
+var Belt_List = require("bs-platform/lib/js/belt_List.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
+
+function filterMap(f, l) {
+  return Belt_List.keepMap(l, f);
+}
 
 var singleton = /* () */0;
 
@@ -21,8 +26,6 @@ var foldl = List.fold_left;
 var foldr = List.fold_right;
 
 var filter = List.filter;
-
-var filterMap = /* () */0;
 
 var length = List.length;
 

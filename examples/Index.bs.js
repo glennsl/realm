@@ -8,6 +8,7 @@ var ManyInput = require("./ManyInput.bs.js");
 var Composition = require("./Composition.bs.js");
 var Old_Stateful = require("./old/Old_Stateful.bs.js");
 var Old_Stateless = require("./old/Old_Stateless.bs.js");
+var FormValidation = require("./FormValidation.bs.js");
 var Old_Composition = require("./old/Old_Composition.bs.js");
 var Old_ReactInterop = require("./old/Old_ReactInterop.bs.js");
 
@@ -18,6 +19,8 @@ Curry._1(Composition.App[/* mount */0], "composition");
 Curry._1(Clock.App[/* mount */0], "clock");
 
 Curry._1(ManyInput.App[/* mount */0], "many-input");
+
+Curry._1(FormValidation.App[/* mount */0], "form-validation");
 
 Old_Stateless.mount("old-stateless");
 
