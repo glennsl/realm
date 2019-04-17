@@ -22,6 +22,14 @@ function tap(f, x) {
   return x;
 }
 
+function $great$great(f, g, x) {
+  return Curry._1(g, Curry._1(f, x));
+}
+
+function $less$less(f, g, x) {
+  return Curry._1(f, Curry._1(g, x));
+}
+
 function $pipe$great(prim, prim$1) {
   return Curry._1(prim$1, prim);
 }
@@ -29,10 +37,6 @@ function $pipe$great(prim, prim$1) {
 function $less$pipe(prim, prim$1) {
   return Curry._1(prim, prim$1);
 }
-
-var $great$great = /* () */0;
-
-var $less$less = /* () */0;
 
 exports.id = id;
 exports.always = always;

@@ -11,7 +11,7 @@ let mapi = ()
 let foldl = List.fold_left
 let foldr = List.fold_right
 let filter = List.filter
-let filterMap = ()
+let filterMap = fun f l -> Belt.List.keepMap l f
 
 (* Utilities *)
 let length = List.length
