@@ -7,21 +7,40 @@ module Core = struct
 
     let make f =
       f
+
     let const value =
       fun resolve -> resolve value
+
     let andThen f task =
       fun resolve ->
         task (fun a -> f a resolve)
+
     let map f task =
       fun resolve ->
         task (fun a -> resolve (f a))
+
     let map2 f taskA taskB =
       taskA
       |> andThen (fun a -> taskB
       |> andThen (fun b -> const (f a b)))
 
+
+    let all2 futureA futureB =
+      let valueA = ref(None) in
+      let valueB = ref(None) in
+      fun resolve ->
+        let tryResolve () =
+          match !valueA, !valueB with
+          | Some a, Some b -> resolve (a, b)
+          | _ -> ()
+          in
+        futureA (fun value -> valueA := Some value; tryResolve ());
+        futureB (fun value -> valueB := Some value; tryResolve ())
+
+
     let run receiver task =
       task receiver
+
 
     let randomInt l h f =
       f ((Random.int h) + l)
@@ -105,6 +124,9 @@ module Core = struct
 
     let now =
       Future.make (fun resolve -> Js.Date.now () |> Js.Date.fromFloat |> resolve)
+
+    let delay ms =
+      Future.make (fun resolve -> let _:Js.Global.timeoutId = Js.Global.setTimeoutFloat resolve ms in ())
       
     let every id ms action =
       Sub.make id action

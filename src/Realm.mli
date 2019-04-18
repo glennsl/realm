@@ -10,6 +10,8 @@ module Core : sig
     val map : ('a -> 'b) -> 'a t -> 'b t
     val map2 : ('a -> 'b -> 'c) -> 'a t -> 'b t -> 'c t
 
+    val all2 : 'a t -> 'b t -> ('a * 'b) t
+
     val run : ('a -> unit) -> 'a t -> unit
 
     val randomInt : int -> int -> int t
@@ -48,6 +50,7 @@ module Core : sig
     type t
 
     val now : t Future.t
+    val delay : float -> unit Future.t
     val every : string -> float -> (unit -> 'action) -> 'action Sub.t
 
     val toString : t -> string

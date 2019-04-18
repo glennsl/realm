@@ -62,6 +62,33 @@ function map2(f, taskA, taskB) {
               }));
 }
 
+function all2(futureA, futureB) {
+  var valueA = /* record */[/* contents */undefined];
+  var valueB = /* record */[/* contents */undefined];
+  return (function (resolve) {
+      var tryResolve = function (param) {
+        var match = valueA[0];
+        var match$1 = valueB[0];
+        if (match !== undefined && match$1 !== undefined) {
+          return Curry._1(resolve, /* tuple */[
+                      Caml_option.valFromOption(match),
+                      Caml_option.valFromOption(match$1)
+                    ]);
+        } else {
+          return /* () */0;
+        }
+      };
+      Curry._1(futureA, (function (value) {
+              valueA[0] = Caml_option.some(value);
+              return tryResolve(/* () */0);
+            }));
+      return Curry._1(futureB, (function (value) {
+                    valueB[0] = Caml_option.some(value);
+                    return tryResolve(/* () */0);
+                  }));
+    });
+}
+
 function run(receiver, task) {
   return Curry._1(task, receiver);
 }
@@ -76,6 +103,7 @@ var Future = /* module */[
   /* andThen */andThen,
   /* map */map,
   /* map2 */map2,
+  /* all2 */all2,
   /* run */run,
   /* randomInt */randomInt
 ];
@@ -226,6 +254,13 @@ function now(resolve) {
                   })), resolve);
 }
 
+function delay(ms) {
+  return (function (resolve) {
+      setTimeout(resolve, ms);
+      return /* () */0;
+    });
+}
+
 function every(id, ms, action) {
   return make$1(id, action, (function (callback) {
                 var intervalId = setInterval(callback, ms);
@@ -242,6 +277,7 @@ function toString(prim) {
 
 var Time = /* module */[
   /* now */now,
+  /* delay */delay,
   /* every */every,
   /* toString */toString
 ];

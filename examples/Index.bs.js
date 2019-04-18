@@ -11,6 +11,7 @@ var Old_Stateful = require("./old/Old_Stateful.bs.js");
 var Old_Stateless = require("./old/Old_Stateless.bs.js");
 var FormValidation = require("./FormValidation.bs.js");
 var Old_Composition = require("./old/Old_Composition.bs.js");
+var ConcurrentEffect = require("./ConcurrentEffect.bs.js");
 var Old_ReactInterop = require("./old/Old_ReactInterop.bs.js");
 
 Curry._1(Stateful.App[/* mount */0], "stateful");
@@ -24,6 +25,8 @@ Curry._1(ManyInput.App[/* mount */0], "many-input");
 Curry._1(FormValidation.App[/* mount */0], "form-validation");
 
 Curry._1(CustomAction.App[/* mount */0], "custom-action");
+
+Curry._1(ConcurrentEffect.App[/* mount */0], "concurrent-effect");
 
 Old_Stateless.mount("old-stateless");
 

@@ -40,7 +40,7 @@ function init$1(param) {
 }
 
 var toggle = Curry._2(Realm.Core[/* Effect */15][/* do_ */3], (function (param) {
-        return Curry._2(Realm.Core[/* Future */14][/* randomInt */6], 0, 10);
+        return Curry._2(Realm.Core[/* Future */14][/* randomInt */7], 0, 10);
       }), (function (n, model) {
         return /* record */[
                 /* show */!model[/* show */0],
