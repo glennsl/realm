@@ -25,49 +25,49 @@ function init(param) {
 
 function view(model) {
   return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
-              Realm.Core[/* |> */11](textInput(model[/* a */0]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (m) {
-                          return m[/* a */0];
-                        }), (function (m, v) {
-                          return /* record */[
-                                  /* a */v,
-                                  /* b */m[/* b */1],
-                                  /* c */m[/* c */2],
-                                  /* d */m[/* d */3]
-                                ];
-                        }))),
-              /* :: */[
-                Realm.Core[/* |> */11](textInput(model[/* b */1]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (m) {
-                            return m[/* b */1];
-                          }), (function (m, v) {
-                            return /* record */[
-                                    /* a */m[/* a */0],
-                                    /* b */v,
-                                    /* c */m[/* c */2],
-                                    /* d */m[/* d */3]
-                                  ];
-                          }))),
-                /* :: */[
-                  Realm.Core[/* |> */11](textInput(model[/* c */2]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (m) {
-                              return m[/* c */2];
+              Realm.Core[/* |> */11](textInput(model[/* a */0]), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (m) {
+                              return m[/* a */0];
                             }), (function (m, v) {
                               return /* record */[
-                                      /* a */m[/* a */0],
+                                      /* a */v,
                                       /* b */m[/* b */1],
-                                      /* c */v,
+                                      /* c */m[/* c */2],
                                       /* d */m[/* d */3]
                                     ];
-                            }))),
-                  /* :: */[
-                    Realm.Core[/* |> */11](textInput(model[/* d */3]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (m) {
-                                return m[/* d */3];
+                            })))),
+              /* :: */[
+                Realm.Core[/* |> */11](textInput(model[/* b */1]), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (m) {
+                                return m[/* b */1];
                               }), (function (m, v) {
                                 return /* record */[
                                         /* a */m[/* a */0],
-                                        /* b */m[/* b */1],
+                                        /* b */v,
                                         /* c */m[/* c */2],
-                                        /* d */v
+                                        /* d */m[/* d */3]
                                       ];
-                              }))),
+                              })))),
+                /* :: */[
+                  Realm.Core[/* |> */11](textInput(model[/* c */2]), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (m) {
+                                  return m[/* c */2];
+                                }), (function (m, v) {
+                                  return /* record */[
+                                          /* a */m[/* a */0],
+                                          /* b */m[/* b */1],
+                                          /* c */v,
+                                          /* d */m[/* d */3]
+                                        ];
+                                })))),
+                  /* :: */[
+                    Realm.Core[/* |> */11](textInput(model[/* d */3]), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (m) {
+                                    return m[/* d */3];
+                                  }), (function (m, v) {
+                                    return /* record */[
+                                            /* a */m[/* a */0],
+                                            /* b */m[/* b */1],
+                                            /* c */m[/* c */2],
+                                            /* d */v
+                                          ];
+                                  })))),
                     /* [] */0
                   ]
                 ]

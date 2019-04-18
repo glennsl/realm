@@ -4,7 +4,7 @@ open Model;
 
 let editTextInput = initialValue =>
   TodoTextInput.view(~className="edit", initialValue)
-    |> Html.map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] })
+    |> Html.map(Effect.map(_ => "", (model, name) => { ...model, entries: model.entries @ [Todo.make(name)] }))
 
 let view = (entry: Todo.t) => {
   open Html;

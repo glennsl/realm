@@ -69,15 +69,19 @@ module App = SimpleApp(struct
 
       let clicker model =
         Clicker.view model.clicker
-          |> map 
-              (fun model -> model.clicker)
-              (fun model clickerModel -> { model with clicker = clickerModel })
+          |> map
+              ( Effect.map
+                  (fun model -> model.clicker)
+                  (fun model clickerModel -> { model with clicker = clickerModel })
+              )
 
       let toggler ~greeting  model =
         Toggler.view ~greeting model.toggler
           |> map
-              (fun model -> model.toggler)
-              (fun model togglerModel -> { model with toggler = togglerModel })
+              ( Effect.map
+                  (fun model -> model.toggler)
+                  (fun model togglerModel -> { model with toggler = togglerModel })
+              )
   end
 
   let view model =

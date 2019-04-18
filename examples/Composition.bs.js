@@ -82,25 +82,25 @@ function init$2(param) {
 }
 
 function clicker(model) {
-  return Realm.Core[/* |> */11](view(model[/* clicker */0]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (model) {
-                    return model[/* clicker */0];
-                  }), (function (model, clickerModel) {
-                    return /* record */[
-                            /* clicker */clickerModel,
-                            /* toggler */model[/* toggler */1]
-                          ];
-                  })));
+  return Realm.Core[/* |> */11](view(model[/* clicker */0]), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (model) {
+                        return model[/* clicker */0];
+                      }), (function (model, clickerModel) {
+                        return /* record */[
+                                /* clicker */clickerModel,
+                                /* toggler */model[/* toggler */1]
+                              ];
+                      }))));
 }
 
 function toggler(greeting, model) {
-  return Realm.Core[/* |> */11](view$1(greeting, model[/* toggler */1]), Curry._2(Realm.React[/* Html */0][/* map */17], (function (model) {
-                    return model[/* toggler */1];
-                  }), (function (model, togglerModel) {
-                    return /* record */[
-                            /* clicker */model[/* clicker */0],
-                            /* toggler */togglerModel
-                          ];
-                  })));
+  return Realm.Core[/* |> */11](view$1(greeting, model[/* toggler */1]), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (model) {
+                        return model[/* toggler */1];
+                      }), (function (model, togglerModel) {
+                        return /* record */[
+                                /* clicker */model[/* clicker */0],
+                                /* toggler */togglerModel
+                              ];
+                      }))));
 }
 
 function view$2(model) {

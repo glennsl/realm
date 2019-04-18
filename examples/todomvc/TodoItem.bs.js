@@ -9,17 +9,17 @@ var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var TodoTextInput = require("./TodoTextInput.bs.js");
 
 function editTextInput(initialValue) {
-  return Realm.Core[/* |> */11](TodoTextInput.view("edit", undefined, initialValue), Curry._2(Realm.React[/* Html */0][/* map */17], (function (param) {
-                    return "";
-                  }), (function (model, name) {
-                    return /* record */[
-                            /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
-                                  Model.Todo[/* make */1](name),
-                                  /* [] */0
-                                ]),
-                            /* visibility */model[/* visibility */1]
-                          ];
-                  })));
+  return Realm.Core[/* |> */11](TodoTextInput.view("edit", undefined, initialValue), Curry._1(Realm.React[/* Html */0][/* map */17], Curry._2(Realm.Core[/* Effect */15][/* map */5], (function (param) {
+                        return "";
+                      }), (function (model, name) {
+                        return /* record */[
+                                /* entries */Pervasives.$at(model[/* entries */0], /* :: */[
+                                      Model.Todo[/* make */1](name),
+                                      /* [] */0
+                                    ]),
+                                /* visibility */model[/* visibility */1]
+                              ];
+                      }))));
 }
 
 function view(entry) {
