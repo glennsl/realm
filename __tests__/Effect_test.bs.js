@@ -14,14 +14,14 @@ Jest.describe("Future", (function (param) {
                 var task = Curry._1(Realm.Core[/* Future */14][/* make */0], (function (callback) {
                         return Curry._1(callback, expected);
                       }));
-                return Curry._2(Realm.Core[/* Future */14][/* run */5], (function (value) {
+                return Curry._2(Realm.Core[/* Future */14][/* run */6], (function (value) {
                               return Curry._1(finish, Jest.Expect[/* toBe */2](expected, Jest.Expect[/* expect */0](value)));
                             }), task);
               }));
         Jest.testAsync("const", undefined, (function (finish) {
                 var expected = "my-value";
                 var task = Curry._1(Realm.Core[/* Future */14][/* const */1], expected);
-                return Curry._2(Realm.Core[/* Future */14][/* run */5], (function (value) {
+                return Curry._2(Realm.Core[/* Future */14][/* run */6], (function (value) {
                               return Curry._1(finish, Jest.Expect[/* toBe */2](expected, Jest.Expect[/* expect */0](value)));
                             }), task);
               }));
@@ -29,19 +29,19 @@ Jest.describe("Future", (function (param) {
                 var task = Curry._2(Realm.Core[/* Future */14][/* andThen */2], (function (a) {
                         return Curry._1(Realm.Core[/* Future */14][/* const */1], a + "b");
                       }), Curry._1(Realm.Core[/* Future */14][/* const */1], "a"));
-                return Curry._2(Realm.Core[/* Future */14][/* run */5], (function (value) {
+                return Curry._2(Realm.Core[/* Future */14][/* run */6], (function (value) {
                               return Curry._1(finish, Jest.Expect[/* toBe */2]("ab", Jest.Expect[/* expect */0](value)));
                             }), task);
               }));
         Jest.testAsync("map", undefined, (function (finish) {
-                return Curry._2(Realm.Core[/* Future */14][/* run */5], (function (value) {
+                return Curry._2(Realm.Core[/* Future */14][/* run */6], (function (value) {
                               return Curry._1(finish, Jest.Expect[/* toBe */2](8, Jest.Expect[/* expect */0](value)));
                             }), Curry._2(Realm.Core[/* Future */14][/* map */3], (function (x) {
                                   return x + 5 | 0;
                                 }), Curry._1(Realm.Core[/* Future */14][/* const */1], 3)));
               }));
         return Jest.testAsync("map2", undefined, (function (finish) {
-                      return Curry._2(Realm.Core[/* Future */14][/* run */5], (function (value) {
+                      return Curry._2(Realm.Core[/* Future */14][/* run */6], (function (value) {
                                     return Curry._1(finish, Jest.Expect[/* toBe */2](9, Jest.Expect[/* expect */0](value)));
                                   }), Curry._3(Realm.Core[/* Future */14][/* map2 */4], (function (x, y) {
                                         return x + y | 0;
@@ -193,7 +193,7 @@ Jest.describe("Effect", (function (param) {
             var result$1 = match$1[1];
             var model$1 = match$1[0];
             if (next !== undefined) {
-              return Curry._2(Realm.Core[/* Future */14][/* run */5], (function (param) {
+              return Curry._2(Realm.Core[/* Future */14][/* run */6], (function (param) {
                             return aux(model$1, result$1, param);
                           }), Caml_option.valFromOption(next));
             } else {

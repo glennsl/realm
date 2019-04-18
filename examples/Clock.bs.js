@@ -28,7 +28,7 @@ function subs(model) {
   };
   if (model[/* running */1]) {
     return /* :: */[
-            Curry._3(Realm.Core[/* Time */17][/* every */1], "fast", 1000, tick),
+            Curry._3(Realm.Core[/* Time */17][/* every */2], "fast", 1000, tick),
             /* [] */0
           ];
   } else {
@@ -52,7 +52,7 @@ var disable = Curry._1(Realm.Core[/* Effect */15][/* update */2], (function (mod
 
 function view(model) {
   return Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
-              Curry._1(Realm.React[/* Html */0][/* text */2], Curry._1(Realm.Core[/* Time */17][/* toString */2], model[/* time */0])),
+              Curry._1(Realm.React[/* Html */0][/* text */2], Curry._1(Realm.Core[/* Time */17][/* toString */3], model[/* time */0])),
               /* :: */[
                 Curry._4(Realm.React[/* Html */0][/* div */4], undefined, undefined, undefined, /* :: */[
                       Curry._4(Realm.React[/* Html */0][/* button */3], undefined, undefined, /* :: */[
