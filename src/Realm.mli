@@ -69,12 +69,12 @@ module React : sig
       val autofocus : 'a -> _ t
       val hidden : 'a -> _ t
       val name : string -> _ t
-      val onClick : 'model Effect.t -> 'model t
-      val onDoubleClick : 'model  Effect.t -> 'model t
-      val onChange : 'model Effect.t -> 'model t
-      val onBlur : 'model Effect.t -> 'model t
-      val onInput : ('a -> 'model Effect.t) -> 'model t
-      val onKeyDown : ('a -> 'model Effect.t) -> 'model t
+      val onClick : 'action -> 'action t
+      val onDoubleClick : 'action -> 'action t
+      val onChange : 'action -> 'action t
+      val onBlur : 'action -> 'action t
+      val onInput : ('a -> 'action) -> 'action t
+      val onKeyDown : ('a -> 'action) -> 'action t
     end
 
     val null : _ t
@@ -168,27 +168,26 @@ module React : sig
       -> 'model t list
       -> 'model t
 
-    val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
+    val map : ('a -> 'b) -> 'a t -> 'b t
 
-    val raw : (('model Effect.t -> unit) -> ReasonReact.reactElement) -> 'model t
+    val raw : (('action -> unit) -> ReasonReact.reactElement) -> 'action t
   end
 
   module type AppSpec = sig
     type model
-    (* type action *)
+    type action
 
     val init : unit -> model Future.t
-    val update : model Effect.t -> model Effect.t
-    val subs : model -> model Effect.t Sub.t list
-    val view : model -> model Html.t
+    val update : action -> model Effect.t
+    val subs : model -> action Sub.t list
+    val view : model -> action Html.t
   end
 
   module type SimpleAppSpec = sig
     type model
-    (* type action *)
 
     val init : unit -> model
-    val view : model -> model Html.t
+    val view : model -> model Effect.t Html.t
   end
 
   module type App = sig

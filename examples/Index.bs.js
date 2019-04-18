@@ -6,6 +6,7 @@ var Curry = require("bs-platform/lib/js/curry.js");
 var Stateful = require("./Stateful.bs.js");
 var ManyInput = require("./ManyInput.bs.js");
 var Composition = require("./Composition.bs.js");
+var CustomAction = require("./CustomAction.bs.js");
 var Old_Stateful = require("./old/Old_Stateful.bs.js");
 var Old_Stateless = require("./old/Old_Stateless.bs.js");
 var FormValidation = require("./FormValidation.bs.js");
@@ -21,6 +22,8 @@ Curry._1(Clock.App[/* mount */0], "clock");
 Curry._1(ManyInput.App[/* mount */0], "many-input");
 
 Curry._1(FormValidation.App[/* mount */0], "form-validation");
+
+Curry._1(CustomAction.App[/* mount */0], "custom-action");
 
 Old_Stateless.mount("old-stateless");
 

@@ -8,6 +8,10 @@ module App = App(struct
     ; running: bool
     }
 
+  type action =
+    model Effect.t
+
+
   let init () =
     Time.now
       |> Future.map (fun time -> { time; running = true })
@@ -23,11 +27,13 @@ module App = App(struct
     else
       []
 
+
   let enable =
     Effect.update (fun model -> { model with running = true })
 
   let disable =
     Effect.update (fun model -> { model with running = false })
+
 
   let view model =
     let open Html in

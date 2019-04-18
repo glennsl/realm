@@ -26,9 +26,9 @@ module App = SimpleApp(struct
   let view model =
     let open Html in
     div
-      [ textInput model.a |> map (fun m -> m.a ) (fun m v -> { m with a = v })
-      ; textInput model.b |> map (fun m -> m.b ) (fun m v -> { m with b = v })
-      ; textInput model.c |> map (fun m -> m.c ) (fun m v -> { m with c = v })
-      ; textInput model.d |> map (fun m -> m.d ) (fun m v -> { m with d = v })
+      [ textInput model.a |> map (Effect.map (fun m -> m.a ) (fun m v -> { m with a = v }))
+      ; textInput model.b |> map (Effect.map (fun m -> m.b ) (fun m v -> { m with b = v }))
+      ; textInput model.c |> map (Effect.map (fun m -> m.c ) (fun m v -> { m with c = v }))
+      ; textInput model.d |> map (Effect.map (fun m -> m.d ) (fun m v -> { m with d = v }))
       ]
 end)

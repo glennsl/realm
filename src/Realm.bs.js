@@ -246,13 +246,7 @@ var Time = /* module */[
   /* toString */toString
 ];
 
-function run$1(mount, render, init, $staropt$star, $staropt$star$1, view, arg) {
-  var update = $staropt$star !== undefined ? $staropt$star : (function (x) {
-        return x;
-      });
-  var subs = $staropt$star$1 !== undefined ? $staropt$star$1 : (function (param) {
-        return /* [] */0;
-      });
+function run$1(mount, render, init, update, subs, view, arg) {
   return Curry._2(init, arg, (function (initialModel) {
                 var activeSubs = /* record */[/* contents */Belt_MapString.empty];
                 var model = /* record */[/* contents */initialModel];
@@ -332,38 +326,38 @@ function name(name$1) {
           ]);
 }
 
-function onClick(command) {
+function onClick(action) {
   return /* Event */Block.__(1, [
             "onClick",
             (function (param) {
-                return command;
+                return action;
               })
           ]);
 }
 
-function onDoubleClick(command) {
+function onDoubleClick(action) {
   return /* Event */Block.__(1, [
             "onDoubleClick",
             (function (param) {
-                return command;
+                return action;
               })
           ]);
 }
 
-function onChange(command) {
+function onChange(action) {
   return /* Event */Block.__(1, [
             "onChange",
             (function (param) {
-                return command;
+                return action;
               })
           ]);
 }
 
-function onBlur(command) {
+function onBlur(action) {
   return /* Event */Block.__(1, [
             "onBlur",
             (function (param) {
-                return command;
+                return action;
               })
           ]);
 }
@@ -579,11 +573,9 @@ function input($staropt$star, value, id, className, $staropt$star$1, children) {
   }
 }
 
-function map$2(getter, setter, element, dispatch) {
-  return Curry._1(element, (function (effect) {
-                return Curry._1(dispatch, Realm__Core.$pipe$great(effect, (function (param) {
-                                  return map$1(getter, setter, param);
-                                })));
+function map$2(f, element, dispatch) {
+  return Curry._1(element, (function (param) {
+                return Realm__Core.$great$great(f, dispatch, param);
               }));
 }
 
@@ -602,9 +594,10 @@ function App(Spec) {
 }
 
 function SimpleApp(Spec) {
+  var init = Spec[0];
   var view = Spec[1];
-  var init = function (param) {
-    var partial_arg = Curry._1(Spec[/* init */0], /* () */0);
+  var init$1 = function (param) {
+    var partial_arg = Curry._1(init, /* () */0);
     return (function (param) {
         return Curry._1(param, partial_arg);
       });
@@ -619,7 +612,7 @@ function SimpleApp(Spec) {
     var render = function (component) {
       return ReactDOMRe.renderToElementWithId(component, at);
     };
-    return run$1(render, render, init, update, subs, view, /* () */0);
+    return run$1(render, render, init$1, update, subs, view, /* () */0);
   };
   return /* module */[/* mount */mount];
 }

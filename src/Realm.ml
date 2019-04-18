@@ -126,8 +126,8 @@ module type RuntimeConfig = sig
 end
 
 module Runtime(Config : RuntimeConfig) = struct
-  type 'model dispatcher = 'model Effect.t -> unit
-  type 'model element = 'model dispatcher -> Config.element
+  type 'action dispatcher = 'action -> unit
+  type 'action element = 'action dispatcher -> Config.element
 
   module SubMap = Belt.Map.String
 
@@ -142,7 +142,7 @@ module Runtime(Config : RuntimeConfig) = struct
     view : ('model -> 'model element) ->
     'arg ->
     unit *)
-    = fun ~mount ~render ~init ?(update = fun x -> x) ?(subs = fun _ -> []) ~view arg ->
+    = fun ~mount ~render ~init ~update ~subs ~view arg ->
   (* let run
     ~mount:(mount : htmlElement -> unit)
     ~render:(render : htmlElement -> unit)
@@ -210,18 +210,18 @@ module React = struct
 
     module Attr = struct
       type event
-      type 'model t =
+      type 'action t =
         | Raw of string * string
-        | Event of string * (event -> 'model Effect.t)
+        | Event of string * (event -> 'action)
 
       let className name = Raw ("className", name)
       let autofocus value = Raw ("autoFocus", Obj.magic value)
       let hidden value = Raw ("hidden", Obj.magic value)
       let name name = Raw ("name", name)
-      let onClick command = Event ("onClick", fun _ -> command)
-      let onDoubleClick command = Event ("onDoubleClick", fun _ -> command)
-      let onChange command = Event ("onChange", fun _ -> command)
-      let onBlur command = Event ("onBlur", fun _ -> command)
+      let onClick action = Event ("onClick", fun _ -> action)
+      let onDoubleClick action = Event ("onDoubleClick", fun _ -> action)
+      let onChange action = Event ("onChange", fun _ -> action)
+      let onBlur action = Event ("onBlur", fun _ -> action)
       let onInput callback = Event ("onInput", fun event -> callback (Obj.magic event)##target##value)
       let onKeyDown callback = Event ("onKeyDown", fun event -> callback (Obj.magic event)##keyCode)
 
@@ -271,9 +271,9 @@ module React = struct
       | `Checkbox checked ->
         _element "input" ?id ?className ~attrs:([Attr.Raw ("type", "checkbox"); Raw ("checked", Obj.magic checked)] @ attrs) children
 
-    let map getter setter element =
+    let map f element =
         fun dispatch ->
-          element (fun effect -> dispatch (effect |> Effect.map getter setter))
+          element (f >> dispatch)
 
     let raw f =
       f
@@ -282,19 +282,19 @@ module React = struct
 
   module type AppSpec = sig
     type model
+    type action
 
     val init : unit -> model Future.t
-    val update : model Effect.t -> model Effect.t
-    val subs : model -> model Effect.t Sub.t list
-    val view : model -> model Html.t
+    val update : action -> model Effect.t
+    val subs : model -> action Sub.t list
+    val view : model -> action Html.t
   end
 
   module type SimpleAppSpec = sig
     type model
-    (* type action *)
 
     val init : unit -> model
-    val view : model -> model Html.t
+    val view : model -> model Effect.t Html.t
   end
 
   module type App = sig
@@ -312,7 +312,8 @@ module React = struct
   module SimpleApp(Spec : SimpleAppSpec) = struct
     include App(struct
       include Spec
-      let init () = Future.const (Spec.init ())
+      type action = model Effect.t
+      let init () = Future.const (init ())
       let update x = x
       let subs _ = []
     end)

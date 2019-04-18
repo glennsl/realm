@@ -3,6 +3,7 @@ let () = Composition.App.mount ~at:"composition"
 let () = Clock.App.mount ~at:"clock"
 let () = ManyInput.App.mount ~at:"many-input"
 let () = FormValidation.App.mount ~at:"form-validation"
+let () = CustomAction.App.mount ~at:"custom-action"
 
 let () = Old_Stateless.mount ~at:"old-stateless"
 let () = Old_Stateful.mount ~at:"old-stateful"

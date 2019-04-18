@@ -154,13 +154,13 @@ module App = SimpleApp(struct
     let open Attr in
     div
       [ validatedTextInput "Required" model.a
-          |> map (fun m -> m.a ) (fun m v -> { m with a = v })
+          |> map (Effect.map (fun m -> m.a ) (fun m v -> { m with a = v }))
       ; validatedTextInput "E-mail address" model.b
-          |> map (fun m -> m.b ) (fun m v -> { m with b = v })
+          |> map (Effect.map (fun m -> m.b ) (fun m v -> { m with b = v }))
       ; validatedTextInput "JSON" model.c
-          |> map (fun m -> m.c ) (fun m v -> { m with c = v })
+          |> map (Effect.map (fun m -> m.c ) (fun m v -> { m with c = v }))
       ; validatedTextInput "Whole number" model.d
-          |> map (fun m -> m.d ) (fun m v -> { m with d = v })
+          |> map (Effect.map (fun m -> m.d ) (fun m v -> { m with d = v }))
       ; button ~attrs:[ onClick submit ] [ text "Submit" ]
       ; text model.submitMessage
       ]
