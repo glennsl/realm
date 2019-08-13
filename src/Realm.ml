@@ -48,11 +48,11 @@ module Core = struct
 
 
   module Effect = struct
-    type 'model t =
-      'model node list
-    and 'model node =
-      | Update of ('model -> 'model)
-      | Task   of ('model -> ('model -> 'model) Future.t)
+    type ('a, 'b) t =
+      ('a, 'b) node list
+    and ('a, 'b) node =
+      | Update of ('a -> 'b)
+      | Task   of ('a -> 'b Future.t)
 
     let none =
       []
@@ -63,8 +63,8 @@ module Core = struct
     let update updater =
       [ Update updater ]
 
-    let do_ action mapper =
-      [ Task (fun model -> action model |> Future.map mapper) ]
+    let do_ action =
+      [ Task action ]
 
     let rec andThen last =
       function
@@ -307,7 +307,7 @@ module React = struct
     type action
 
     val init : unit -> model Future.t
-    val update : action -> model Effect.t
+    val update : action -> (model, model) Effect.t
     val subs : model -> action Sub.t list
     val view : model -> action Html.t
   end
@@ -316,7 +316,7 @@ module React = struct
     type model
 
     val init : unit -> model
-    val view : model -> model Effect.t Html.t
+    val view : model -> (model, model) Effect.t Html.t
   end
 
   module type App = sig
@@ -334,7 +334,7 @@ module React = struct
   module SimpleApp(Spec : SimpleAppSpec) = struct
     include App(struct
       include Spec
-      type action = model Effect.t
+      type action = (model, model) Effect.t
       let init () = Future.const (init ())
       let update x = x
       let subs _ = []

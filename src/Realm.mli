@@ -19,14 +19,14 @@ module Core : sig
 
 
   module Effect : sig
-    type 'model t
+    type ('a, 'b) t
 
-    val none : 'model t
-    val const : 'model -> 'model t
-    val update : ('model -> 'model) -> 'model t
-    val do_ : ('model -> 'result Future.t) -> ('result -> 'model -> 'model) -> 'model t
-    val andThen : 'model t -> 'model t -> 'model t
-    val map : ('b -> 'a) -> ('b -> 'a -> 'b) -> 'a t -> 'b t
+    val none : _ t
+    val const : 'a -> (_, 'a) t
+    val update : ('a -> 'b) -> ('a, 'b) t
+    val do_ : ('a -> 'b Future.t) -> ('b -> 'a -> 'a) -> ('a, 'b) t
+    val andThen : ('b, 'c) t -> ('a, 'b) t -> ('a, 'c) t
+    val map : ('a1 -> 'a2) -> ('b1 -> 'a1 -> 'b2) -> ('a1, 'b1) t -> ('a2, 'b2) t
 
     (* val step : 'model -> 'model t -> ('model option* 'model t Task.t option) *)
   end
@@ -181,7 +181,7 @@ module React : sig
     type action
 
     val init : unit -> model Future.t
-    val update : action -> model Effect.t
+    val update : action -> (model, model) Effect.t
     val subs : model -> action Sub.t list
     val view : model -> action Html.t
   end
@@ -190,7 +190,7 @@ module React : sig
     type model
 
     val init : unit -> model
-    val view : model -> model Effect.t Html.t
+    val view : model -> (model, model) Effect.t Html.t
   end
 
   module type App = sig
