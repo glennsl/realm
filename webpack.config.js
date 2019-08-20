@@ -27,5 +27,14 @@ module.exports = [{
     publicPath: outputDir,
     filename: 'todomvc-minimal.js',
   },
+}, {
+  entry: './examples/vdom/VdomTest.bs.js',
+  mode: isProd ? 'production' : 'development',
+  devtool: false,
+  output: {
+    path: outputDir,
+    publicPath: outputDir,
+    filename: 'VdomTest.js',
+  },
 }];
 
