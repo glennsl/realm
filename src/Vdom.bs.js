@@ -3,6 +3,8 @@
 
 var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
+var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
+var Pervasives = require("bs-platform/lib/js/pervasives.js");
 
 function make(namespace, key, value) {
   return /* record */[
@@ -14,58 +16,258 @@ function make(namespace, key, value) {
 
 var Attribute = /* module */[/* make */make];
 
+function dekey(node) {
+  switch (node.tag | 0) {
+    case 0 : 
+    case 1 : 
+        return node;
+    case 2 : 
+        var match = node[0];
+        return /* Element */Block.__(1, [/* record */[
+                    /* namespace */match[/* namespace */0],
+                    /* tag */match[/* tag */1],
+                    /* attributes */match[/* attributes */2],
+                    /* children */List.map((function (param) {
+                            return dekey(param[1]);
+                          }), match[/* children */3])
+                  ]]);
+    
+  }
+}
+
 function text(s) {
   return /* Text */Block.__(0, [s]);
 }
 
-function element(namespace, key, tagName, attributes, children) {
+function element(namespace, tag, attributes, children) {
   return /* Element */Block.__(1, [/* record */[
               /* namespace */namespace,
-              /* tagName */tagName,
-              /* key */key,
+              /* tag */tag,
               /* attributes */attributes,
               /* children */children
             ]]);
 }
 
 var $$Node = /* module */[
+  /* dekey */dekey,
   /* text */text,
   /* element */element
 ];
 
+var Dom = /* module */[];
+
 function append(node, targetNode) {
   var domNode;
-  if (node.tag) {
-    var spec = node[0];
-    var match = spec[/* namespace */0];
-    var el = match !== undefined ? document.createElementNS(match, spec[/* tagName */1]) : document.createElement(spec[/* tagName */1]);
-    List.iter((function (attr) {
-            var match = attr[/* namespace */0];
-            if (match !== undefined) {
-              el.setAttribute(match, attr[/* key */1], attr[/* value */2]);
-              return /* () */0;
-            } else {
-              el.setAttribute(attr[/* key */1], attr[/* value */2]);
-              return /* () */0;
-            }
-          }), spec[/* attributes */3]);
-    List.iter((function (child) {
-            return append(child, el);
-          }), spec[/* children */4]);
-    domNode = el;
-  } else {
-    domNode = document.createTextNode(node[0]);
+  switch (node.tag | 0) {
+    case 0 : 
+        domNode = document.createTextNode(node[0]);
+        break;
+    case 1 : 
+        var spec = node[0];
+        var match = spec[/* namespace */0];
+        var el = match !== undefined ? document.createElementNS(match, spec[/* tag */1]) : document.createElement(spec[/* tag */1]);
+        List.iter((function (attr) {
+                var match = attr[/* namespace */0];
+                if (match !== undefined) {
+                  el.setAttribute(match, attr[/* key */1], attr[/* value */2]);
+                  return /* () */0;
+                } else {
+                  el.setAttribute(attr[/* key */1], attr[/* value */2]);
+                  return /* () */0;
+                }
+              }), spec[/* attributes */2]);
+        List.iter((function (child) {
+                return append(child, el);
+              }), spec[/* children */3]);
+        domNode = el;
+        break;
+    case 2 : 
+        domNode = Pervasives.failwith("todo");
+        break;
+    
   }
   targetNode.appendChild(domNode);
   return /* () */0;
 }
 
 function render(node, targetId) {
-  return append(node, document.getElementById(targetId));
+  var domNode = document.getElementById(targetId);
+  append(node, domNode);
+  return domNode;
+}
+
+function diff(rootDomNode, oldVTree, newVTree) {
+  var diffNode = function (domNode, patches, oVNode, _nVNode) {
+    while(true) {
+      var nVNode = _nVNode;
+      var exit = 0;
+      switch (oVNode.tag | 0) {
+        case 0 : 
+            switch (nVNode.tag | 0) {
+              case 0 : 
+                  var nText = nVNode[0];
+                  if (oVNode[0] === nText) {
+                    return patches;
+                  } else {
+                    return /* :: */[
+                            /* SetText */Block.__(3, [
+                                domNode,
+                                nText
+                              ]),
+                            patches
+                          ];
+                  }
+              case 1 : 
+              case 2 : 
+                  exit = 1;
+                  break;
+              
+            }
+            break;
+        case 1 : 
+            var o = oVNode[0];
+            switch (nVNode.tag | 0) {
+              case 0 : 
+                  exit = 1;
+                  break;
+              case 1 : 
+                  var n = nVNode[0];
+                  if (o[/* tag */1] === n[/* tag */1] && Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0])) {
+                    var parentDomNode = domNode;
+                    var _patches = patches;
+                    var _oldVNodes = o[/* children */3];
+                    var _newVNodes = n[/* children */3];
+                    var _index = 0;
+                    while(true) {
+                      var index = _index;
+                      var newVNodes = _newVNodes;
+                      var oldVNodes = _oldVNodes;
+                      var patches$1 = _patches;
+                      if (oldVNodes) {
+                        if (newVNodes) {
+                          var childDomNodes = parentDomNode.childNodes;
+                          var probablyDomNode = childDomNodes[index];
+                          var patches$2 = probablyDomNode !== undefined ? diffNode(probablyDomNode, patches$1, oldVNodes[0], newVNodes[0]) : Pervasives.failwith("well this shouldn't happen");
+                          _index = index + 1 | 0;
+                          _newVNodes = newVNodes[1];
+                          _oldVNodes = oldVNodes[1];
+                          _patches = patches$2;
+                          continue ;
+                        } else {
+                          return /* :: */[
+                                  /* PopNodes */Block.__(2, [
+                                      parentDomNode,
+                                      List.length(oldVNodes)
+                                    ]),
+                                  patches$1
+                                ];
+                        }
+                      } else if (newVNodes) {
+                        return /* :: */[
+                                /* PushNodes */Block.__(1, [
+                                    parentDomNode,
+                                    newVNodes
+                                  ]),
+                                patches$1
+                              ];
+                      } else {
+                        return patches$1;
+                      }
+                    };
+                  } else {
+                    return /* :: */[
+                            /* Rerender */Block.__(0, [
+                                domNode,
+                                nVNode
+                              ]),
+                            patches
+                          ];
+                  }
+              case 2 : 
+                  _nVNode = dekey(nVNode);
+                  continue ;
+              
+            }
+            break;
+        case 2 : 
+            var o$1 = oVNode[0];
+            switch (nVNode.tag | 0) {
+              case 0 : 
+              case 1 : 
+                  exit = 1;
+                  break;
+              case 2 : 
+                  var n$1 = nVNode[0];
+                  if (o$1[/* tag */1] === n$1[/* tag */1] && Caml_obj.caml_equal(o$1[/* namespace */0], n$1[/* namespace */0])) {
+                    return patches;
+                  } else {
+                    return /* :: */[
+                            /* Rerender */Block.__(0, [
+                                domNode,
+                                nVNode
+                              ]),
+                            patches
+                          ];
+                  }
+              
+            }
+            break;
+        
+      }
+      if (exit === 1) {
+        return /* :: */[
+                /* Rerender */Block.__(0, [
+                    domNode,
+                    nVNode
+                  ]),
+                patches
+              ];
+      }
+      
+    };
+  };
+  var match = rootDomNode.firstChild;
+  if (match !== undefined) {
+    return diffNode(match, /* [] */0, oldVTree, newVTree);
+  } else {
+    return Pervasives.failwith("no dom");
+  }
+}
+
+function pp_node(param) {
+  switch (param.tag | 0) {
+    case 0 : 
+        return "Text " + (String(param[0]) + " ");
+    case 1 : 
+        return "Element " + (String(param[0][/* tag */1]) + " ");
+    case 2 : 
+        return "KeyedElement " + (String(param[0][/* tag */1]) + " ");
+    
+  }
+}
+
+function pp_patch(param) {
+  switch (param.tag | 0) {
+    case 0 : 
+        var text = pp_node(param[1]);
+        return "Rerender " + (String(text) + "");
+    case 1 : 
+        var length = List.length(param[1]);
+        return "PushNodes " + (String(length) + "");
+    case 2 : 
+        return "PopNodes " + (String(param[1]) + " ");
+    case 3 : 
+        return "SetText " + (String(param[1]) + "");
+    
+  }
 }
 
 exports.Attribute = Attribute;
 exports.$$Node = $$Node;
+exports.Dom = Dom;
 exports.append = append;
 exports.render = render;
+exports.diff = diff;
+exports.pp_node = pp_node;
+exports.pp_patch = pp_patch;
 /* No side effect */
