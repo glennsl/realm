@@ -26,7 +26,7 @@ function dekey(node) {
         return /* Element */Block.__(1, [/* record */[
                     /* namespace */match[/* namespace */0],
                     /* tag */match[/* tag */1],
-                    /* attributes */match[/* attributes */2],
+                    /* properties */match[/* properties */2],
                     /* children */List.map((function (param) {
                             return dekey(param[1]);
                           }), match[/* children */3])
@@ -39,11 +39,11 @@ function text(s) {
   return /* Text */Block.__(0, [s]);
 }
 
-function element(namespace, tag, attributes, children) {
+function element(namespace, tag, properties, children) {
   return /* Element */Block.__(1, [/* record */[
               /* namespace */namespace,
               /* tag */tag,
-              /* attributes */attributes,
+              /* properties */properties,
               /* children */children
             ]]);
 }
@@ -66,7 +66,8 @@ function append(node, targetNode) {
         var spec = node[0];
         var match = spec[/* namespace */0];
         var el = match !== undefined ? document.createElementNS(match, spec[/* tag */1]) : document.createElement(spec[/* tag */1]);
-        List.iter((function (attr) {
+        List.iter((function (param) {
+                var attr = param[0];
                 var match = attr[/* namespace */0];
                 if (match !== undefined) {
                   el.setAttribute(match, attr[/* key */1], attr[/* value */2]);
@@ -75,7 +76,7 @@ function append(node, targetNode) {
                   el.setAttribute(attr[/* key */1], attr[/* value */2]);
                   return /* () */0;
                 }
-              }), spec[/* attributes */2]);
+              }), spec[/* properties */2]);
         List.iter((function (child) {
                 return append(child, el);
               }), spec[/* children */3]);
@@ -133,8 +134,9 @@ function diff(rootDomNode, oldVTree, newVTree) {
               case 1 : 
                   var n = nVNode[0];
                   if (o[/* tag */1] === n[/* tag */1] && Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0])) {
+                    var patches$1 = diffProperties(domNode, patches, o[/* properties */2], n[/* properties */2]);
                     var parentDomNode = domNode;
-                    var _patches = patches;
+                    var _patches = patches$1;
                     var _oldVNodes = o[/* children */3];
                     var _newVNodes = n[/* children */3];
                     var _index = 0;
@@ -142,16 +144,16 @@ function diff(rootDomNode, oldVTree, newVTree) {
                       var index = _index;
                       var newVNodes = _newVNodes;
                       var oldVNodes = _oldVNodes;
-                      var patches$1 = _patches;
+                      var patches$2 = _patches;
                       if (oldVNodes) {
                         if (newVNodes) {
                           var childDomNodes = parentDomNode.childNodes;
                           var probablyDomNode = childDomNodes[index];
-                          var patches$2 = probablyDomNode !== undefined ? diffNode(probablyDomNode, patches$1, oldVNodes[0], newVNodes[0]) : Pervasives.failwith("well this shouldn't happen");
+                          var patches$3 = probablyDomNode !== undefined ? diffNode(probablyDomNode, patches$2, oldVNodes[0], newVNodes[0]) : Pervasives.failwith("well this shouldn't happen");
                           _index = index + 1 | 0;
                           _newVNodes = newVNodes[1];
                           _oldVNodes = oldVNodes[1];
-                          _patches = patches$2;
+                          _patches = patches$3;
                           continue ;
                         } else {
                           return /* :: */[
@@ -159,7 +161,7 @@ function diff(rootDomNode, oldVTree, newVTree) {
                                       parentDomNode,
                                       List.length(oldVNodes)
                                     ]),
-                                  patches$1
+                                  patches$2
                                 ];
                         }
                       } else if (newVNodes) {
@@ -168,10 +170,10 @@ function diff(rootDomNode, oldVTree, newVTree) {
                                     parentDomNode,
                                     newVNodes
                                   ]),
-                                patches$1
+                                patches$2
                               ];
                       } else {
-                        return patches$1;
+                        return patches$2;
                       }
                     };
                   } else {
@@ -226,6 +228,94 @@ function diff(rootDomNode, oldVTree, newVTree) {
       
     };
   };
+  var diffProperties = function (domNode, patches, oldProperties, newProperties) {
+    var oldHelper = function (_patches, _oldProperties$prime, _newProperties$prime) {
+      while(true) {
+        var newProperties$prime = _newProperties$prime;
+        var oldProperties$prime = _oldProperties$prime;
+        var patches = _patches;
+        if (oldProperties$prime) {
+          var oldRest = oldProperties$prime[1];
+          var oldProperty = oldProperties$prime[0];
+          if (newProperties$prime) {
+            var newProperty = newProperties$prime[0];
+            var n = newProperty[0];
+            var o = oldProperty[0];
+            if (Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0]) && o[/* key */1] === n[/* key */1]) {
+              _newProperties$prime = newProperties;
+              _oldProperties$prime = oldRest;
+              if (o[/* value */2] === n[/* value */2]) {
+                continue ;
+              } else {
+                _patches = /* :: */[
+                  /* SetProperty */Block.__(4, [
+                      domNode,
+                      newProperty
+                    ]),
+                  patches
+                ];
+                continue ;
+              }
+            } else {
+              _newProperties$prime = newProperties$prime[1];
+              continue ;
+            }
+          } else {
+            _newProperties$prime = newProperties;
+            _oldProperties$prime = oldRest;
+            _patches = /* :: */[
+              /* RemoveProperty */Block.__(5, [
+                  domNode,
+                  oldProperty
+                ]),
+              patches
+            ];
+            continue ;
+          }
+        } else {
+          return patches;
+        }
+      };
+    };
+    var patches$1 = oldHelper(patches, oldProperties, newProperties);
+    var _patches = patches$1;
+    var _newProperties$prime = newProperties;
+    var _oldProperties$prime = oldProperties;
+    while(true) {
+      var oldProperties$prime = _oldProperties$prime;
+      var newProperties$prime = _newProperties$prime;
+      var patches$2 = _patches;
+      if (newProperties$prime) {
+        var newRest = newProperties$prime[1];
+        var newProperty = newProperties$prime[0];
+        if (oldProperties$prime) {
+          var o = oldProperties$prime[0][0];
+          var n = newProperty[0];
+          if (Caml_obj.caml_equal(n[/* namespace */0], o[/* namespace */0]) && n[/* key */1] === o[/* key */1]) {
+            _oldProperties$prime = oldProperties;
+            _newProperties$prime = newRest;
+            continue ;
+          } else {
+            _oldProperties$prime = oldProperties$prime[1];
+            continue ;
+          }
+        } else {
+          _oldProperties$prime = oldProperties;
+          _newProperties$prime = newRest;
+          _patches = /* :: */[
+            /* SetProperty */Block.__(4, [
+                domNode,
+                newProperty
+              ]),
+            patches$2
+          ];
+          continue ;
+        }
+      } else {
+        return patches$2;
+      }
+    };
+  };
   var match = rootDomNode.firstChild;
   if (match !== undefined) {
     return diffNode(match, /* [] */0, oldVTree, newVTree);
@@ -258,6 +348,10 @@ function pp_patch(param) {
         return "PopNodes " + (String(param[1]) + " ");
     case 3 : 
         return "SetText " + (String(param[1]) + "");
+    case 4 : 
+        return "SetProperty " + (String(param[1]) + "");
+    case 5 : 
+        return "RemoveProperty " + (String(param[1]) + "");
     
   }
 }

@@ -2,13 +2,13 @@ open Vdom.Node
 
 let oldNode =
   element "strong"
-    [ Vdom.Attribute.make "class" "test-class" ]
+    [ Attribute (Vdom.Attribute.make "class" "test-class") ]
     [ text "Hello"
     ; element "em" [] [ text " world" ]
     ]
 let node =
   element "strong"
-    [ Vdom.Attribute.make "class" "test-class" ]
+    [ Attribute (Vdom.Attribute.make "class" "test-class") ]
     [ text "Hello"
     ; text "!"
     ; element "em" [] [ text " world" ]

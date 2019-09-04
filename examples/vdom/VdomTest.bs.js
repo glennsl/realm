@@ -5,7 +5,7 @@ var List = require("bs-platform/lib/js/list.js");
 var Vdom = require("../../src/Vdom.bs.js");
 
 var oldNode = Vdom.$$Node[/* element */2](undefined, "strong", /* :: */[
-      Vdom.Attribute[/* make */0](undefined, "class", "test-class"),
+      /* Attribute */[Vdom.Attribute[/* make */0](undefined, "class", "test-class")],
       /* [] */0
     ], /* :: */[
       Vdom.$$Node[/* text */1]("Hello"),
@@ -19,7 +19,7 @@ var oldNode = Vdom.$$Node[/* element */2](undefined, "strong", /* :: */[
     ]);
 
 var node = Vdom.$$Node[/* element */2](undefined, "strong", /* :: */[
-      Vdom.Attribute[/* make */0](undefined, "class", "test-class"),
+      /* Attribute */[Vdom.Attribute[/* make */0](undefined, "class", "test-class")],
       /* [] */0
     ], /* :: */[
       Vdom.$$Node[/* text */1]("Hello"),

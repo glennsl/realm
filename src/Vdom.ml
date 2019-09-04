@@ -18,21 +18,24 @@ module Node = struct
     | Element of t element
     | KeyedElement of (string * t) element
 
+  and property =
+    | Attribute of Attribute.t
+
   and 'a element =
     { namespace: string option
     ; tag: string
-    ; attributes: Attribute.t list
+    ; properties: property list
     ; children: 'a list
     }
 
 
 let rec dekey =
   function
-  | KeyedElement { namespace; tag; attributes; children } ->
+  | KeyedElement { namespace; tag; properties; children } ->
     Element 
       { namespace
       ; tag
-      ; attributes
+      ; properties
       ; children = List.map (fun (_, child) -> dekey child) children
       }
   | node -> node
@@ -41,8 +44,8 @@ let rec dekey =
   let text s =
     Text s
 
-  let element ?namespace tag attributes children =
-    Element { namespace; tag; attributes; children }
+  let element ?namespace tag properties children =
+    Element { namespace; tag; properties; children }
 end
 
 
@@ -76,11 +79,13 @@ let rec append node targetNode =
         | Some namespace -> Dom.createElementNS namespace spec.tag
         | None -> Dom.createElement spec.tag
       in
-      List.iter (fun attr ->
-        match attr.Attribute.namespace with
-        | Some namespace -> Dom.setAttributeNS namespace attr.key attr.value el
-        | None -> Dom.setAttribute attr.key attr.value el
-        ) spec.attributes;
+      List.iter (function
+        | Node.Attribute attr ->
+          ( match attr.Attribute.namespace with
+          | Some namespace -> Dom.setAttributeNS namespace attr.key attr.value el
+          | None -> Dom.setAttribute attr.key attr.value el
+          )
+        ) spec.properties;
       List.iter (fun child -> append child el) spec.children;
       el
     
@@ -101,6 +106,8 @@ type patch =
   | PushNodes of Dom.node * Node.t list
   | PopNodes of Dom.node * int
   | SetText of Dom.node * string
+  | SetProperty of Dom.node * Node.property
+  | RemoveProperty of Dom.node * Node.property
 
 
 let diff
@@ -124,6 +131,7 @@ let diff
 
     | Element o, Element n ->
       if o.tag = n.tag && o.namespace = n.namespace then
+        let patches = diffProperties domNode patches o.properties n.properties in
         diffChildNodes domNode patches o.children n.children 0
       else
         Rerender (domNode, nVNode) :: patches
@@ -137,6 +145,51 @@ let diff
     | _ ->
       Rerender (domNode, nVNode) :: patches
     )
+
+  and diffProperties domNode patches oldProperties newProperties =
+    (* naive approach, pretty much assumes a small number of properties *)
+    let rec oldHelper patches oldProperties' newProperties' = 
+      ( match oldProperties', newProperties' with
+      | [], _ ->
+        patches
+
+      | oldProperty :: oldRest, [] ->
+        oldHelper (RemoveProperty (domNode, oldProperty) :: patches) oldRest newProperties
+
+      | oldProperty :: oldRest, newProperty :: newRest ->
+        ( match oldProperty, newProperty with
+        | Attribute o, Attribute n when o.namespace = n.namespace && o.key = n.key ->
+          if o.value = n.value then
+            oldHelper patches oldRest newProperties
+          else
+            oldHelper (SetProperty (domNode, newProperty) :: patches) oldRest newProperties
+        
+        | _ ->
+          oldHelper patches oldProperties' newRest
+        )
+      )
+
+    and newHelper patches newProperties' oldProperties' = 
+      ( match newProperties', oldProperties' with
+      | [], _ ->
+        patches
+
+      | newProperty :: newRest, [] ->
+        newHelper (SetProperty (domNode, newProperty) :: patches) newRest oldProperties
+
+      | newProperty :: newRest, oldProperty :: oldRest ->
+        ( match newProperty, oldProperty with
+        | Attribute n, Attribute o when n.namespace = o.namespace && n.key = o.key ->
+          newHelper patches newRest oldProperties
+        
+        | _ ->
+          newHelper patches newProperties' oldRest
+        )
+      )
+    in
+
+    let patches = oldHelper patches oldProperties newProperties in
+    newHelper patches newProperties oldProperties
 
   and diffChildNodes parentDomNode patches oldVNodes newVNodes index =
     ( match oldVNodes, newVNodes with
@@ -178,4 +231,6 @@ let pp_patch =
   | Rerender (_, node) -> let text = pp_node node in {j|Rerender $text|j}
   | PushNodes (_, nodes) -> let length = List.length nodes in {j|PushNodes $length|j}
   | PopNodes (_, n) -> {j|PopNodes $n |j}
-  | SetText (_, text)-> {j|SetText $text|j}
+  | SetText (_, text) -> {j|SetText $text|j}
+  | SetProperty (_, property) -> {j|SetProperty $property|j}
+  | RemoveProperty (_, property) -> {j|RemoveProperty $property|j}
