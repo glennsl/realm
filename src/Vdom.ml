@@ -31,14 +31,16 @@ module Node = struct
 
 let rec dekey =
   function
-  | KeyedElement { namespace; tag; properties; children } ->
-    Element 
-      { namespace
-      ; tag
-      ; properties
-      ; children = List.map (fun (_, child) -> dekey child) children
-      }
-  | node -> node
+    | KeyedElement { namespace; tag; properties; children } ->
+      Element 
+        { namespace
+        ; tag
+        ; properties
+        ; children = List.map (fun (_, child) -> dekey child) children
+        }
+
+    | node ->
+      node
 
 
   let text s =
@@ -67,37 +69,45 @@ module Dom = struct
 end
 
 
-let rec append node targetNode =
+let rec append targetNode node =
   let domNode =
-    match node with
-    | Node.Text text ->
-      Dom.createTextNode text
+    ( match node with
+      | Node.Text text ->
+        Dom.createTextNode text
 
-    | Node.Element spec ->
-      let el =
-        match spec.namespace with 
-        | Some namespace -> Dom.createElementNS namespace spec.tag
-        | None -> Dom.createElement spec.tag
-      in
-      List.iter (function
-        | Node.Attribute attr ->
-          ( match attr.Attribute.namespace with
-          | Some namespace -> Dom.setAttributeNS namespace attr.key attr.value el
-          | None -> Dom.setAttribute attr.key attr.value el
+      | Node.Element spec ->
+        let el =
+          ( match spec.namespace with 
+            | Some namespace ->
+              Dom.createElementNS namespace spec.tag
+
+            | None ->
+              Dom.createElement spec.tag
           )
-        ) spec.properties;
-      List.iter (fun child -> append child el) spec.children;
-      el
-    
-    | Node.KeyedElement _ ->
-      failwith "todo"
+        in
+        List.iter (function
+          | Node.Attribute attr ->
+            ( match attr.Attribute.namespace with
+              | Some namespace ->
+                Dom.setAttributeNS namespace attr.key attr.value el
+
+              | None ->
+                Dom.setAttribute attr.key attr.value el
+            )
+          ) spec.properties;
+        List.iter (append el) spec.children;
+        el
+      
+      | Node.KeyedElement _ ->
+        failwith "todo"
+    )
   in
   Dom.appendChild domNode targetNode
 
 
 let render node targetId =
   let domNode = Dom.getElementById targetId in
-  append node domNode;
+  append domNode node;
   domNode
 
 
@@ -118,32 +128,31 @@ let diff
   =
 
   let rec diffNode domNode patches oVNode nVNode =
-    let open Node in
-    ( match oVNode, nVNode with
-    | Text oText, Text nText ->
-      if oText = nText then
-        patches
-      else
-        SetText (domNode, nText) :: patches
+    Node.( match oVNode, nVNode with
+      | Text oText, Text nText ->
+        if oText = nText then
+          patches
+        else
+          SetText (domNode, nText) :: patches
 
-    | Element _, KeyedElement _ ->
-      diffNode domNode patches oVNode (dekey nVNode)
+      | Element _, KeyedElement _ ->
+        diffNode domNode patches oVNode (dekey nVNode)
 
-    | Element o, Element n ->
-      if o.tag = n.tag && o.namespace = n.namespace then
-        let patches = diffProperties domNode patches o.properties n.properties in
-        diffChildNodes domNode patches o.children n.children 0
-      else
+      | Element o, Element n ->
+        if o.tag = n.tag && o.namespace = n.namespace then
+          let patches = diffProperties domNode patches o.properties n.properties in
+          diffChildNodes domNode patches o.children n.children 0
+        else
+          Rerender (domNode, nVNode) :: patches
+
+      | KeyedElement o, KeyedElement n ->
+        if o.tag = n.tag && o.namespace = n.namespace then
+          patches
+        else
+          Rerender (domNode, nVNode) :: patches
+
+      | _ ->
         Rerender (domNode, nVNode) :: patches
-
-    | KeyedElement o, KeyedElement n ->
-      if o.tag = n.tag && o.namespace = n.namespace then
-        patches
-      else
-        Rerender (domNode, nVNode) :: patches
-
-    | _ ->
-      Rerender (domNode, nVNode) :: patches
     )
 
   and diffProperties domNode patches oldProperties newProperties =
@@ -153,7 +162,7 @@ let diff
       let rec processXs acc xs ys = 
         (* match Xs against Ys, report back whether or not a match was found *)
         ( match xs, ys with
-      | [], _ ->
+          | [], _ ->
             (* no more Xs, return *)
             acc
 
@@ -205,7 +214,7 @@ let diff
       Node.( match x, y with
         | Attribute o, Attribute n when o.namespace = n.namespace && o.key = n.key ->
           true
-        
+
         | _ ->
           false
       )
@@ -222,10 +231,10 @@ let diff
           Node.( match oldProperty, newProperty with
             | Attribute o, Attribute n when o.value <> n.value ->
               SetProperty (domNode, newProperty) :: patches
-        
-        | _ ->
+
+            | _ ->
               patches
-        )
+          )
 
         | _ ->
           patches
@@ -249,8 +258,11 @@ let diff
       let probablyDomNode = Dom.getChild childDomNodes index in
       let patches =
         ( match probablyDomNode with
-        | Some domNode -> diffNode domNode patches oVNode nVNode
-        | None -> failwith "well this shouldn't happen"
+          | Some domNode ->
+            diffNode domNode patches oVNode nVNode
+
+          | None ->
+            failwith "well this shouldn't happen"
         )
       in
       diffChildNodes parentDomNode patches oRest nRest (index + 1)
@@ -258,21 +270,42 @@ let diff
 
   in
   match Dom.firstChild rootDomNode with
-  | Some node -> diffNode node [] oldVTree newVTree
-  | None -> failwith "no dom"
+    | Some node ->
+      diffNode node [] oldVTree newVTree
+
+    | None ->
+      failwith "no dom"
 
 
 let pp_node =
   function
-  | Node.Text text -> {j|Text $text |j}
-  | Node.Element { tag } -> {j|Element $tag |j}
-  | Node.KeyedElement { tag } -> {j|KeyedElement $tag |j}
+    | Node.Text text ->
+      {j|Text $text |j}
+
+    | Node.Element { tag } ->
+      {j|Element $tag |j}
+
+    | Node.KeyedElement { tag } ->
+      {j|KeyedElement $tag |j}
 
 let pp_patch =
   function
-  | Rerender (_, node) -> let text = pp_node node in {j|Rerender $text|j}
-  | PushNodes (_, nodes) -> let length = List.length nodes in {j|PushNodes $length|j}
-  | PopNodes (_, n) -> {j|PopNodes $n |j}
-  | SetText (_, text) -> {j|SetText $text|j}
-  | SetProperty (_, property) -> {j|SetProperty $property|j}
-  | RemoveProperty (_, property) -> {j|RemoveProperty $property|j}
+    | Rerender (_, node) ->
+      let text = pp_node node in
+      {j|Rerender $text|j}
+
+    | PushNodes (_, nodes) ->
+      let length = List.length nodes in
+      {j|PushNodes $length|j}
+
+    | PopNodes (_, n) ->
+      {j|PopNodes $n |j}
+
+    | SetText (_, text) ->
+      {j|SetText $text|j}
+
+    | SetProperty (_, property) ->
+      {j|SetProperty $property|j}
+
+    | RemoveProperty (_, property) ->
+      {j|RemoveProperty $property|j}
