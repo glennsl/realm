@@ -147,49 +147,91 @@ let diff
     )
 
   and diffProperties domNode patches oldProperties newProperties =
-    (* naive approach, pretty much assumes a small number of properties *)
-    let rec oldHelper patches oldProperties' newProperties' = 
-      ( match oldProperties', newProperties' with
+    (* naive approach, assumes a small number of properties *)
+
+    let helper isMatch onResult acc allXs allYs = 
+      let rec processXs acc xs ys = 
+        (* match Xs against Ys, report back whether or not a match was found *)
+        ( match xs, ys with
       | [], _ ->
-        patches
+            (* no more Xs, return *)
+            acc
 
-      | oldProperty :: oldRest, [] ->
-        oldHelper (RemoveProperty (domNode, oldProperty) :: patches) oldRest newProperties
+          | x :: remainingXs, [] ->
+            (* no more Ys, report back, move on to next X *)
+            let acc = onResult acc (Some x) None in
+            processXs acc remainingXs allYs
 
-      | oldProperty :: oldRest, newProperty :: newRest ->
-        ( match oldProperty, newProperty with
-        | Attribute o, Attribute n when o.namespace = n.namespace && o.key = n.key ->
-          if o.value = n.value then
-            oldHelper patches oldRest newProperties
-          else
-            oldHelper (SetProperty (domNode, newProperty) :: patches) oldRest newProperties
-        
-        | _ ->
-          oldHelper patches oldProperties' newRest
+          | x :: remainingXs, y :: _ when isMatch x y ->
+            (* found match, report back, move on to next X *)
+            let acc = onResult acc (Some x) (Some y) in
+            processXs acc remainingXs allYs
+
+          | _, _ :: remainingYs ->
+            (* no match, check next Y *)
+            processXs acc xs remainingYs
         )
-      )
 
-    and newHelper patches newProperties' oldProperties' = 
-      ( match newProperties', oldProperties' with
-      | [], _ ->
-        patches
+      and processYs acc xs ys = 
+        (* match Ys against Xs, report back only when match was NOT found, since
+         * matches were reported in processXs
+         *)
+        ( match xs, ys with
+          | _, [] ->
+            (* no more Ys, return *)
+            acc
 
-      | newProperty :: newRest, [] ->
-        newHelper (SetProperty (domNode, newProperty) :: patches) newRest oldProperties
+          | [], y :: remainingYs ->
+            (* no more Xs, report back, move on to next Y *)
+            let acc = onResult acc None (Some y) in
+            processYs acc allXs remainingYs
 
-      | newProperty :: newRest, oldProperty :: oldRest ->
-        ( match newProperty, oldProperty with
-        | Attribute n, Attribute o when n.namespace = o.namespace && n.key = o.key ->
-          newHelper patches newRest oldProperties
-        
-        | _ ->
-          newHelper patches newProperties' oldRest
+          | x :: _, y :: remainingYs when isMatch x y ->
+            (* found match, already reported in processXs, so just move on to next Y *)
+            processYs acc xs remainingYs
+
+          | _ :: remainingXs, _ ->
+            (* no match, check next X *)
+            processYs acc remainingXs ys
         )
-      )
+      in
+
+      let acc = processXs acc allXs allYs in
+      let acc = processYs acc allXs allYs in
+      acc
     in
 
-    let patches = oldHelper patches oldProperties newProperties in
-    newHelper patches newProperties oldProperties
+    let isMatch x y =
+      Node.( match x, y with
+        | Attribute o, Attribute n when o.namespace = n.namespace && o.key = n.key ->
+          true
+        
+        | _ ->
+          false
+      )
+
+    and onResult patches x y =
+      ( match x, y with
+        | Some oldProperty, None ->
+          RemoveProperty (domNode, oldProperty) :: patches
+
+        | None, Some newProperty ->
+          SetProperty (domNode, newProperty) :: patches
+
+        | Some oldProperty, Some newProperty ->
+          Node.( match oldProperty, newProperty with
+            | Attribute o, Attribute n when o.value <> n.value ->
+              SetProperty (domNode, newProperty) :: patches
+        
+        | _ ->
+              patches
+        )
+
+        | _ ->
+          patches
+      )
+    in
+    helper isMatch onResult patches oldProperties newProperties
 
   and diffChildNodes parentDomNode patches oldVNodes newVNodes index =
     ( match oldVNodes, newVNodes with

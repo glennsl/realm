@@ -3,8 +3,10 @@
 
 var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
+var Curry = require("bs-platform/lib/js/curry.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
+var Caml_option = require("bs-platform/lib/js/caml_option.js");
 
 function make(namespace, key, value) {
   return /* record */[
@@ -56,7 +58,7 @@ var $$Node = /* module */[
 
 var Dom = /* module */[];
 
-function append(node, targetNode) {
+function append(targetNode, node) {
   var domNode;
   switch (node.tag | 0) {
     case 0 : 
@@ -77,8 +79,8 @@ function append(node, targetNode) {
                   return /* () */0;
                 }
               }), spec[/* properties */2]);
-        List.iter((function (child) {
-                return append(child, el);
+        List.iter((function (param) {
+                return append(el, param);
               }), spec[/* children */3]);
         domNode = el;
         break;
@@ -93,7 +95,7 @@ function append(node, targetNode) {
 
 function render(node, targetId) {
   var domNode = document.getElementById(targetId);
-  append(node, domNode);
+  append(domNode, node);
   return domNode;
 }
 
@@ -229,90 +231,115 @@ function diff(rootDomNode, oldVTree, newVTree) {
     };
   };
   var diffProperties = function (domNode, patches, oldProperties, newProperties) {
-    var oldHelper = function (_patches, _oldProperties$prime, _newProperties$prime) {
-      while(true) {
-        var newProperties$prime = _newProperties$prime;
-        var oldProperties$prime = _oldProperties$prime;
-        var patches = _patches;
-        if (oldProperties$prime) {
-          var oldRest = oldProperties$prime[1];
-          var oldProperty = oldProperties$prime[0];
-          if (newProperties$prime) {
-            var newProperty = newProperties$prime[0];
-            var n = newProperty[0];
-            var o = oldProperty[0];
-            if (Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0]) && o[/* key */1] === n[/* key */1]) {
-              _newProperties$prime = newProperties;
-              _oldProperties$prime = oldRest;
-              if (o[/* value */2] === n[/* value */2]) {
-                continue ;
-              } else {
-                _patches = /* :: */[
-                  /* SetProperty */Block.__(4, [
+    var isMatch = function (x, y) {
+      var n = y[0];
+      var o = x[0];
+      if (Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0])) {
+        return o[/* key */1] === n[/* key */1];
+      } else {
+        return false;
+      }
+    };
+    var onResult = function (patches, x, y) {
+      if (x !== undefined) {
+        var oldProperty = x;
+        if (y !== undefined) {
+          var newProperty = y;
+          if (oldProperty[0][/* value */2] !== newProperty[0][/* value */2]) {
+            return /* :: */[
+                    /* SetProperty */Block.__(4, [
+                        domNode,
+                        newProperty
+                      ]),
+                    patches
+                  ];
+          } else {
+            return patches;
+          }
+        } else {
+          return /* :: */[
+                  /* RemoveProperty */Block.__(5, [
                       domNode,
-                      newProperty
+                      oldProperty
                     ]),
                   patches
                 ];
-                continue ;
-              }
+        }
+      } else if (y !== undefined) {
+        return /* :: */[
+                /* SetProperty */Block.__(4, [
+                    domNode,
+                    y
+                  ]),
+                patches
+              ];
+      } else {
+        return patches;
+      }
+    };
+    var isMatch$1 = isMatch;
+    var onResult$1 = onResult;
+    var acc = patches;
+    var allXs = oldProperties;
+    var allYs = newProperties;
+    var processXs = function (_acc, _xs, _ys) {
+      while(true) {
+        var ys = _ys;
+        var xs = _xs;
+        var acc = _acc;
+        if (xs) {
+          var remainingXs = xs[1];
+          var x = xs[0];
+          if (ys) {
+            var y = ys[0];
+            if (Curry._2(isMatch$1, x, y)) {
+              var acc$1 = Curry._3(onResult$1, acc, Caml_option.some(x), Caml_option.some(y));
+              _ys = allYs;
+              _xs = remainingXs;
+              _acc = acc$1;
+              continue ;
             } else {
-              _newProperties$prime = newProperties$prime[1];
+              _ys = ys[1];
               continue ;
             }
           } else {
-            _newProperties$prime = newProperties;
-            _oldProperties$prime = oldRest;
-            _patches = /* :: */[
-              /* RemoveProperty */Block.__(5, [
-                  domNode,
-                  oldProperty
-                ]),
-              patches
-            ];
+            var acc$2 = Curry._3(onResult$1, acc, Caml_option.some(x), undefined);
+            _ys = allYs;
+            _xs = remainingXs;
+            _acc = acc$2;
             continue ;
           }
         } else {
-          return patches;
+          return acc;
         }
       };
     };
-    var patches$1 = oldHelper(patches, oldProperties, newProperties);
-    var _patches = patches$1;
-    var _newProperties$prime = newProperties;
-    var _oldProperties$prime = oldProperties;
+    var acc$1 = processXs(acc, allXs, allYs);
+    var _acc = acc$1;
+    var _xs = allXs;
+    var _ys = allYs;
     while(true) {
-      var oldProperties$prime = _oldProperties$prime;
-      var newProperties$prime = _newProperties$prime;
-      var patches$2 = _patches;
-      if (newProperties$prime) {
-        var newRest = newProperties$prime[1];
-        var newProperty = newProperties$prime[0];
-        if (oldProperties$prime) {
-          var o = oldProperties$prime[0][0];
-          var n = newProperty[0];
-          if (Caml_obj.caml_equal(n[/* namespace */0], o[/* namespace */0]) && n[/* key */1] === o[/* key */1]) {
-            _oldProperties$prime = oldProperties;
-            _newProperties$prime = newRest;
+      var ys = _ys;
+      var xs = _xs;
+      var acc$2 = _acc;
+      if (ys) {
+        if (xs) {
+          if (Curry._2(isMatch$1, xs[0], ys[0])) {
+            _ys = ys[1];
             continue ;
           } else {
-            _oldProperties$prime = oldProperties$prime[1];
+            _xs = xs[1];
             continue ;
           }
         } else {
-          _oldProperties$prime = oldProperties;
-          _newProperties$prime = newRest;
-          _patches = /* :: */[
-            /* SetProperty */Block.__(4, [
-                domNode,
-                newProperty
-              ]),
-            patches$2
-          ];
+          var acc$3 = Curry._3(onResult$1, acc$2, undefined, Caml_option.some(ys[0]));
+          _ys = ys[1];
+          _xs = allXs;
+          _acc = acc$3;
           continue ;
         }
       } else {
-        return patches$2;
+        return acc$2;
       }
     };
   };
