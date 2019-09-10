@@ -1,4 +1,31 @@
 
+module Dom = struct
+  type node = Dom.node
+  type event = Dom.event
+  type nodelist
+
+  external getElementById : string -> node = "document.getElementById" [@@bs.val]
+  external createElement : string -> node = "document.createElement" [@@bs.val]
+  external createElementNS : string -> string -> Dom.node = "document.createElementNS" [@@bs.val]
+  external createTextNode : string -> node = "document.createTextNode" [@@bs.val]
+  external setAttribute : string -> string -> unit = "setAttribute" [@@bs.send.pipe: node] (* element *)
+  external removeAttribute : string -> unit = "removeAttribute" [@@bs.send.pipe: node] (* element *)
+  external setAttributeNS : string -> string -> string -> unit = "setAttribute" [@@bs.send.pipe: node] (* element *)
+  external addEventListener : string -> (event -> unit) -> unit = "addEventListener" [@@bs.send.pipe: node] (* element *)
+  external removeEventListener : string -> (event -> unit) -> unit = "removeEventListener" [@@bs.send.pipe: node] (* element *)
+
+  external appendChild : node -> unit = "appendChild" [@@bs.send.pipe: node]
+  external replaceChild : node -> unit = "replaceChild" [@@bs.send.pipe: node]
+  external removeChild : node -> unit = "removeChild" [@@bs.send.pipe: node]
+  external childNodes : node -> nodelist = "childNodes" [@@bs.get] (* nodelist *)
+  external getChild : nodelist -> int -> node option = "" [@@bs.get_index] [@@bs.return undefined_to_opt]
+  external firstChild : node -> node option = "firstChild" [@@bs.get] [@@bs.return undefined_to_opt]
+  external lastChild : node -> node option = "lastChild" [@@bs.get] [@@bs.return undefined_to_opt]
+
+  external replaceData : int -> int -> string -> unit = "replaceData" [@@bs.send.pipe: node] (* CharacterData *)
+  external length : node -> int = "length" [@@bs.get] (* CharacterData *)
+end
+
 
 module Attribute = struct
   type t =
@@ -50,66 +77,6 @@ let rec dekey =
   let element ?namespace tag properties children =
     Element { namespace; tag; properties; children }
 end
-
-
-module Dom = struct
-  type node = Dom.node
-  type nodelist
-
-  external getElementById : string -> Dom.node = "document.getElementById" [@@bs.val]
-  external createElement : string -> Dom.node = "document.createElement" [@@bs.val]
-  external createElementNS : string -> string -> Dom.node = "document.createElementNS" [@@bs.val]
-  external createTextNode : string -> Dom.node = "document.createTextNode" [@@bs.val]
-  external setAttribute : string -> string -> unit = "setAttribute" [@@bs.send.pipe: Dom.node] (* element *)
-  external setAttributeNS : string -> string -> string -> unit = "setAttribute" [@@bs.send.pipe: Dom.node] (* element *)
-
-  external appendChild : Dom.node -> unit = "appendChild" [@@bs.send.pipe: Dom.node]
-  external childNodes : Dom.node -> nodelist = "childNodes" [@@bs.get] (* nodelist *)
-  external getChild : nodelist -> int -> Dom.node option = "" [@@bs.get_index] [@@bs.return undefined_to_opt]
-  external firstChild : Dom.node -> Dom.node option = "firstChild" [@@bs.get] [@@bs.return undefined_to_opt]
-end
-
-
-let rec append targetNode node =
-  let domNode =
-    ( match node with
-      | Node.Text text ->
-        Dom.createTextNode text
-
-      | Node.Element spec ->
-        let el =
-          ( match spec.namespace with 
-            | Some namespace ->
-              Dom.createElementNS namespace spec.tag
-
-            | None ->
-              Dom.createElement spec.tag
-          )
-        in
-        List.iter (function
-          | Node.Attribute attr ->
-            ( match attr.Attribute.namespace with
-              | Some namespace ->
-                Dom.setAttributeNS namespace attr.key attr.value el
-
-              | None ->
-                Dom.setAttribute attr.key attr.value el
-            )
-          ) spec.properties;
-        List.iter (append el) spec.children;
-        el
-      
-      | Node.KeyedElement _ ->
-        failwith "todo"
-    )
-  in
-  Dom.appendChild domNode targetNode
-
-
-let render node targetId =
-  let domNode = Dom.getElementById targetId in
-  append domNode node;
-  domNode
 
 
 type patch =
@@ -265,9 +232,8 @@ let diff
 
     | oVNode :: oRest, nVNode :: nRest ->
       let childDomNodes = Dom.childNodes parentDomNode in
-      let probablyDomNode = Dom.getChild childDomNodes index in
       let patches =
-        ( match probablyDomNode with
+        ( match Dom.getChild childDomNodes index with
           | Some domNode ->
             diffNode domNode patches oVNode nVNode
 
@@ -285,6 +251,87 @@ let diff
 
     | None ->
       failwith "no dom"
+
+
+let rec render node =
+  Node.( match node with
+    | Text text ->
+      Dom.createTextNode text
+
+    | Element spec ->
+      let el =
+        ( match spec.namespace with 
+          | Some namespace ->
+            Dom.createElementNS namespace spec.tag
+
+          | None ->
+            Dom.createElement spec.tag
+        )
+      in
+      List.iter
+        ( function
+          | Attribute attr ->
+            ( match attr.Attribute.namespace with
+              | Some namespace ->
+                Dom.setAttributeNS namespace attr.key attr.value el
+
+              | None ->
+                Dom.setAttribute attr.key attr.value el
+            )
+
+          | Event (name, callback) ->
+            Dom.addEventListener name callback el
+        ) spec.properties;
+      List.iter (fun child -> Dom.appendChild (render child) el) spec.children;
+      el
+    
+    | KeyedElement _ ->
+      failwith "todo"
+  )
+
+
+let patch =
+  List.iter
+    ( function
+      | Rerender (domNode, node) ->
+        Dom.replaceChild (render node) domNode
+
+      | PushNodes (domNode, nodes) ->
+        List.iter (fun node -> Dom.appendChild (render node) domNode) nodes
+
+      | PopNodes (domNode, n) ->
+        for _ = 1 to n do
+          match Dom.lastChild domNode with
+            | Some child ->
+              Dom.removeChild child domNode
+
+            | None ->
+              ()
+        done
+
+      | SetText (domNode, text) ->
+        Dom.replaceData 0 (Dom.length domNode) text domNode
+
+      | SetProperty (domNode, property) ->
+        ( match property with
+          | Attribute attr ->
+            Dom.setAttribute attr.key attr.value domNode
+
+          | Event (name, callback) ->
+            Dom.addEventListener name callback domNode
+        )
+
+
+      | RemoveProperty (domNode, property) ->
+        ( match property with
+          | Attribute attr ->
+            Dom.removeAttribute attr.key domNode
+
+          | Event (name, callback) ->
+            Dom.removeEventListener name callback domNode
+        )
+    )
+
 
 
 let pp_node =

@@ -8,6 +8,8 @@ var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 
+var Dom = /* module */[];
+
 function make(namespace, key, value) {
   return /* record */[
           /* namespace */namespace,
@@ -55,49 +57,6 @@ var $$Node = /* module */[
   /* text */text,
   /* element */element
 ];
-
-var Dom = /* module */[];
-
-function append(targetNode, node) {
-  var domNode;
-  switch (node.tag | 0) {
-    case 0 : 
-        domNode = document.createTextNode(node[0]);
-        break;
-    case 1 : 
-        var spec = node[0];
-        var match = spec[/* namespace */0];
-        var el = match !== undefined ? document.createElementNS(match, spec[/* tag */1]) : document.createElement(spec[/* tag */1]);
-        List.iter((function (param) {
-                var attr = param[0];
-                var match = attr[/* namespace */0];
-                if (match !== undefined) {
-                  el.setAttribute(match, attr[/* key */1], attr[/* value */2]);
-                  return /* () */0;
-                } else {
-                  el.setAttribute(attr[/* key */1], attr[/* value */2]);
-                  return /* () */0;
-                }
-              }), spec[/* properties */2]);
-        List.iter((function (param) {
-                return append(el, param);
-              }), spec[/* children */3]);
-        domNode = el;
-        break;
-    case 2 : 
-        domNode = Pervasives.failwith("todo");
-        break;
-    
-  }
-  targetNode.appendChild(domNode);
-  return /* () */0;
-}
-
-function render(node, targetId) {
-  var domNode = document.getElementById(targetId);
-  append(domNode, node);
-  return domNode;
-}
 
 function diff(rootDomNode, oldVTree, newVTree) {
   var diffNode = function (domNode, patches, oVNode, _nVNode) {
@@ -150,8 +109,8 @@ function diff(rootDomNode, oldVTree, newVTree) {
                       if (oldVNodes) {
                         if (newVNodes) {
                           var childDomNodes = parentDomNode.childNodes;
-                          var probablyDomNode = childDomNodes[index];
-                          var patches$3 = probablyDomNode !== undefined ? diffNode(probablyDomNode, patches$2, oldVNodes[0], newVNodes[0]) : Pervasives.failwith("well this shouldn't happen");
+                          var match = childDomNodes[index];
+                          var patches$3 = match !== undefined ? diffNode(match, patches$2, oldVNodes[0], newVNodes[0]) : Pervasives.failwith("well this shouldn't happen");
                           _index = index + 1 | 0;
                           _newVNodes = newVNodes[1];
                           _oldVNodes = oldVNodes[1];
@@ -232,12 +191,24 @@ function diff(rootDomNode, oldVTree, newVTree) {
   };
   var diffProperties = function (domNode, patches, oldProperties, newProperties) {
     var isMatch = function (x, y) {
-      var n = y[0];
-      var o = x[0];
-      if (Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0])) {
-        return o[/* key */1] === n[/* key */1];
+      if (x.tag) {
+        if (y.tag) {
+          return x[0] === y[0];
+        } else {
+          return false;
+        }
       } else {
-        return false;
+        var o = x[0];
+        if (y.tag) {
+          return false;
+        } else {
+          var n = y[0];
+          if (Caml_obj.caml_equal(o[/* namespace */0], n[/* namespace */0])) {
+            return o[/* key */1] === n[/* key */1];
+          } else {
+            return false;
+          }
+        }
       }
     };
     var onResult = function (patches, x, y) {
@@ -245,7 +216,27 @@ function diff(rootDomNode, oldVTree, newVTree) {
         var oldProperty = x;
         if (y !== undefined) {
           var newProperty = y;
-          if (oldProperty[0][/* value */2] !== newProperty[0][/* value */2]) {
+          if (oldProperty.tag) {
+            if (newProperty.tag) {
+              return /* :: */[
+                      /* RemoveProperty */Block.__(5, [
+                          domNode,
+                          oldProperty
+                        ]),
+                      /* :: */[
+                        /* SetProperty */Block.__(4, [
+                            domNode,
+                            newProperty
+                          ]),
+                        patches
+                      ]
+                    ];
+            } else {
+              return patches;
+            }
+          } else if (newProperty.tag || oldProperty[0][/* value */2] === newProperty[0][/* value */2]) {
+            return patches;
+          } else {
             return /* :: */[
                     /* SetProperty */Block.__(4, [
                         domNode,
@@ -253,8 +244,6 @@ function diff(rootDomNode, oldVTree, newVTree) {
                       ]),
                     patches
                   ];
-          } else {
-            return patches;
           }
         } else {
           return /* :: */[
@@ -351,6 +340,93 @@ function diff(rootDomNode, oldVTree, newVTree) {
   }
 }
 
+function render(node) {
+  switch (node.tag | 0) {
+    case 0 : 
+        return document.createTextNode(node[0]);
+    case 1 : 
+        var spec = node[0];
+        var match = spec[/* namespace */0];
+        var el = match !== undefined ? document.createElementNS(match, spec[/* tag */1]) : document.createElement(spec[/* tag */1]);
+        List.iter((function (param) {
+                if (param.tag) {
+                  el.addEventListener(param[0], param[1]);
+                  return /* () */0;
+                } else {
+                  var attr = param[0];
+                  var match = attr[/* namespace */0];
+                  if (match !== undefined) {
+                    el.setAttribute(match, attr[/* key */1], attr[/* value */2]);
+                    return /* () */0;
+                  } else {
+                    el.setAttribute(attr[/* key */1], attr[/* value */2]);
+                    return /* () */0;
+                  }
+                }
+              }), spec[/* properties */2]);
+        List.iter((function (child) {
+                el.appendChild(render(child));
+                return /* () */0;
+              }), spec[/* children */3]);
+        return el;
+    case 2 : 
+        return Pervasives.failwith("todo");
+    
+  }
+}
+
+function patch(param) {
+  return List.iter((function (param) {
+                switch (param.tag | 0) {
+                  case 0 : 
+                      param[0].replaceChild(render(param[1]));
+                      return /* () */0;
+                  case 1 : 
+                      var domNode = param[0];
+                      return List.iter((function (node) {
+                                    domNode.appendChild(render(node));
+                                    return /* () */0;
+                                  }), param[1]);
+                  case 2 : 
+                      var domNode$1 = param[0];
+                      for(var _for = 1 ,_for_finish = param[1]; _for <= _for_finish; ++_for){
+                        var match = domNode$1.lastChild;
+                        if (match !== undefined) {
+                          domNode$1.removeChild(match);
+                        }
+                        
+                      }
+                      return /* () */0;
+                  case 3 : 
+                      var domNode$2 = param[0];
+                      domNode$2.replaceData(0, domNode$2.length, param[1]);
+                      return /* () */0;
+                  case 4 : 
+                      var property = param[1];
+                      var domNode$3 = param[0];
+                      if (property.tag) {
+                        domNode$3.addEventListener(property[0], property[1]);
+                        return /* () */0;
+                      } else {
+                        var attr = property[0];
+                        domNode$3.setAttribute(attr[/* key */1], attr[/* value */2]);
+                        return /* () */0;
+                      }
+                  case 5 : 
+                      var property$1 = param[1];
+                      var domNode$4 = param[0];
+                      if (property$1.tag) {
+                        domNode$4.removeEventListener(property$1[0], property$1[1]);
+                        return /* () */0;
+                      } else {
+                        domNode$4.removeAttribute(property$1[0][/* key */1]);
+                        return /* () */0;
+                      }
+                  
+                }
+              }), param);
+}
+
 function pp_node(param) {
   switch (param.tag | 0) {
     case 0 : 
@@ -383,12 +459,12 @@ function pp_patch(param) {
   }
 }
 
+exports.Dom = Dom;
 exports.Attribute = Attribute;
 exports.$$Node = $$Node;
-exports.Dom = Dom;
-exports.append = append;
-exports.render = render;
 exports.diff = diff;
+exports.render = render;
+exports.patch = patch;
 exports.pp_node = pp_node;
 exports.pp_patch = pp_patch;
 /* No side effect */
