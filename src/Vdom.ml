@@ -20,6 +20,7 @@ module Node = struct
 
   and property =
     | Attribute of Attribute.t
+    | Event of string * (Dom.event -> unit)
 
   and 'a element =
     { namespace: string option
@@ -215,6 +216,9 @@ let diff
         | Attribute o, Attribute n when o.namespace = n.namespace && o.key = n.key ->
           true
 
+        | Event (oName, _), Event (nName, _) when oName = nName ->
+          true
+
         | _ ->
           false
       )
@@ -231,6 +235,12 @@ let diff
           Node.( match oldProperty, newProperty with
             | Attribute o, Attribute n when o.value <> n.value ->
               SetProperty (domNode, newProperty) :: patches
+
+            | Event _, Event _ ->
+              (* TODO: Event delegation *)
+              RemoveProperty (domNode, oldProperty)
+                :: SetProperty (domNode, newProperty)
+                :: patches
 
             | _ ->
               patches
