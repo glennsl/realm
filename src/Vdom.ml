@@ -15,15 +15,25 @@ module Dom = struct
   external removeEventListener : string -> (event -> unit) -> unit = "removeEventListener" [@@bs.send.pipe: node] (* element *)
 
   external appendChild : node -> unit = "appendChild" [@@bs.send.pipe: node]
-  external replaceChild : node -> unit = "replaceChild" [@@bs.send.pipe: node]
+  external insertBefore : node -> anchor:node -> unit = "insertBefore" [@@bs.send.pipe: node]
+  external replaceChild : node -> target:node -> unit = "replaceChild" [@@bs.send.pipe: node]
   external removeChild : node -> unit = "removeChild" [@@bs.send.pipe: node]
   external childNodes : node -> nodelist = "childNodes" [@@bs.get] (* nodelist *)
   external getChild : nodelist -> int -> node option = "" [@@bs.get_index] [@@bs.return undefined_to_opt]
   external firstChild : node -> node option = "firstChild" [@@bs.get] [@@bs.return undefined_to_opt]
   external lastChild : node -> node option = "lastChild" [@@bs.get] [@@bs.return undefined_to_opt]
+  external parentNode : node -> node option = "parentNode" [@@bs.get] [@@bs.return undefined_to_opt]
 
   external replaceData : int -> int -> string -> unit = "replaceData" [@@bs.send.pipe: node] (* CharacterData *)
   external length : node -> int = "length" [@@bs.get] (* CharacterData *)
+end
+
+module Dict = struct
+  type 'a t = 'a Js.Dict.t
+  let empty = Js.Dict.empty
+  let get = Js.Dict.get
+  let set = Js.Dict.set
+  let values = Js.Dict.values
 end
 
 
@@ -76,6 +86,11 @@ let rec dekey =
 
   let element ?namespace tag properties children =
     Element { namespace; tag; properties; children }
+
+  module Keyed = struct
+  let element ?namespace tag properties children =
+    KeyedElement { namespace; tag; properties; children }
+  end
 end
 
 
@@ -86,6 +101,11 @@ type patch =
   | SetText of Dom.node * string
   | SetProperty of Dom.node * Node.property
   | RemoveProperty of Dom.node * Node.property
+  | Reorder of Dom.node *
+      [ `Insert of Node.t * int
+      | `Remove of int
+      | `Move of int * int
+      ] array
 
 
 let diff
@@ -115,7 +135,8 @@ let diff
 
       | KeyedElement o, KeyedElement n ->
         if o.tag = n.tag && o.namespace = n.namespace then
-          patches
+          let patches = diffProperties domNode patches o.properties n.properties in
+          diffKeyedChildNodes domNode patches o.children n.children
         else
           Rerender (domNode, nVNode) :: patches
 
@@ -244,6 +265,99 @@ let diff
       diffChildNodes parentDomNode patches oRest nRest (index + 1)
     )
 
+  and diffKeyedChildNodes parentDomNode patches oldVNodes newVNodes =
+    let key_SUFFIX = "_rlm" in
+    let changes = Dict.empty () in
+
+    let rec insert key node index =
+      ( match Dict.get changes key with
+        | None ->
+          Dict.set changes key (`Insert (node, index))
+
+        | Some (`Remove fromIndex) ->
+          Dict.set changes key (`Move (fromIndex, index));
+
+        | _ ->
+          insert (key ^ key_SUFFIX) node index
+      )
+    in
+
+    let rec remove key node index =
+      ( match Dict.get changes key with
+        | None ->
+          Dict.set changes key (`Remove index)
+
+        | Some (`Insert (_, toIndex)) ->
+          Dict.set changes key (`Move (index, toIndex));
+
+        | _ ->
+          remove (key ^ key_SUFFIX) node index
+      )
+    in
+
+    let diffChildNode  oVNode nVNode index =
+      let childDomNodes = Dom.childNodes parentDomNode in
+      ( match Dom.getChild childDomNodes index with
+        | Some domNode ->
+          diffNode domNode patches oVNode nVNode
+
+        | None ->
+          failwith "well this shouldn't happen"
+      )
+    in
+
+    let rec helper patches oldVNodes newVNodes index =
+      ( match oldVNodes, newVNodes with
+      | [], [] ->
+        patches
+
+      | [], newRest ->
+        PushNodes (parentDomNode, List.map snd newRest) :: patches
+
+      | oldRest, [] ->
+        PopNodes (parentDomNode, List.length oldRest) :: patches
+
+      | (oKey, oVNode) :: oRest, (nKey, nVNode) :: nRest ->
+        if oKey = nKey then
+          let patches = diffChildNode oVNode nVNode index in
+          helper patches oRest nRest (index + 1)
+        else
+          ( match oRest, nRest with
+            | (oNextKey, _) :: oNextRest, (nNextKey, _) :: nNextRest ->
+              if oKey = nNextKey && nKey = oNextKey then
+                begin
+                  insert nKey nVNode index;
+                  remove oKey oVNode (index + 1);
+                  helper patches oNextRest nNextRest (index + 1)
+                end
+
+              else if oKey = nNextKey then
+                begin
+                  insert nKey nVNode index;
+                  helper patches oRest nNextRest (index + 2)
+                end
+
+              else if nKey = oNextKey then
+                begin
+                  remove oKey oVNode index;
+                  helper patches oNextRest nRest (index + 1)
+                end
+
+              else
+                begin
+                  remove oKey oVNode index;
+                  insert nKey nVNode index;
+                  helper patches oRest nRest (index + 1)
+                end
+
+            | _ ->
+                helper patches oRest nRest (index + 1)
+          )
+      )
+    in
+    let patches = helper patches oldVNodes newVNodes 0 in
+    Reorder (parentDomNode, Js.Dict.values changes) :: patches
+
   in
   match Dom.firstChild rootDomNode with
     | Some node ->
@@ -285,8 +399,32 @@ let rec render node =
       List.iter (fun child -> Dom.appendChild (render child) el) spec.children;
       el
     
-    | KeyedElement _ ->
-      failwith "todo"
+    | KeyedElement spec ->
+      let el =
+        ( match spec.namespace with 
+          | Some namespace ->
+            Dom.createElementNS namespace spec.tag
+
+          | None ->
+            Dom.createElement spec.tag
+        )
+      in
+      List.iter
+        ( function
+          | Attribute attr ->
+            ( match attr.Attribute.namespace with
+              | Some namespace ->
+                Dom.setAttributeNS namespace attr.key attr.value el
+
+              | None ->
+                Dom.setAttribute attr.key attr.value el
+            )
+
+          | Event (name, callback) ->
+            Dom.addEventListener name callback el
+        ) spec.properties;
+      List.iter (fun (_, child) -> Dom.appendChild (render child) el) spec.children;
+      el
   )
 
 
@@ -294,7 +432,12 @@ let patch =
   List.iter
     ( function
       | Rerender (domNode, node) ->
-        Dom.replaceChild (render node) domNode
+        ( match Dom.parentNode domNode with
+        | Some parent ->
+          Dom.replaceChild ~target:domNode (render node) parent
+        | None ->
+          ()
+        )
 
       | PushNodes (domNode, nodes) ->
         List.iter (fun node -> Dom.appendChild (render node) domNode) nodes
@@ -330,6 +473,44 @@ let patch =
           | Event (name, callback) ->
             Dom.removeEventListener name callback domNode
         )
+      
+      | Reorder (domNode, changes) ->
+        Array.iter
+          ( function
+            | `Insert (node, index) ->
+              ( match Dom.getChild (Dom.childNodes domNode) index with
+                | Some anchor ->
+                  Dom.insertBefore ~anchor (render node) domNode
+
+                | None ->
+                  ()
+              )
+
+            | `Remove index ->
+              ( match Dom.getChild (Dom.childNodes domNode) index with
+                | Some target ->
+                  Dom.removeChild target domNode
+
+                | None ->
+                  ()
+              )
+
+            | `Move (fromIndex, toIndex) ->
+              ( match Dom.getChild (Dom.childNodes domNode) fromIndex with
+                | Some target ->
+                  Dom.removeChild target domNode;
+                  ( match Dom.getChild (Dom.childNodes domNode) toIndex with
+                    | Some anchor ->
+                      Dom.insertBefore ~anchor target domNode
+
+                    | None ->
+                      ()
+                  )
+
+                | None ->
+                  ()
+              )
+          ) changes
     )
 
 
@@ -344,6 +525,18 @@ let pp_node =
 
     | Node.KeyedElement { tag } ->
       {j|KeyedElement $tag |j}
+
+let pp_change =
+  function
+    | `Insert (node, index) ->
+      {j|Insert $index $node|j}
+
+    | `Remove index ->
+      {j|Remove $index|j}
+
+    | `Move (fromIndex, toIndex) ->
+      {j|Move $fromIndex $toIndex|j}
+
 
 let pp_patch =
   function
@@ -366,3 +559,7 @@ let pp_patch =
 
     | RemoveProperty (_, property) ->
       {j|RemoveProperty $property|j}
+
+    | Reorder (_, changes) ->
+      let changes = Array.map pp_change changes in
+      {j|Reorder $changes|j}

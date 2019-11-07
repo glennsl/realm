@@ -2,13 +2,31 @@
 'use strict';
 
 var List = require("bs-platform/lib/js/list.js");
+var $$Array = require("bs-platform/lib/js/array.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
+var Js_dict = require("bs-platform/lib/js/js_dict.js");
 var Caml_obj = require("bs-platform/lib/js/caml_obj.js");
 var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
 
 var Dom = /* module */[];
+
+function empty(prim) {
+  return { };
+}
+
+function set(prim, prim$1, prim$2) {
+  prim[prim$1] = prim$2;
+  return /* () */0;
+}
+
+var Dict = /* module */[
+  /* empty */empty,
+  /* get */Js_dict.get,
+  /* set */set,
+  /* values */Js_dict.values
+];
 
 function make(namespace, key, value) {
   return /* record */[
@@ -52,10 +70,22 @@ function element(namespace, tag, properties, children) {
             ]]);
 }
 
+function element$1(namespace, tag, properties, children) {
+  return /* KeyedElement */Block.__(2, [/* record */[
+              /* namespace */namespace,
+              /* tag */tag,
+              /* properties */properties,
+              /* children */children
+            ]]);
+}
+
+var Keyed = /* module */[/* element */element$1];
+
 var $$Node = /* module */[
   /* dekey */dekey,
   /* text */text,
-  /* element */element
+  /* element */element,
+  /* Keyed */Keyed
 ];
 
 function diff(rootDomNode, oldVTree, newVTree) {
@@ -162,7 +192,192 @@ function diff(rootDomNode, oldVTree, newVTree) {
               case 2 : 
                   var n$1 = nVNode[0];
                   if (o$1[/* tag */1] === n$1[/* tag */1] && Caml_obj.caml_equal(o$1[/* namespace */0], n$1[/* namespace */0])) {
-                    return patches;
+                    var patches$4 = diffProperties(domNode, patches, o$1[/* properties */2], n$1[/* properties */2]);
+                    var parentDomNode$1 = domNode;
+                    var patches$5 = patches$4;
+                    var oldVNodes$1 = o$1[/* children */3];
+                    var newVNodes$1 = n$1[/* children */3];
+                    var key_SUFFIX = "_rlm";
+                    var changes = { };
+                    var insert = (function(changes){
+                    return function insert(_key, node, index) {
+                      while(true) {
+                        var key = _key;
+                        var match = Js_dict.get(changes, key);
+                        if (match !== undefined) {
+                          var match$1 = match;
+                          if (typeof match$1 === "number") {
+                            _key = key + key_SUFFIX;
+                            continue ;
+                          } else if (match$1[0] !== 958206052) {
+                            _key = key + key_SUFFIX;
+                            continue ;
+                          } else {
+                            return set(changes, key, /* `Move */[
+                                        859442993,
+                                        /* tuple */[
+                                          match$1[1],
+                                          index
+                                        ]
+                                      ]);
+                          }
+                        } else {
+                          return set(changes, key, /* `Insert */[
+                                      -764299431,
+                                      /* tuple */[
+                                        node,
+                                        index
+                                      ]
+                                    ]);
+                        }
+                      };
+                    }
+                    }(changes));
+                    var remove = (function(changes){
+                    return function remove(_key, node, index) {
+                      while(true) {
+                        var key = _key;
+                        var match = Js_dict.get(changes, key);
+                        if (match !== undefined) {
+                          var match$1 = match;
+                          if (typeof match$1 === "number") {
+                            _key = key + key_SUFFIX;
+                            continue ;
+                          } else if (match$1[0] !== -764299431) {
+                            _key = key + key_SUFFIX;
+                            continue ;
+                          } else {
+                            return set(changes, key, /* `Move */[
+                                        859442993,
+                                        /* tuple */[
+                                          index,
+                                          match$1[1][1]
+                                        ]
+                                      ]);
+                          }
+                        } else {
+                          return set(changes, key, /* `Remove */[
+                                      958206052,
+                                      index
+                                    ]);
+                        }
+                      };
+                    }
+                    }(changes));
+                    var diffChildNode = (function(parentDomNode$1,patches$5){
+                    return function diffChildNode(oVNode, nVNode, index) {
+                      var childDomNodes = parentDomNode$1.childNodes;
+                      var match = childDomNodes[index];
+                      if (match !== undefined) {
+                        return diffNode(match, patches$5, oVNode, nVNode);
+                      } else {
+                        return Pervasives.failwith("well this shouldn't happen");
+                      }
+                    }
+                    }(parentDomNode$1,patches$5));
+                    var helper = (function(parentDomNode$1){
+                    return function helper(_patches, _oldVNodes, _newVNodes, _index) {
+                      while(true) {
+                        var index = _index;
+                        var newVNodes = _newVNodes;
+                        var oldVNodes = _oldVNodes;
+                        var patches = _patches;
+                        if (oldVNodes) {
+                          if (newVNodes) {
+                            var nRest = newVNodes[1];
+                            var match = newVNodes[0];
+                            var nVNode = match[1];
+                            var nKey = match[0];
+                            var oRest = oldVNodes[1];
+                            var match$1 = oldVNodes[0];
+                            var oVNode = match$1[1];
+                            var oKey = match$1[0];
+                            if (oKey === nKey) {
+                              var patches$1 = diffChildNode(oVNode, nVNode, index);
+                              _index = index + 1 | 0;
+                              _newVNodes = nRest;
+                              _oldVNodes = oRest;
+                              _patches = patches$1;
+                              continue ;
+                            } else {
+                              var exit = 0;
+                              if (oRest && nRest) {
+                                var nNextRest = nRest[1];
+                                var nNextKey = nRest[0][0];
+                                var oNextRest = oRest[1];
+                                var oNextKey = oRest[0][0];
+                                if (oKey === nNextKey && nKey === oNextKey) {
+                                  insert(nKey, nVNode, index);
+                                  remove(oKey, oVNode, index + 1 | 0);
+                                  _index = index + 1 | 0;
+                                  _newVNodes = nNextRest;
+                                  _oldVNodes = oNextRest;
+                                  continue ;
+                                } else if (oKey === nNextKey) {
+                                  insert(nKey, nVNode, index);
+                                  _index = index + 2 | 0;
+                                  _newVNodes = nNextRest;
+                                  _oldVNodes = oRest;
+                                  continue ;
+                                } else {
+                                  remove(oKey, oVNode, index);
+                                  if (nKey === oNextKey) {
+                                    _index = index + 1 | 0;
+                                    _newVNodes = nRest;
+                                    _oldVNodes = oNextRest;
+                                    continue ;
+                                  } else {
+                                    insert(nKey, nVNode, index);
+                                    _index = index + 1 | 0;
+                                    _newVNodes = nRest;
+                                    _oldVNodes = oRest;
+                                    continue ;
+                                  }
+                                }
+                              } else {
+                                exit = 1;
+                              }
+                              if (exit === 1) {
+                                _index = index + 1 | 0;
+                                _newVNodes = nRest;
+                                _oldVNodes = oRest;
+                                continue ;
+                              }
+                              
+                            }
+                          } else {
+                            return /* :: */[
+                                    /* PopNodes */Block.__(2, [
+                                        parentDomNode$1,
+                                        List.length(oldVNodes)
+                                      ]),
+                                    patches
+                                  ];
+                          }
+                        } else if (newVNodes) {
+                          return /* :: */[
+                                  /* PushNodes */Block.__(1, [
+                                      parentDomNode$1,
+                                      List.map((function (prim) {
+                                              return prim[1];
+                                            }), newVNodes)
+                                    ]),
+                                  patches
+                                ];
+                        } else {
+                          return patches;
+                        }
+                      };
+                    }
+                    }(parentDomNode$1));
+                    var patches$6 = helper(patches$5, oldVNodes$1, newVNodes$1, 0);
+                    return /* :: */[
+                            /* Reorder */Block.__(6, [
+                                parentDomNode$1,
+                                Js_dict.values(changes)
+                              ]),
+                            patches$6
+                          ];
                   } else {
                     return /* :: */[
                             /* Rerender */Block.__(0, [
@@ -370,7 +585,30 @@ function render(node) {
               }), spec[/* children */3]);
         return el;
     case 2 : 
-        return Pervasives.failwith("todo");
+        var spec$1 = node[0];
+        var match$1 = spec$1[/* namespace */0];
+        var el$1 = match$1 !== undefined ? document.createElementNS(match$1, spec$1[/* tag */1]) : document.createElement(spec$1[/* tag */1]);
+        List.iter((function (param) {
+                if (param.tag) {
+                  el$1.addEventListener(param[0], param[1]);
+                  return /* () */0;
+                } else {
+                  var attr = param[0];
+                  var match = attr[/* namespace */0];
+                  if (match !== undefined) {
+                    el$1.setAttribute(match, attr[/* key */1], attr[/* value */2]);
+                    return /* () */0;
+                  } else {
+                    el$1.setAttribute(attr[/* key */1], attr[/* value */2]);
+                    return /* () */0;
+                  }
+                }
+              }), spec$1[/* properties */2]);
+        List.iter((function (param) {
+                el$1.appendChild(render(param[1]));
+                return /* () */0;
+              }), spec$1[/* children */3]);
+        return el$1;
     
   }
 }
@@ -379,49 +617,95 @@ function patch(param) {
   return List.iter((function (param) {
                 switch (param.tag | 0) {
                   case 0 : 
-                      param[0].replaceChild(render(param[1]));
-                      return /* () */0;
-                  case 1 : 
                       var domNode = param[0];
+                      var match = domNode.parentNode;
+                      if (match !== undefined) {
+                        match.replaceChild(render(param[1]), domNode);
+                        return /* () */0;
+                      } else {
+                        return /* () */0;
+                      }
+                  case 1 : 
+                      var domNode$1 = param[0];
                       return List.iter((function (node) {
-                                    domNode.appendChild(render(node));
+                                    domNode$1.appendChild(render(node));
                                     return /* () */0;
                                   }), param[1]);
                   case 2 : 
-                      var domNode$1 = param[0];
+                      var domNode$2 = param[0];
                       for(var _for = 1 ,_for_finish = param[1]; _for <= _for_finish; ++_for){
-                        var match = domNode$1.lastChild;
-                        if (match !== undefined) {
-                          domNode$1.removeChild(match);
+                        var match$1 = domNode$2.lastChild;
+                        if (match$1 !== undefined) {
+                          domNode$2.removeChild(match$1);
                         }
                         
                       }
                       return /* () */0;
                   case 3 : 
-                      var domNode$2 = param[0];
-                      domNode$2.replaceData(0, domNode$2.length, param[1]);
+                      var domNode$3 = param[0];
+                      domNode$3.replaceData(0, domNode$3.length, param[1]);
                       return /* () */0;
                   case 4 : 
                       var property = param[1];
-                      var domNode$3 = param[0];
+                      var domNode$4 = param[0];
                       if (property.tag) {
-                        domNode$3.addEventListener(property[0], property[1]);
+                        domNode$4.addEventListener(property[0], property[1]);
                         return /* () */0;
                       } else {
                         var attr = property[0];
-                        domNode$3.setAttribute(attr[/* key */1], attr[/* value */2]);
+                        domNode$4.setAttribute(attr[/* key */1], attr[/* value */2]);
                         return /* () */0;
                       }
                   case 5 : 
                       var property$1 = param[1];
-                      var domNode$4 = param[0];
+                      var domNode$5 = param[0];
                       if (property$1.tag) {
-                        domNode$4.removeEventListener(property$1[0], property$1[1]);
+                        domNode$5.removeEventListener(property$1[0], property$1[1]);
                         return /* () */0;
                       } else {
-                        domNode$4.removeAttribute(property$1[0][/* key */1]);
+                        domNode$5.removeAttribute(property$1[0][/* key */1]);
                         return /* () */0;
                       }
+                  case 6 : 
+                      var domNode$6 = param[0];
+                      return $$Array.iter((function (param) {
+                                    var variant = param[0];
+                                    if (variant !== 859442993) {
+                                      if (variant >= 958206052) {
+                                        var match = domNode$6.childNodes[param[1]];
+                                        if (match !== undefined) {
+                                          domNode$6.removeChild(match);
+                                          return /* () */0;
+                                        } else {
+                                          return /* () */0;
+                                        }
+                                      } else {
+                                        var match$1 = param[1];
+                                        var match$2 = domNode$6.childNodes[match$1[1]];
+                                        if (match$2 !== undefined) {
+                                          domNode$6.insertBefore(render(match$1[0]), match$2);
+                                          return /* () */0;
+                                        } else {
+                                          return /* () */0;
+                                        }
+                                      }
+                                    } else {
+                                      var match$3 = param[1];
+                                      var match$4 = domNode$6.childNodes[match$3[0]];
+                                      if (match$4 !== undefined) {
+                                        domNode$6.removeChild(match$4);
+                                        var match$5 = domNode$6.childNodes[match$3[1]];
+                                        if (match$5 !== undefined) {
+                                          domNode$6.insertBefore(match$4, match$5);
+                                          return /* () */0;
+                                        } else {
+                                          return /* () */0;
+                                        }
+                                      } else {
+                                        return /* () */0;
+                                      }
+                                    }
+                                  }), param[1]);
                   
                 }
               }), param);
@@ -436,6 +720,21 @@ function pp_node(param) {
     case 2 : 
         return "KeyedElement " + (String(param[0][/* tag */1]) + " ");
     
+  }
+}
+
+function pp_change(param) {
+  var variant = param[0];
+  if (variant !== 859442993) {
+    if (variant >= 958206052) {
+      return "Remove " + (String(param[1]) + "");
+    } else {
+      var match = param[1];
+      return "Insert " + (String(match[1]) + (" " + (String(match[0]) + "")));
+    }
+  } else {
+    var match$1 = param[1];
+    return "Move " + (String(match$1[0]) + (" " + (String(match$1[1]) + "")));
   }
 }
 
@@ -455,16 +754,21 @@ function pp_patch(param) {
         return "SetProperty " + (String(param[1]) + "");
     case 5 : 
         return "RemoveProperty " + (String(param[1]) + "");
+    case 6 : 
+        var changes = $$Array.map(pp_change, param[1]);
+        return "Reorder " + (String(changes) + "");
     
   }
 }
 
 exports.Dom = Dom;
+exports.Dict = Dict;
 exports.Attribute = Attribute;
 exports.$$Node = $$Node;
 exports.diff = diff;
 exports.render = render;
 exports.patch = patch;
 exports.pp_node = pp_node;
+exports.pp_change = pp_change;
 exports.pp_patch = pp_patch;
 /* No side effect */
